@@ -44,21 +44,79 @@ export const NanosystemSeriesDtoSchema = z.object({
 export type NanosystemSeriesDto = z.infer<typeof NanosystemSeriesDtoSchema>;
 
 export const CommonParticleGenerationParametersSchema = z.object({
-  Count: z.number(),
-  NumericalConcentration: z.number().optional(),
-  GlobalSize: z.number().optional(),
-  MinSize: z.number(),
-  MaxSize: z.number(),
-  Theta: z.number(),
-  K: z.number(),
-  Excess: z.number(),
-  Epsilon: z.number().optional()
+  count: z.number(),
+  numericalConcentration: z.number().nullable(),
+  globalSize: z.number().nullable(),
+  minSize: z.number(),
+  maxSize: z.number(),
+  theta: z.number(),
+  k: z.number(),
+  excess: z.number(),
+  epsilon: z.number().nullable()
 });
 
-// Схема для MassGenerateNanoSystemOptions (без валидации)
 export const MassGenerateNanoSystemOptionsSchema = z.object({
-  Options: z.array(CommonParticleGenerationParametersSchema),
-  NanoSystemsKind: ParticleKindSchema
+  options: z.array(CommonParticleGenerationParametersSchema),
+  nanoSystemsKind: ParticleKindSchema
 });
 export type CommonParticleGenerationParameters = z.infer<typeof CommonParticleGenerationParametersSchema>;
 export type MassGenerateNanoSystemOptions = z.infer<typeof MassGenerateNanoSystemOptionsSchema>;
+
+export const GetNanosystemGenerationOptionsQuerySchema = z.object({
+  count: z.number().int().positive(),
+  particleKind: z.enum(["0", "1"]).transform(Number),
+  epsilonFrom: z.number().nullable(),
+  epsilonTo: z.number().nullable(),
+  particleCountFrom: z.number().int(),
+  particleCountTo: z.number().int(),
+  globalSizeFrom: z.number().nullable(),
+  globalSizeTo: z.number().nullable(),
+  numericalConcentrationFrom: z.number().nullable(),
+  numericalConcentrationTo: z.number().nullable(),
+  excessFrom: z.number().nullable(),
+  excessTo: z.number().nullable(),
+  maxParticleSizeFrom: z.number(),
+  maxParticleSizeTo: z.number(),
+  minParticleSizeFrom: z.number(),
+  minParticleSizeTo: z.number(),
+  kFrom: z.number(),
+  kTo: z.number(),
+  thetaFrom: z.number(),
+  thetaTo: z.number(),
+})
+
+export type GetNanosystemGenerationOptionsQuery = z.infer<typeof GetNanosystemGenerationOptionsQuerySchema>;
+
+// Или более компактный вариант:
+export const GenerationZoneFormSchema = z.number().transform(val => {
+  const mapping = {
+    0: 'Cube',
+    1: 'Sphere'
+  };
+  const result = mapping[val as keyof typeof mapping];
+  if (!result) throw new Error(`Invalid GenerationZoneForm value: ${val}`);
+  return result;
+});
+export const NanosystemDtoSchema = z.object({
+  id: z.string().uuid(),
+  particleKind: ParticleKindSchema,
+  seriesId: z.string().uuid(),
+  objectId: z.string().uuid(),
+  userId: z.number(),
+  particleCount: z.number(),
+  globalSize: z.number(),
+  generationZoneVolume: z.number(),
+  generationZoneForm: GenerationZoneFormSchema,
+  numericalConcentration: z.number(),
+  maxParticleSize: z.number(),
+  minParticleSize: z.number(),
+  excess: z.number(),
+  k: z.number(),
+  theta: z.number(),
+  generationStart: z.string(), // или z.date() если парсится в Date
+  generationEnd: z.string(),   // или z.date() если парсится в Date
+  inputDate: z.string(),       // или z.date() если парсится в Date
+});
+
+// Тип TypeScript на основе схемы
+export type NanosystemDto = z.infer<typeof NanosystemDtoSchema>;
