@@ -1,6 +1,6 @@
 import type { PaginatedResponse } from './../api/nanosystemApi';
 import { useQuery } from "@tanstack/react-query";
-import { fetchNanosystems } from "../api/nanosystemApi";
+import { fetchNanosystemSeries } from "../api/nanosystemApi";
 import type { NanosystemSeriesDto } from "../api/nanosystemTypes";
 
 export const useNanosystemSeries = (
@@ -10,7 +10,7 @@ export const useNanosystemSeries = (
 ) => {
   return useQuery<PaginatedResponse<NanosystemSeriesDto>>({
     queryKey: ["nanosystem-series-list", gridifyQuery, page, pageSize],
-    queryFn: () => fetchNanosystems(gridifyQuery, page, pageSize),
+    queryFn: () => fetchNanosystemSeries(gridifyQuery, page, pageSize),
     placeholderData: (previousData) => previousData,
   });
 };

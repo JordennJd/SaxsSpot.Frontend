@@ -1,5 +1,6 @@
 // src/features/nanosystems/components/NanosystemFilters.tsx
 import React, { useState } from "react";
+import { AddNanosystemButton } from "../../../components/ui/nanosystems/AddNanosystemButton";
 
 interface NanosystemFiltersProps {
   onFilterChange: (gridifyQuery: string) => void;
@@ -20,7 +21,7 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
           type="text"
           value={gridifyQuery}
           onChange={(e) => setGridifyQuery(e.target.value)}
-          placeholder="Enter Gridify query (e.g., 'particleKind:Protein')"
+          placeholder="Enter Gridify query (e.g., 'ParticleCountFrom > 1000')"
           className="flex-1 p-2 border rounded-md"
         />
         <button
@@ -29,6 +30,7 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
         >
           Apply Filter
         </button>
+        <AddNanosystemButton />
       </div>
     </form>
   );

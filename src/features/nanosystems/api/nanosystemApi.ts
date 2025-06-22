@@ -12,7 +12,7 @@ export type PaginatedResponse<T> = {
   pageSize: number;
 };
 
-export const fetchNanosystems = async (
+export const fetchNanosystemSeries = async (
   gridifyQuery?: string,
   page: number = 1,
   pageSize: number = 10
@@ -21,10 +21,13 @@ export const fetchNanosystems = async (
     "/nanosystem/get-nanosystem-series-list",
     {
       params: { 
-        gridify: gridifyQuery,
-        page,
-        pageSize,
-      },
+        filter: gridifyQuery,
+        page: page,
+        pageSize: pageSize,
+      },    
+      paramsSerializer: (params) => {
+        return new URLSearchParams(params).toString();
+      }
     }
   );
   return {

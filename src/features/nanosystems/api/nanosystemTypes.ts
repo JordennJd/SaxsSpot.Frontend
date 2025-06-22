@@ -42,3 +42,23 @@ export const NanosystemSeriesDtoSchema = z.object({
 });
 
 export type NanosystemSeriesDto = z.infer<typeof NanosystemSeriesDtoSchema>;
+
+export const CommonParticleGenerationParametersSchema = z.object({
+  Count: z.number(),
+  NumericalConcentration: z.number().optional(),
+  GlobalSize: z.number().optional(),
+  MinSize: z.number(),
+  MaxSize: z.number(),
+  Theta: z.number(),
+  K: z.number(),
+  Excess: z.number(),
+  Epsilon: z.number().optional()
+});
+
+// Схема для MassGenerateNanoSystemOptions (без валидации)
+export const MassGenerateNanoSystemOptionsSchema = z.object({
+  Options: z.array(CommonParticleGenerationParametersSchema),
+  NanoSystemsKind: ParticleKindSchema
+});
+export type CommonParticleGenerationParameters = z.infer<typeof CommonParticleGenerationParametersSchema>;
+export type MassGenerateNanoSystemOptions = z.infer<typeof MassGenerateNanoSystemOptionsSchema>;
