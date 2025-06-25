@@ -1,8 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import {ParticleKindMap, type GetNanosystemGenerationOptionsQuery} from "../api/nanosystemTypes";
+import {ParticleKindMap, type GetNanosystemGenerationOptionsQuery, type MassGenerateNanoSystemOptions} from "../api/nanosystemTypes";
 import { fetchNanosystemMassGenerationParameters } from '../api/nanosystemApi';
 import type { AxiosError } from 'axios';
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 
 export const NanosystemSeriesForm = () => {
   const [sizeInputType, setSizeInputType] = useState<'globalSize' | 'concentration'>('concentration');
@@ -35,14 +36,17 @@ export const NanosystemSeriesForm = () => {
       ThetaTo: 3
     }
   });
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [apiErrors, setApiErrors] = useState<Record<string, string[]>>({});
   const particleKind = watch("ParticleKind");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationOptions, setGenerationOptions] = useState<MassGenerateNanoSystemOptions | null>(null);
 
   const onSubmit = async (data: GetNanosystemGenerationOptionsQuery) => {
     try{
         let result = await fetchNanosystemMassGenerationParameters(data)
-        console.log(result);
+        setIsModalOpen(true);
+        setGenerationOptions(result);
     }
     catch(e){
       let response = await e.response;
@@ -50,10 +54,43 @@ export const NanosystemSeriesForm = () => {
     }
   };
 
+  const handleGenerate = async () => {
+    if (!generationOptions) return;
+    
+    try {
+      setIsGenerating(true);
+    //   const result = await generateNanosystems({
+    //     options: generationOptions.options,
+    //     nanoSystemsKind: generationOptions.nanoSystemsKind
+    //   });
+      // Можно добавить обработку успешного результата
+    } catch (error) {
+      console.error('Generation failed:', error);
+      // Обработка ошибки
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+  const updateOptionField = (index: number, field: keyof NanosystemOption, value: any) => {
+    if (!generationOptions) return;
+    
+    const newOptions = [...generationOptions.options];
+    newOptions[index] = {
+      ...newOptions[index],
+      [field]: value
+    };
+    
+    setGenerationOptions({
+      ...generationOptions,
+      options: newOptions
+    });
+  };
+
   const getError = (fieldName: keyof GetNanosystemGenerationOptionsQuery) => 
     errors[fieldName]?.message || apiErrors[fieldName]?.[0];
 
   return (
+<>
     <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
         Nanosystem Parameters
@@ -374,6 +411,134 @@ export const NanosystemSeriesForm = () => {
         </div>
       </form>
     </div>
+ <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} className="relative z-50">
+ <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+ <div className="fixed inset-0 flex items-center justify-center p-4">
+   <DialogPanel className="w-full max-w-4xl rounded bg-white dark:bg-gray-800 p-6 max-h-[90vh] overflow-y-auto">
+     <DialogTitle className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+       Generated Options
+     </DialogTitle>
+
+     {generationOptions && (
+       <div className="space-y-6">
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+           {generationOptions.options.map((option, index) => (
+             <div key={index} className="border rounded-lg p-4 dark:border-gray-600">
+               <h3 className="font-medium text-lg mb-3">Option #{index + 1}</h3>
+               <div className="space-y-2">
+                 <div>
+                   <Label>Particle Count</Label>
+                   <Input
+                     type="number"
+                     value={option.count}
+                     onChange={(e) => updateOptionField(index, 'count', Number(e.target.value))}
+                   />
+                 </div>
+                 <div>
+                   <Label>Min Size</Label>
+                   <Input
+                     type="number"
+                     step="0.01"
+                     value={option.minSize}
+                     onChange={(e) => updateOptionField(index, 'minSize', Number(e.target.value))}
+                   />
+                 </div>
+                 <div>
+                   <Label>Max Size</Label>
+                   <Input
+                     type="number"
+                     step="0.01"
+                     value={option.maxSize}
+                     onChange={(e) => updateOptionField(index, 'maxSize', Number(e.target.value))}
+                   />
+                 </div>
+                 {particleKind !== "0" && (
+                   <div>
+                     <Label>Epsilon</Label>
+                     <Input
+                       type="number"
+                       step="0.01"
+                       value={option.epsilon || ''}
+                       onChange={(e) => updateOptionField(index, 'epsilon', Number(e.target.value))}
+                     />
+                   </div>
+                 )}
+                 <div>
+                   <Label>Excess</Label>
+                   <Input
+                     type="number"
+                     step="0.01"
+                     value={option.excess}
+                     onChange={(e) => updateOptionField(index, 'excess', Number(e.target.value))}
+                   />
+                 </div>
+                 <div>
+                   <Label>K</Label>
+                   <Input
+                     type="number"
+                     step="0.01"
+                     value={option.k}
+                     onChange={(e) => updateOptionField(index, 'k', Number(e.target.value))}
+                   />
+                 </div>
+                 <div>
+                   <Label>Theta</Label>
+                   <Input
+                     type="number"
+                     step="0.1"
+                     value={option.theta}
+                     onChange={(e) => updateOptionField(index, 'theta', Number(e.target.value))}
+                   />
+                 </div>
+                 {sizeInputType === 'concentration' ? (
+                   <div>
+                     <Label>Concentration</Label>
+                     <Input
+                       type="number"
+                       step="0.0001"
+                       value={option.numericalConcentration}
+                       onChange={(e) => updateOptionField(index, 'numericalConcentration', Number(e.target.value))}
+                     />
+                   </div>
+                 ) : (
+                   <div>
+                     <Label>Global Size</Label>
+                     <Input
+                       type="number"
+                       step="0.01"
+                       value={option.globalSize || ''}
+                       onChange={(e) => updateOptionField(index, 'globalSize', Number(e.target.value))}
+                     />
+                   </div>
+                 )}
+               </div>
+             </div>
+           ))}
+         </div>
+
+         <div className="flex justify-end space-x-3 pt-4">
+           <button
+             type="button"
+             onClick={() => setIsModalOpen(false)}
+             className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+           >
+             Cancel
+           </button>
+           <button
+             type="button"
+             onClick={handleGenerate}
+             disabled={isGenerating}
+             className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+           >
+             {isGenerating ? 'Generating...' : 'Generate Nanosystems'}
+           </button>
+         </div>
+       </div>
+     )}
+   </DialogPanel>
+ </div>
+</Dialog>
+</>
   );
 };
 
