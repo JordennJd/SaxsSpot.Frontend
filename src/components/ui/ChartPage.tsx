@@ -1,8 +1,7 @@
-// CalculationChartPage.tsx
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import {PlotChart} from "../../features/calculation/api/calculationApi.ts";
-import type {PlotChartRequest} from "../../features/calculation/api/calculationTypes.ts";
+import { PlotChart } from "../../features/calculation/api/calculationApi.ts";
+import type { PlotChartRequest } from "../../features/calculation/api/calculationTypes.ts";
 
 export const CalculationChartPage = () => {
     const { id } = useParams();
@@ -24,25 +23,55 @@ export const CalculationChartPage = () => {
             setIsLoading(true);
             try {
                 const result = await PlotChart(request);
-                console.log(result)
                 const fullHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Chart</title>
-        <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/mpld3@0.5.10/dist/mpld3.min.js"></script>
-        <style>
-          body { margin: 0; padding: 0; }
-          #chart-container { width: 100%; height: 100%; }
-        </style>
-      </head>
-      <body>
-        <div id="chart-container">${result}</div>
-      </body>
-      </html>
-    `;
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <title>Chart</title>
+                        <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+                        <script src="https://cdn.jsdelivr.net/npm/mpld3@0.5.10/dist/mpld3.min.js"></script>
+                        <style>
+                            html, body {
+                                margin: 0;
+                                padding: 0;
+                                width: 100%;
+                                height: 100%;
+                                overflow: hidden;
+                            }
+                            #chart-container {
+                                width: 100%;
+                                height: 100%;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                background: white;
+                                padding-bottom: 100px; /* Добавляем отступ снизу */
+                            }
+                            .mpld3-figure {
+                                margin: 0 auto;
+                                display: block;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div id="chart-container">${result}</div>
+                        <script>
+                            // Добавляем обработчик для ресайза
+                            window.addEventListener('resize', function() {
+                                if(window.mpld3) {
+                                    const figures = document.querySelectorAll('.mpld3-figure');
+                                    figures.forEach(fig => {
+                                        const id = fig.id;
+                                        const spec = JSON.parse(fig.dataset.mpld3 || '{}');
+                                        window.mpld3.draw_figure(id, spec);
+                                    });
+                                }
+                            });
+                        </script>
+                    </body>
+                    </html>
+                `;
                 setChart(fullHtml);
             } catch (error) {
                 console.error("Error fetching chart:", error);
@@ -63,7 +92,7 @@ export const CalculationChartPage = () => {
     };
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 flex flex-col" style={{ minHeight: '100vh' }}>
             <h1 className="text-2xl font-bold mb-4">Calculation Chart</h1>
 
             <div className="bg-white p-4 rounded-lg shadow-md mb-4">
@@ -128,21 +157,24 @@ export const CalculationChartPage = () => {
 
             {isLoading ? (
                 <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
             ) : (
-                <div className="chart">
-                    <h2 className="text-lg font-semibold mb-2">Chart Visualization</h2>
-                    <iframe
-                        srcDoc={chart}
-                        style={{ width: '100%', height: '500px', border: 'none' }}
-                        sandbox="allow-scripts allow-same-origin"
-                        className="w-full h-96 border-0"
-                    />
+                <div className="flex-grow flex flex-col bg-white rounded-lg shadow-md overflow-hidden mb-4">
+                    <h2 className="text-lg font-semibold p-6 border-b">Chart Visualization</h2>
+                    <div className="flex-grow relative" style={{ minHeight: '600px', height: 'calc(100vh)' }}>
+                        <iframe
+                            srcDoc={chart}
+                            style={{ width: '100%', height: '100%', border: 'none' }}
+                            sandbox="allow-scripts allow-same-origin"
+                            className="absolute inset-0"
+                            title="Chart visualization"
+                        />
+                    </div>
                 </div>
             )}
 
-            <div className="mt-4">
+            <div className="mt-auto mb-4">
                 <button
                     onClick={() => navigate(-1)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
