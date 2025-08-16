@@ -1,6 +1,7 @@
 // CalculationDetailsCard.tsx
 import { Dialog } from '@headlessui/react';
-import type {CalculationDto} from "../api/calculationTypes.ts";
+import { type CalculationDto, type PlotChartRequest } from "../api/calculationTypes.ts";
+import { useNavigate } from "react-router-dom";
 
 export const CalculationDetailsCard = ({
                                            calculation,
@@ -11,6 +12,20 @@ export const CalculationDetailsCard = ({
     isOpen: boolean;
     onClose: () => void;
 }) => {
+    const navigate = useNavigate();
+
+    const handleViewChart = async () => {
+        const request: PlotChartRequest = {
+            CalculatesId: [calculation.id],
+            ChartTitle: "Scattering",
+            XAxis: "Q",
+            YAxis: "I",
+            ScaleMethodsX: "Linear",
+            ScaleMethodsY: "Linear",
+        };
+        navigate(`/calculations/${calculation.id}/chart`, { state: { request } });
+    };
+
     return (
         <Dialog open={isOpen} onClose={onClose} className="relative z-50">
             <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -20,7 +35,6 @@ export const CalculationDetailsCard = ({
                         <div className="text-xl font-bold text-white">Calculation Details</div>
                         <p className="text-blue-200">ID: {calculation?.id || 'N/A'}</p>
                     </Dialog.Title>
-
                     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto flex-1">
                         <DetailItem label="Nanosystem ID" value={calculation.nanosystemId} />
                         <DetailItem label="Object ID" value={calculation.objectId} />
@@ -58,7 +72,13 @@ export const CalculationDetailsCard = ({
                         <DetailItem label="Calculation End" value={calculation.calculateEnd} />
                     </div>
 
-                    <div className="px-6 py-3 border-t border-gray-200 flex justify-end">
+                    <div className="px-6 py-3 border-t border-gray-200 flex justify-between">
+                        <button
+                            onClick={handleViewChart}
+                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                        >
+                            View Chart
+                        </button>
                         <button
                             onClick={onClose}
                             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"

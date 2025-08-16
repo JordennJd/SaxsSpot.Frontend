@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ApiResponseSchema } from "../../common/commonTypes.ts";
+import { ApiResponseListSchema } from "../../common/commonTypes.ts";
 
 // ==================== ENUMS AND SCHEMAS ====================
 
@@ -55,7 +55,17 @@ export const CalculationDtoSchema = z.object({
     calculateEnd: DateTimeSchema.nullable(),
 });
 
-const spaceParametersSchema = z.object({
+
+export const PlotChartRequestSchema = z.object({
+    ChartTitle: z.string(),
+    XAxis: z.string(),
+    YAxis: z.string(),
+    CalculatesId: z.array(z.string().uuid()),
+    ScaleMethodsX: SpaceMethodSchema,
+    ScaleMethodsY: SpaceMethodSchema
+});
+
+export const spaceParametersSchema = z.object({
     spaceMethod: z.number(),
     scaleMethod: z.number(),
     spaceParameter: z.number(),
@@ -77,5 +87,6 @@ export type ScaleMethod = z.infer<typeof ScaleMethodSchema>;
 export type SpaceMethod = z.infer<typeof SpaceMethodSchema>;
 export type RunCalculationRequest = z.infer<typeof RunCalculationRequestSchema>
 export type CalculationDto = z.infer<typeof CalculationDtoSchema>;
-export const CalculationApiResponseSchema = ApiResponseSchema(CalculationDtoSchema);
+export const CalculationApiResponseSchema = ApiResponseListSchema(CalculationDtoSchema);
 export type CalculationApiResponse = z.infer<typeof CalculationApiResponseSchema>;
+export type PlotChartRequest = z.infer<typeof PlotChartRequestSchema>;

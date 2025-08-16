@@ -1,8 +1,9 @@
 import {calculationApiClient} from "../../../lib/axios.ts";
 import {
     type CalculationApiResponse,
-    CalculationApiResponseSchema, type RunCalculationRequest,
+    CalculationApiResponseSchema, type PlotChartRequest, type RunCalculationRequest,
 } from "./calculationTypes.ts";
+import type {ApiResponse} from "../../common/commonTypes.ts";
 
 export const fetchCalculationsByNanosystem = async (
     nanosystemId: string,
@@ -38,4 +39,20 @@ export const RunCalculation = async (
     );
 
     return response.data;
+};
+
+export const PlotChart = async (request: PlotChartRequest): Promise<string> => {
+    const response = await calculationApiClient
+        .get<ApiResponse<string>>(
+            "/calculation/plot",
+            {
+                params: {...request},
+                paramsSerializer: (params) => {
+                    return new URLSearchParams(params).toString();
+                }
+            }
+        );
+
+    console.log(response)
+    return response.data.result;
 };

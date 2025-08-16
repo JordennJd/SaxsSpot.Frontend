@@ -4,6 +4,7 @@ import { NanosystemSeriesListPage } from "./pages/NanosystemSeriesListPage";
 import { NanosystemSeriesAddPage } from "./pages/NanosystemSeriesAddPage";
 import { SeriesDetailPage } from "./pages/SerialDetailPage";
 import JobManagementDashboard from "./pages/JobManagementDashboard.tsx";
+import {CalculationChartPage} from "./components/ui/ChartPage.tsx";
 
 // Создаём клиент React Query
 const queryClient = new QueryClient();
@@ -68,8 +69,8 @@ function App() {
             <Route path="/" element={<NanosystemSeriesListPage />} />
             <Route path="/new" element={<NanosystemSeriesAddPage />} />
             <Route path="/series/:guid" element={<SeriesDetailPage />} />
-          <Route path="/jobs" element={<JobManagementDashboard />} />
-
+            <Route path="/jobs" element={<JobManagementDashboard />} />
+            <Route path="/calculations/:guid/chart" element={<CalculationChartPage />} />
         </Routes>
         </div>
       </Router>
