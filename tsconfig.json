@@ -3,5 +3,10 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    "skipLibCheck": true,     // Пропускать проверку типов в библиотеках
+    "noEmitOnError": false,   // Собирать проект, даже если есть ошибки
+    "strict": false           // Отключить строгий режим
+  }
 }

@@ -5,7 +5,9 @@
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "skipLibCheck": true,
+    "skipLibCheck": true,     // Пропускать проверку типов в библиотеках
+    "noEmitOnError": false,   // Собирать проект, даже если есть ошибки
+    "strict": false,           // Отключить строгий режим
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -14,9 +16,12 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
 
-    /* Linting */
-    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,

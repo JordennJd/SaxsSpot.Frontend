@@ -9,3 +9,10 @@ export const errorResponseSchema = z.object({
   });
 
 export type ErrorResponse = z.infer<typeof errorResponseSchema>;
+
+export type PaginatedResponse<T> = {
+    data: T[];
+    count: number;
+    page: number;
+    pageSize: number;
+};

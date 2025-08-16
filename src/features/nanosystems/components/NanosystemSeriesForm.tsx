@@ -1,8 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import {ParticleKindMap, type GetNanosystemGenerationOptionsQuery, type MassGenerateNanoSystemOptions} from "../api/nanosystemTypes";
-import { fetchNanosystemMassGenerationParameters } from '../api/nanosystemApi';
-import type { AxiosError } from 'axios';
+import {ParticleKindMap, type CommonParticleGenerationParameters, type GetNanosystemGenerationOptionsQuery, type MassGenerateNanoSystemOptions} from "../api/nanosystemTypes";
+import {fetchNanosystemMassGenerationParameters, RunMassGeneration} from '../api/nanosystemApi';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 
 export const NanosystemSeriesForm = () => {
@@ -14,42 +13,42 @@ export const NanosystemSeriesForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<GetNanosystemGenerationOptionsQuery>({
     defaultValues: {
-      Count: 3,
-      ParticleKind: "0",
-      EpsilonFrom: 1,
-      EpsilonTo: 1,
-      ParticleCountFrom: 10000,
-      ParticleCountTo: 10000,
-      GlobalSizeFrom: null,
-      GlobalSizeTo: null,
-      NumericalConcentrationFrom: 0.2,
-      NumericalConcentrationTo: 0.2,
-      ExcessFrom: 1,
-      ExcessTo: 1.1,
-      MaxParticleSizeFrom: 1,
-      MaxParticleSizeTo: 2,
-      MinParticleSizeFrom: 1,
-      MinParticleSizeTo: 3,
-      KFrom: 2,
-      KTo: 2,
-      ThetaFrom: 3,
-      ThetaTo: 3
+      count: 3,
+      particleKind: 0,
+      epsilonFrom: 1,
+      epsilonTo: 1,
+      particleCountFrom: 10000,
+      particleCountTo: 10000,
+      globalSizeFrom: null,
+      globalSizeTo: null,
+      numericalConcentrationFrom: 0.2,
+      numericalConcentrationTo: 0.2,
+      excessFrom: 1,
+      excessTo: 1.1,
+      maxParticleSizeFrom: 3,
+      maxParticleSizeTo: 3,
+      minParticleSizeFrom: 1,
+      minParticleSizeTo: 1,
+      kFrom: 2,
+      kTo: 2,
+      thetaFrom: 3,
+      thetaTo: 3
     }
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [apiErrors, setApiErrors] = useState<Record<string, string[]>>({});
-  const particleKind = watch("ParticleKind");
+  const particleKind = watch("particleKind");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationOptions, setGenerationOptions] = useState<MassGenerateNanoSystemOptions | null>(null);
 
   const onSubmit = async (data: GetNanosystemGenerationOptionsQuery) => {
     try{
-        let result = await fetchNanosystemMassGenerationParameters(data)
+      const result = await fetchNanosystemMassGenerationParameters(data)
         setIsModalOpen(true);
         setGenerationOptions(result);
     }
-    catch(e){
-      let response = await e.response;
+    catch(e: any){
+      const response = await e.response;
       setApiErrors(response.data.errors);
     }
   };
@@ -59,19 +58,17 @@ export const NanosystemSeriesForm = () => {
     
     try {
       setIsGenerating(true);
-    //   const result = await generateNanosystems({
-    //     options: generationOptions.options,
-    //     nanoSystemsKind: generationOptions.nanoSystemsKind
-    //   });
-      // Можно добавить обработку успешного результата
+      const runResult = await RunMassGeneration(generationOptions)
+      alert("success! job with guid: " + runResult + " started")
+
     } catch (error) {
-      console.error('Generation failed:', error);
-      // Обработка ошибки
+      alert(error.message)
+      console.error('Start generating failed:', error);
     } finally {
       setIsGenerating(false);
     }
   };
-  const updateOptionField = (index: number, field: keyof NanosystemOption, value: any) => {
+  const updateOptionField = (index: number, field: keyof CommonParticleGenerationParameters, value: any) => {
     if (!generationOptions) return;
     
     const newOptions = [...generationOptions.options];
@@ -100,16 +97,15 @@ export const NanosystemSeriesForm = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Count */}
           <div>
-            <Label htmlFor="Count">Count</Label>
+            <Label htmlFor="count">Count</Label>
             <Input
-              id="Count"
+              id="count"
               type="number"
-              {...register("Count", { valueAsNumber: true })}
-              error={getError("Count")}
+              {...register("count", { valueAsNumber: true })}
+              error={getError("count")}
             />
           </div>
 
-          {/* Particle Kind */}
           <div>
             <Label>Particle Kind</Label>
             <div className="flex space-x-4 mt-1">
@@ -118,7 +114,7 @@ export const NanosystemSeriesForm = () => {
                   <input
                     type="radio"
                     value={value}
-                    {...register("ParticleKind")}
+                    {...register("particleKind")}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
@@ -134,21 +130,21 @@ export const NanosystemSeriesForm = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="ParticleCountFrom">From</Label>
+                <Label htmlFor="particleCountFrom">From</Label>
                 <Input
-                  id="ParticleCountFrom"
+                  id="particleCountFrom"
                   type="number"
-                  {...register("ParticleCountFrom", { valueAsNumber: true })}
-                  error={getError("ParticleCountFrom")}
+                  {...register("particleCountFrom", { valueAsNumber: true })}
+                  error={getError("particleCountFrom")}
                 />
               </div>
               <div>
                 <Label htmlFor="ParticleCountTo">To</Label>
                 <Input
-                  id="ParticleCountTo"
+                  id="particleCountTo"
                   type="number"
-                  {...register("ParticleCountTo", { valueAsNumber: true })}
-                  error={getError("ParticleCountTo")}
+                  {...register("particleCountTo", { valueAsNumber: true })}
+                  error={getError("particleCountTo")}
                 />
               </div>
             </div>
@@ -161,43 +157,43 @@ export const NanosystemSeriesForm = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
-                <Label htmlFor="MaxParticleSizeFrom">Max Size From</Label>
+                <Label htmlFor="maxParticleSizeFrom">Max Size From</Label>
                 <Input
-                  id="MaxParticleSizeFrom"
+                  id="maxParticleSizeFrom"
                   type="number"
                   step="0.01"
-                  {...register("MaxParticleSizeFrom", { valueAsNumber: true })}
-                  error={getError("MaxParticleSizeFrom")}
+                  {...register("maxParticleSizeFrom", { valueAsNumber: true })}
+                  error={getError("maxParticleSizeFrom")}
                 />
               </div>
               <div>
                 <Label htmlFor="MaxParticleSizeTo">Max Size To</Label>
                 <Input
-                  id="MaxParticleSizeTo"
+                  id="maxParticleSizeTo"
                   type="number"
                   step="0.01"
-                  {...register("MaxParticleSizeTo", { valueAsNumber: true })}
-                  error={getError("MaxParticleSizeTo")}
+                  {...register("maxParticleSizeTo", { valueAsNumber: true })}
+                  error={getError("maxParticleSizeTo")}
                 />
               </div>
               <div>
-                <Label htmlFor="MinParticleSizeFrom">Min Size From</Label>
+                <Label htmlFor="minParticleSizeFrom">Min Size From</Label>
                 <Input
-                  id="MinParticleSizeFrom"
+                  id="minParticleSizeFrom"
                   type="number"
                   step="0.01"
-                  {...register("MinParticleSizeFrom", { valueAsNumber: true })}
-                  error={getError("MinParticleSizeFrom")}
+                  {...register("minParticleSizeFrom", { valueAsNumber: true })}
+                  error={getError("minParticleSizeFrom")}
                 />
               </div>
               <div>
                 <Label htmlFor="MinParticleSizeTo">Min Size To</Label>
                 <Input
-                  id="MinParticleSizeTo"
+                  id="minParticleSizeTo"
                   type="number"
                   step="0.01"
-                  {...register("MinParticleSizeTo", { valueAsNumber: true })}
-                  error={getError("MinParticleSizeTo")}
+                  {...register("minParticleSizeTo", { valueAsNumber: true })}
+                  error={getError("minParticleSizeTo")}
                 />
               </div>
             </div>
@@ -234,8 +230,8 @@ export const NanosystemSeriesForm = () => {
                     id="NumericalConcentrationFrom"
                     type="number"
                     step="0.0001"
-                    {...register("NumericalConcentrationFrom", { valueAsNumber: true })}
-                    error={getError("NumericalConcentrationFrom")}
+                    {...register("numericalConcentrationFrom", { valueAsNumber: true })}
+                    error={getError("numericalConcentrationFrom")}
                   />
                 </div>
                 <div>
@@ -244,39 +240,38 @@ export const NanosystemSeriesForm = () => {
                     id="NumericalConcentrationTo"
                     type="number"
                     step="0.0001"
-                    {...register("NumericalConcentrationTo", { valueAsNumber: true })}
-                    error={getError("NumericalConcentrationTo")}
+                    {...register("numericalConcentrationTo", { valueAsNumber: true })}
+                    error={getError("numericalConcentrationTo")}
                   />
                 </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="GlobalSizeFrom">Global Size From</Label>
+                  <Label htmlFor="globalSizeFrom">Global Size From</Label>
                   <Input
-                    id="GlobalSizeFrom"
+                    id="globalSizeFrom"
                     type="number"
                     step="0.01"
-                    {...register("GlobalSizeFrom", { valueAsNumber: true })}
-                    error={getError("GlobalSizeFrom")}
+                    {...register("globalSizeFrom", { valueAsNumber: true })}
+                    error={getError("globalSizeFrom")}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="GlobalSizeTo">Global Size To</Label>
+                  <Label htmlFor="globalSizeTo">Global Size To</Label>
                   <Input
-                    id="GlobalSizeTo"
+                    id="globalSizeTo"
                     type="number"
                     step="0.01"
-                    {...register("GlobalSizeTo", { valueAsNumber: true })}
-                    error={getError("GlobalSizeTo")}
+                    {...register("globalSizeTo", { valueAsNumber: true })}
+                    error={getError("globalSizeTo")}
                   />
                 </div>
               </div>
             )}
           </div>
 
-          {/* Epsilon Parameters - only shown when particleKind is not sphere */}
-          {particleKind !== "0" && (
+          {particleKind !== 0 && (
             <div className="md:col-span-2 border-t pt-4">
               <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-white">
                 Epsilon Parameters
@@ -288,8 +283,8 @@ export const NanosystemSeriesForm = () => {
                     id="EpsilonFrom"
                     type="number"
                     step="0.01"
-                    {...register("EpsilonFrom", { valueAsNumber: true })}
-                    error={getError("EpsilonFrom")}
+                    {...register("epsilonFrom", { valueAsNumber: true })}
+                    error={getError("epsilonFrom")}
                   />
                 </div>
                 <div>
@@ -298,8 +293,8 @@ export const NanosystemSeriesForm = () => {
                     id="EpsilonTo"
                     type="number"
                     step="0.01"
-                    {...register("EpsilonTo", { valueAsNumber: true })}
-                    error={getError("EpsilonTo")}
+                    {...register("epsilonTo", { valueAsNumber: true })}
+                    error={getError("epsilonTo")}
                   />
                 </div>
               </div>
@@ -318,8 +313,8 @@ export const NanosystemSeriesForm = () => {
                   id="ExcessFrom"
                   type="number"
                   step="0.01"
-                  {...register("ExcessFrom", { valueAsNumber: true })}
-                  error={getError("ExcessFrom")}
+                  {...register("excessFrom", { valueAsNumber: true })}
+                  error={getError("excessFrom")}
                 />
               </div>
               <div>
@@ -328,8 +323,8 @@ export const NanosystemSeriesForm = () => {
                   id="ExcessTo"
                   type="number"
                   step="0.01"
-                  {...register("ExcessTo", { valueAsNumber: true })}
-                  error={getError("ExcessTo")}
+                  {...register("excessTo", { valueAsNumber: true })}
+                  error={getError("excessTo")}
                 />
               </div>
             </div>
@@ -347,8 +342,8 @@ export const NanosystemSeriesForm = () => {
                   id="KFrom"
                   type="number"
                   step="0.01"
-                  {...register("KFrom", { valueAsNumber: true })}
-                  error={getError("KFrom")}
+                  {...register("kFrom", { valueAsNumber: true })}
+                  error={getError("kFrom")}
                 />
               </div>
               <div>
@@ -357,8 +352,8 @@ export const NanosystemSeriesForm = () => {
                   id="KTo"
                   type="number"
                   step="0.01"
-                  {...register("KTo", { valueAsNumber: true })}
-                  error={getError("KTo")}
+                  {...register("kTo", { valueAsNumber: true })}
+                  error={getError("kTo")}
                 />
               </div>
             </div>
@@ -376,8 +371,8 @@ export const NanosystemSeriesForm = () => {
                   id="ThetaFrom"
                   type="number"
                   step="0.1"
-                  {...register("ThetaFrom", { valueAsNumber: true })}
-                  error={getError("ThetaFrom")}
+                  {...register("thetaFrom", { valueAsNumber: true })}
+                  error={getError("thetaFrom")}
                 />
               </div>
               <div>
@@ -386,8 +381,8 @@ export const NanosystemSeriesForm = () => {
                   id="ThetaTo"
                   type="number"
                   step="0.1"
-                  {...register("ThetaTo", { valueAsNumber: true })}
-                  error={getError("ThetaTo")}
+                  {...register("thetaTo", { valueAsNumber: true })}
+                  error={getError("thetaTo")}
                 />
               </div>
             </div>
@@ -431,7 +426,7 @@ export const NanosystemSeriesForm = () => {
                    <Input
                      type="number"
                      value={option.count}
-                     onChange={(e) => updateOptionField(index, 'count', Number(e.target.value))}
+                     onChange={(e: any) => updateOptionField(index, 'count', Number(e.target.value))}
                    />
                  </div>
                  <div>
@@ -452,7 +447,7 @@ export const NanosystemSeriesForm = () => {
                      onChange={(e) => updateOptionField(index, 'maxSize', Number(e.target.value))}
                    />
                  </div>
-                 {particleKind !== "0" && (
+                 {particleKind !== 0 && (
                    <div>
                      <Label>Epsilon</Label>
                      <Input
@@ -549,17 +544,12 @@ const Label = ({ htmlFor, children }: { htmlFor?: string; children: React.ReactN
   </label>
 );
 
-const Input = ({ id, type, step, error, ...props }: any) => (
+const Input = ({ type, ...props }) => (
   <div>
     <input
-      id={id}
       type={type}
-      step={step}
-      className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
-        error ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-300 dark:border-gray-600 dark:bg-gray-700'
-      }`}
+      className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
       {...props}
     />
-    {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
   </div>
 );

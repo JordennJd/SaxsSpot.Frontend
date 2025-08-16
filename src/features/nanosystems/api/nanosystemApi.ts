@@ -1,24 +1,17 @@
-import { errorResponseSchema, type ErrorResponse } from './common/commonTypes';
 // src/features/nanosystems/api/nanosystemApi.ts
-import axios from "axios";
 import type { GetNanosystemGenerationOptionsQuery, MassGenerateNanoSystemOptions, NanosystemDto, NanosystemSeriesDto } from "./nanosystemTypes";
-import { CommonParticleGenerationParametersSchema, MassGenerateNanoSystemOptionsSchema, NanosystemDtoSchema, NanosystemSeriesDtoSchema, ParticleKindSchema } from "./nanosystemTypes";
+import { CommonParticleGenerationParametersSchema, NanosystemDtoSchema, NanosystemSeriesDtoSchema } from "./nanosystemTypes";
 
 import { z } from "zod";
-
-export type PaginatedResponse<T> = {
-  data: T[];
-  count: number;
-  page: number;
-  pageSize: number;
-};
+import {nanosystemApiClient} from "../../../lib/axios.ts";
+import type {PaginatedResponse} from "./common/commonTypes.ts";
 
 export const fetchSeriesNanosystems = async (
   gridifyQuery?: string,
   page: number = 1,
   pageSize: number = 10
 ): Promise<PaginatedResponse<NanosystemSeriesDto>> => {
-  const response = await axios.get<PaginatedResponse<NanosystemSeriesDto>>(
+  const response = await nanosystemApiClient.get<PaginatedResponse<NanosystemSeriesDto>>(
     "/nanosystem/get-nanosystem-series-list",
     {
       params: { 
@@ -40,7 +33,7 @@ export const fetchSeriesNanosystems = async (
 };
 
 export const fetchNanosystemMassGenerationParameters = async (query: GetNanosystemGenerationOptionsQuery): Promise<MassGenerateNanoSystemOptions> => {
-  const response = await axios.get<MassGenerateNanoSystemOptions>(
+  const response = await nanosystemApiClient.get<MassGenerateNanoSystemOptions>(
     "/nanosystem/get-nanosystem-mass-generation-parameters",
     {
       params: {...query},    
@@ -61,7 +54,7 @@ export const fetchNanosystemList = async (
   page: number = 1,
   pageSize: number = 10
 ): Promise<PaginatedResponse<NanosystemDto>> => {
-  const response = await axios.get<PaginatedResponse<NanosystemDto>>(
+  const response = await nanosystemApiClient.get<PaginatedResponse<NanosystemDto>>(
     "/nanosystem/get-nanosystem-list",
     {
       params: { 
@@ -80,4 +73,14 @@ export const fetchNanosystemList = async (
     pageSize: response.data.pageSize,
     page: response.data.page
   };
+};
+
+export const RunMassGeneration = async (
+    options: MassGenerateNanoSystemOptions
+): Promise<string> => {
+    const response = await nanosystemApiClient.post<string>(
+        "/nanosystem/run-mass-generation", options
+    );
+
+    return response.data;
 };
