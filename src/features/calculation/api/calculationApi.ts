@@ -1,7 +1,7 @@
 import {calculationApiClient} from "../../../lib/axios.ts";
 import {
     type CalculationApiResponse,
-    CalculationApiResponseSchema,
+    CalculationApiResponseSchema, type RunCalculationRequest,
 } from "./calculationTypes.ts";
 
 export const fetchCalculationsByNanosystem = async (
@@ -28,4 +28,14 @@ export const fetchCalculationsByNanosystem = async (
     const parsedResponse = CalculationApiResponseSchema.parse(response.data);
     console.log(parsedResponse)
     return parsedResponse;
+};
+
+export const RunCalculation = async (
+    options: RunCalculationRequest
+): Promise<string> => {
+    const response = await calculationApiClient.post<string>(
+        "/calculation/run-calculation", options
+    );
+
+    return response.data;
 };

@@ -55,10 +55,27 @@ export const CalculationDtoSchema = z.object({
     calculateEnd: DateTimeSchema.nullable(),
 });
 
+const spaceParametersSchema = z.object({
+    spaceMethod: z.number(),
+    scaleMethod: z.number(),
+    spaceParameter: z.number(),
+    start: z.number(),
+    end: z.number(),
+});
+
+export const RunCalculationRequestSchema = z.object({
+    qVectorSpaceParameters: spaceParametersSchema,
+    phiVectorSpaceParameters: spaceParametersSchema,
+    thetaVectorSpaceParameters: spaceParametersSchema,
+    systemId: z.string().uuid(),
+    requestId: z.string(),
+});
+
 // ==================== TYPES ====================
 
 export type ScaleMethod = z.infer<typeof ScaleMethodSchema>;
 export type SpaceMethod = z.infer<typeof SpaceMethodSchema>;
+export type RunCalculationRequest = z.infer<typeof RunCalculationRequestSchema>
 export type CalculationDto = z.infer<typeof CalculationDtoSchema>;
 export const CalculationApiResponseSchema = ApiResponseSchema(CalculationDtoSchema);
 export type CalculationApiResponse = z.infer<typeof CalculationApiResponseSchema>;
