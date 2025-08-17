@@ -5,8 +5,11 @@ export const ParticleKindMap = {
   0: "Sphere",
   1: "Parallelepiped",
 } as const;
+
 export type ParticleKindNumber = keyof typeof ParticleKindMap;
 export type ParticleKindString = typeof ParticleKindMap[ParticleKindNumber];
+export type ParticleKind = ParticleKindString;
+
 export const ParticleKindSchema = z.union([
   z.nativeEnum(ParticleKindMap), // Для строковых значений
   z.number().transform(val => {  // Для числовых значений
@@ -15,11 +18,9 @@ export const ParticleKindSchema = z.union([
     }
     throw new Error(`Invalid ParticleKind value: ${val}`);
   })
-]).refine(val => Object.values(ParticleKindMap).includes(val as any), {
+]).refine(val => Object.values(ParticleKindMap).includes(val as ParticleKindString), {
   message: "Invalid particle kind"
 });
-
-export type ParticleKind = z.infer<typeof ParticleKindSchema>;
 export const NanosystemSeriesDtoSchema = z.object({
   id: z.string().uuid(),
   particleKind: ParticleKindSchema,

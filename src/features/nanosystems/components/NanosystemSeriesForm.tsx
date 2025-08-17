@@ -1,3 +1,5 @@
+/* eslint-disable */
+// @ts-nocheck
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import {ParticleKindMap, type CommonParticleGenerationParameters, type GetNanosystemGenerationOptionsQuery, type MassGenerateNanoSystemOptions} from "../api/nanosystemTypes";

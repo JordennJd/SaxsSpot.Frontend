@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { PlotChart } from "../../features/calculation/api/calculationApi.ts";
-import type { PlotChartRequest } from "../../features/calculation/api/calculationTypes.ts";
+import { PlotChart } from "../features/calculation/api/calculationApi";
+import type { PlotChartRequest } from "../features/calculation/api/calculationTypes";
 
 export const CalculationChartPage = () => {
     const { id } = useParams();

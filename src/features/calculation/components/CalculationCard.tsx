@@ -92,9 +92,9 @@ export const CalculationDetailsCard = ({
     );
 };
 
-const DetailItem = ({ label, value }: { label: string; value: string }) => (
+const DetailItem = ({ label, value }: { label: string; value: string | null }) => (
     <div className="bg-gray-50 p-3 rounded border border-gray-200">
         <h4 className="text-sm font-medium text-gray-500">{label}</h4>
-        <p className="mt-1 font-mono text-sm text-gray-900 break-all">{value}</p>
+        <p className="mt-1 font-mono text-sm text-gray-900 break-all">{value || 'N/A'}</p>
     </div>
 );

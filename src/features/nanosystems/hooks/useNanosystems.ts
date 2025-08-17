@@ -11,6 +11,6 @@ export const useNanosystemSeries = (
   return useQuery<PaginatedResponse<NanosystemSeriesDto>>({
     queryKey: ["nanosystem-series-list", gridifyQuery, page, pageSize],
     queryFn: () => fetchSeriesNanosystems(gridifyQuery, page, pageSize),
-    placeholderData: (previousData) => previousData,
+    placeholderData: (previousData: PaginatedResponse<NanosystemSeriesDto> | undefined) => previousData,
   });
 };

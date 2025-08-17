@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+
 import { type NanosystemDto, type NanosystemSeriesDto } from '../features/nanosystems/api/nanosystemTypes';
 import { Pagination } from '../components/ui/Pagination';
 import { useState } from 'react';
@@ -79,7 +80,7 @@ const DetailItem = ({ label, value }: { label: string; value: string }) => (
 export const SeriesDetailPage = () => {
   const { guid: seriesId = "" } = useParams<{ guid: string }>();
   const [page, setPage] = useState(1);
-  const [calculationPage, setCalculationPage] = useState(1);
+  const [calculationPage] = useState(1);
   const pageSize = 10;
 
   const [selectedNanosystem, setSelectedNanosystem] = useState<NanosystemDto | null>(null);
@@ -183,10 +184,11 @@ export const SeriesDetailPage = () => {
     }
   };
 
-  const handleParamChange = (path: string, value: any) => {
+  const handleParamChange = (path: string, value: unknown) => {
     setCalculationParams(prev => {
       const keys = path.split('.');
       const newParams = { ...prev };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let current: any = newParams;
 
       for (let i = 0; i < keys.length - 1; i++) {

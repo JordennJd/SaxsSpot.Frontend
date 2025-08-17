@@ -6,6 +6,8 @@ import { z } from "zod";
 import {nanosystemApiClient} from "../../../lib/axios.ts";
 import type {PaginatedResponse} from "./common/commonTypes.ts";
 
+export type { PaginatedResponse };
+
 export const fetchSeriesNanosystems = async (
   gridifyQuery?: string,
   page: number = 1,
