@@ -1,13 +1,13 @@
 // src/features/nanosystems/components/NanosystemFilters.tsx
-import React, { useState } from "react";
-import { AddNanosystemButton } from "../../../components/ui/nanosystems/AddNanosystemButton";
+import React, { useState } from 'react';
+import { AddNanosystemButton } from '../../../components/ui/nanosystems/AddNanosystemButton';
 
 interface NanosystemFiltersProps {
   onFilterChange: (gridifyQuery: string) => void;
 }
 
 export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) => {
-  const [gridifyQuery, setGridifyQuery] = useState("");
+  const [gridifyQuery, setGridifyQuery] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

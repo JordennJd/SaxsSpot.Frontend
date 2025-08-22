@@ -1,7 +1,10 @@
 import { useNavigate } from 'react-router-dom';
+import { useToastContext } from '../../contexts/ToastContext';
+import { config } from '../../lib/config';
 
 export const Header = () => {
   const navigate = useNavigate();
+  const { showSuccess, showError, showWarning, showInfo } = useToastContext();
 
   return (
     <header className="bg-gradient-to-r from-blue-900 to-purple-900 shadow-lg sticky top-0 z-10">
@@ -41,6 +44,8 @@ export const Header = () => {
             </li>
           </ul>
         </nav>
+
+        {/* Toast Demo Button - Only in Development */}
       </div>
       
       {/* Status bar */}

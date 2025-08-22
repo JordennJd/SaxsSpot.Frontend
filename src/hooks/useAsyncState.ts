@@ -15,7 +15,7 @@ export interface UseAsyncStateReturn<T> extends AsyncState<T> {
 }
 
 export function useAsyncState<T = unknown>(
-  initialData: T | null = null
+  initialData: T | null = null,
 ): UseAsyncStateReturn<T> {
   const [state, setState] = useState<AsyncState<T>>({
     data: initialData,

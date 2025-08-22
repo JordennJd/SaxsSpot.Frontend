@@ -34,7 +34,7 @@ export function useJobManagement(): UseJobManagementReturn {
     waiting: 10,
     running: 10,
     completed: 10,
-    failed: 10
+    failed: 10,
   });
 
   // Sort jobs by date (newest first)
@@ -58,7 +58,7 @@ export function useJobManagement(): UseJobManagementReturn {
       waiting: sortedJobs.filter(job => job.status === JobStatus.Enum.StatusCreated),
       running: sortedJobs.filter(job => job.status === JobStatus.Enum.StatusRunning),
       completed: sortedJobs.filter(job => job.status === JobStatus.Enum.StatusCompleted),
-      failed: sortedJobs.filter(job => job.status === JobStatus.Enum.StatusFailed)
+      failed: sortedJobs.filter(job => job.status === JobStatus.Enum.StatusFailed),
     };
   }, [rawJobs, sortByDate]);
 
@@ -66,7 +66,7 @@ export function useJobManagement(): UseJobManagementReturn {
   const loadMore = useCallback((category: keyof VisibleCounts) => {
     setVisibleCounts(prev => ({
       ...prev,
-      [category]: prev[category] + 10
+      [category]: prev[category] + 10,
     }));
   }, []);
 
@@ -75,7 +75,7 @@ export function useJobManagement(): UseJobManagementReturn {
     const currentDate = new Date();
     await fetchJobsData(() => fetchJobs({
       dateFrom: currentDate,
-      dateTo: currentDate
+      dateTo: currentDate,
     }));
   }, [fetchJobsData]);
 

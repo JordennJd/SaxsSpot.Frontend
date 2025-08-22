@@ -1,19 +1,19 @@
 import { 
   fetchCalculationsByNanosystem, 
   RunCalculation, 
-  PlotChart 
+  PlotChart, 
 } from '@/features/calculation/api/calculationApi';
 import type { 
   CalculationDto, 
   RunCalculationRequest, 
-  PlotChartRequest 
+  PlotChartRequest, 
 } from '@/features/calculation/api/calculationTypes';
 
 export class CalculationService {
   static async getCalculationsByNanosystem(
     nanosystemId: string,
     page: number = 1,
-    pageSize: number = 10
+    pageSize: number = 10,
   ): Promise<CalculationDto[]> {
     try {
       const response = await fetchCalculationsByNanosystem(nanosystemId, page, pageSize);
@@ -101,35 +101,35 @@ export class CalculationService {
         scaleMethod: 0,
         spaceParameter: 0.01,
         start: 0.02,
-        end: 0.4
+        end: 0.4,
       },
       phiVectorSpaceParameters: {
         spaceMethod: 0,
         scaleMethod: 0,
         spaceParameter: 0.01,
         start: 0.02,
-        end: 0.04
+        end: 0.04,
       },
       thetaVectorSpaceParameters: {
         spaceMethod: 0,
         scaleMethod: 0,
         spaceParameter: 0.01,
         start: 0.02,
-        end: 0.04
+        end: 0.04,
       },
       systemId,
-      requestId: ""
+      requestId: '',
     };
   }
 
   static createDefaultChartRequest(calculationIds: string[]): PlotChartRequest {
     return {
       CalculatesId: calculationIds,
-      ChartTitle: "Scattering",
-      XAxis: "Q",
-      YAxis: "I",
-      ScaleMethodsX: "Linear",
-      ScaleMethodsY: "Linear",
+      ChartTitle: 'Scattering',
+      XAxis: 'Q',
+      YAxis: 'I',
+      ScaleMethodsX: 'Linear',
+      ScaleMethodsY: 'Linear',
     };
   }
 } 

@@ -7,9 +7,9 @@ import type { PaginatedResponse } from '../features/nanosystems/api/common/commo
 
 // API Functions
 const fetchSeries = async (seriesId: string): Promise<NanosystemSeriesDto> => {
-  const response = await fetchSeriesNanosystems("id=" + seriesId, 1, 1);
+  const response = await fetchSeriesNanosystems('id=' + seriesId, 1, 1);
   if (response.data.length === 0) {
-    throw new Error("Series not found");
+    throw new Error('Series not found');
   }
   return response.data[0];
 };
@@ -17,17 +17,17 @@ const fetchSeries = async (seriesId: string): Promise<NanosystemSeriesDto> => {
 const fetchNanosystems = async (
   gridifyQuery?: string,
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
 ): Promise<PaginatedResponse<NanosystemDto>> => {
   try {
     const response = await fetchNanosystemList(gridifyQuery, page, pageSize);
     if (response.data.length === 0) {
-      throw new Error("Nanosystem List query error");
+      throw new Error('Nanosystem List query error');
     }
     return response;
   } catch (e) {
     console.log(e);
-    throw new Error("Nanosystem List query error");
+    throw new Error('Nanosystem List query error');
   }
 };
 

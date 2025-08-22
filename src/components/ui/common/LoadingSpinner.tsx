@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { type ComponentProps } from '@/types/global';
 
 interface LoadingSpinnerProps extends ComponentProps {
@@ -10,9 +11,9 @@ const sizeClasses = {
   sm: 'h-4 w-4',
   md: 'h-8 w-8', 
   lg: 'h-12 w-12',
-};
+} as const;
 
-export const LoadingSpinner = ({ 
+const LoadingSpinnerComponent = ({ 
   size = 'md', 
   text, 
   fullScreen = false,
@@ -42,4 +43,8 @@ export const LoadingSpinner = ({
   }
 
   return content;
-}; 
+};
+
+// Memoized component for better performance
+export const LoadingSpinner = memo(LoadingSpinnerComponent);
+LoadingSpinner.displayName = 'LoadingSpinner'; 

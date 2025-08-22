@@ -1,4 +1,6 @@
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { type ComponentProps } from '@/types/global';
+import { handleError } from '../../../lib/errorHandler';
 
 interface ErrorStateProps extends ComponentProps {
   title?: string;
@@ -68,4 +70,61 @@ export const ErrorState = ({
       {content}
     </div>
   );
-}; 
+};
+
+// Error Boundary component
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: (error: Error, resetError: () => void) => ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+}
+
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Handle error with our error handler
+    handleError(error);
+    
+    // Call custom error handler if provided
+    this.props.onError?.(error, errorInfo);
+  }
+
+  resetError = () => {
+    this.setState({ hasError: false, error: undefined });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      // Use custom fallback if provided
+      if (this.props.fallback && this.state.error) {
+        return this.props.fallback(this.state.error, this.resetError);
+      }
+
+      // Default error UI
+      return (
+        <ErrorState
+          title="Application Error"
+          message="Something went wrong in the application. Please refresh the page or try again."
+          onRetry={this.resetError}
+          retryText="Reset Error"
+          fullScreen
+        />
+      );
+    }
+
+    return this.props.children;
+  }
+} 

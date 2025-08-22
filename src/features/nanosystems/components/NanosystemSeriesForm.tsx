@@ -3,10 +3,12 @@
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import {ParticleKindMap, type CommonParticleGenerationParameters, type GetNanosystemGenerationOptionsQuery, type MassGenerateNanoSystemOptions} from "../api/nanosystemTypes";
-import {fetchNanosystemMassGenerationParameters, RunMassGeneration} from '../api/nanosystemApi';
+import {fetchNanosystemMassGenerationParameters, runMassGeneration} from '../api/nanosystemApi';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
+import { useToastContext } from '../../../contexts/ToastContext';
 
 export const NanosystemSeriesForm = () => {
+  const { showSuccess, showError } = useToastContext();
   const [sizeInputType, setSizeInputType] = useState<'globalSize' | 'concentration'>('concentration');
   const {
     register,
@@ -60,11 +62,18 @@ export const NanosystemSeriesForm = () => {
     
     try {
       setIsGenerating(true);
-      const runResult = await RunMassGeneration(generationOptions)
-      alert("success! job with guid: " + runResult + " started")
+      const runResult = await runMassGeneration(generationOptions)
+      showSuccess(
+        'Generation Started', 
+        `Nanosystem generation job has been queued successfully with ID: ${runResult}`,
+        6000
+      );
 
     } catch (error) {
-      alert(error.message)
+      showError(
+        'Generation Failed', 
+        error?.message || 'Unable to start nanosystem generation. Please try again.'
+      );
       console.error('Start generating failed:', error);
     } finally {
       setIsGenerating(false);

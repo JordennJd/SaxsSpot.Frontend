@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { PlotChart } from "../features/calculation/api/calculationApi";
-import type { PlotChartRequest } from "../features/calculation/api/calculationTypes";
+import { PlotChart } from '../features/calculation/api/calculationApi';
+import type { PlotChartRequest } from '../features/calculation/api/calculationTypes';
 
 export const CalculationChartPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const [chart, setChart] = useState<string>("");
+    const [chart, setChart] = useState<string>('');
     const [request, setRequest] = useState<PlotChartRequest>(location.state?.request || {
         CalculatesId: [id || ''],
-        ChartTitle: "Scattering",
-        XAxis: "Q",
-        YAxis: "I",
-        ScaleMethodsX: "Linear",
-        ScaleMethodsY: "Linear",
+        ChartTitle: 'Scattering',
+        XAxis: 'Q',
+        YAxis: 'I',
+        ScaleMethodsX: 'Linear',
+        ScaleMethodsY: 'Linear',
     });
     const [isLoading, setIsLoading] = useState(false);
 
@@ -74,7 +74,7 @@ export const CalculationChartPage = () => {
                 `;
                 setChart(fullHtml);
             } catch (error) {
-                console.error("Error fetching chart:", error);
+                console.error('Error fetching chart:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -87,7 +87,7 @@ export const CalculationChartPage = () => {
         const { name, value } = e.target;
         setRequest(prev => ({
             ...prev,
-            [name]: value
+            [name]: value,
         }));
     };
 

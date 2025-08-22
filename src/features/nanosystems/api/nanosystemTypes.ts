@@ -1,9 +1,9 @@
 // src/features/nanosystems/api/nanosystemTypes.ts
-import { z } from "zod";
+import { z } from 'zod';
 
 export const ParticleKindMap = {
-  0: "Sphere",
-  1: "Parallelepiped",
+  0: 'Sphere',
+  1: 'Parallelepiped',
 } as const;
 
 export type ParticleKindNumber = keyof typeof ParticleKindMap;
@@ -17,9 +17,9 @@ export const ParticleKindSchema = z.union([
       return ParticleKindMap[val as ParticleKindNumber];
     }
     throw new Error(`Invalid ParticleKind value: ${val}`);
-  })
+  }),
 ]).refine(val => Object.values(ParticleKindMap).includes(val as ParticleKindString), {
-  message: "Invalid particle kind"
+  message: 'Invalid particle kind',
 });
 export const NanosystemSeriesDtoSchema = z.object({
   id: z.string().uuid(),
@@ -53,19 +53,19 @@ export const CommonParticleGenerationParametersSchema = z.object({
   theta: z.number(),
   k: z.number(),
   excess: z.number(),
-  epsilon: z.number().nullable()
+  epsilon: z.number().nullable(),
 });
 
 export const MassGenerateNanoSystemOptionsSchema = z.object({
   options: z.array(CommonParticleGenerationParametersSchema),
-  nanoSystemsKind: ParticleKindSchema
+  nanoSystemsKind: ParticleKindSchema,
 });
 export type CommonParticleGenerationParameters = z.infer<typeof CommonParticleGenerationParametersSchema>;
 export type MassGenerateNanoSystemOptions = z.infer<typeof MassGenerateNanoSystemOptionsSchema>;
 
 export const GetNanosystemGenerationOptionsQuerySchema = z.object({
   count: z.number().int().positive(),
-  particleKind: z.enum(["0", "1"]).transform(Number),
+  particleKind: z.enum(['0', '1']).transform(Number),
   epsilonFrom: z.number().nullable(),
   epsilonTo: z.number().nullable(),
   particleCountFrom: z.number().int(),
@@ -84,7 +84,7 @@ export const GetNanosystemGenerationOptionsQuerySchema = z.object({
   kTo: z.number(),
   thetaFrom: z.number(),
   thetaTo: z.number(),
-})
+});
 
 export type GetNanosystemGenerationOptionsQuery = z.infer<typeof GetNanosystemGenerationOptionsQuerySchema>;
 
@@ -92,7 +92,7 @@ export type GetNanosystemGenerationOptionsQuery = z.infer<typeof GetNanosystemGe
 export const GenerationZoneFormSchema = z.number().transform(val => {
   const mapping = {
     0: 'Cube',
-    1: 'Sphere'
+    1: 'Sphere',
   };
   const result = mapping[val as keyof typeof mapping];
   if (!result) throw new Error(`Invalid GenerationZoneForm value: ${val}`);

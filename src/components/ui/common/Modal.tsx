@@ -1,5 +1,6 @@
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, memo, useCallback, type ReactNode } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { type ComponentProps } from '@/types/global';
 
 interface ModalProps extends ComponentProps {
@@ -17,9 +18,9 @@ const sizeClasses = {
   lg: 'max-w-2xl',
   xl: 'max-w-4xl',
   full: 'max-w-7xl',
-};
+} as const;
 
-export const Modal = ({
+const ModalComponent = ({
   isOpen,
   onClose,
   title,
@@ -28,9 +29,13 @@ export const Modal = ({
   children,
   className = '',
 }: ModalProps) => {
+  // Memoize the close handler to prevent unnecessary re-renders
+  const handleClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-50" onClose={handleClose}>
         <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
@@ -73,12 +78,10 @@ export const Modal = ({
                       <button
                         type="button"
                         className="rounded-md p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                        onClick={onClose}
+                        onClick={handleClose}
+                        aria-label="Close modal"
                       >
-                        <span className="sr-only">Close</span>
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <XMarkIcon className="h-5 w-5" aria-hidden="true" />
                       </button>
                     )}
                   </div>
@@ -95,4 +98,8 @@ export const Modal = ({
       </Dialog>
     </Transition>
   );
-}; 
+};
+
+// Memoized component for better performance
+export const Modal = memo(ModalComponent);
+Modal.displayName = 'Modal'; 

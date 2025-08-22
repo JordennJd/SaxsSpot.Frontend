@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 // JobStatus enum
 export const JobStatus = z.enum([
@@ -13,11 +13,11 @@ export type JobStatus = z.infer<typeof JobStatus>;
 // UUID schema (you might want to add more specific validation)
 const uuidSchema = z.string().uuid();
 const statusCodeMap: Record<number, z.infer<typeof JobStatus>> = {
-    0: "StatusCreated",
-    1: "StatusPending",
-    2: "StatusRunning",
-    3: "StatusCompleted",
-    4: "StatusFailed"
+    0: 'StatusCreated',
+    1: 'StatusPending',
+    2: 'StatusRunning',
+    3: 'StatusCompleted',
+    4: 'StatusFailed',
 };
 
 // Job schema

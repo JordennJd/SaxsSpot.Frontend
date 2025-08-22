@@ -14,12 +14,12 @@ export const CalculationModal = ({
   onClose,
   calculationParams,
   onParamChange,
-  onCalculate
+  onCalculate,
 }: CalculationModalProps) => {
   const renderVectorParameters = (
     title: string,
     params: any,
-    prefix: string
+    prefix: string,
   ) => (
     <div className="space-y-2">
       <h3 className="font-medium text-gray-800">{title}</h3>
@@ -69,19 +69,19 @@ export const CalculationModal = ({
 
           <div className="p-6 space-y-4">
             {renderVectorParameters(
-              "Q Vector Parameters",
+              'Q Vector Parameters',
               calculationParams.qVectorSpaceParameters,
-              "qVectorSpaceParameters"
+              'qVectorSpaceParameters',
             )}
             {renderVectorParameters(
-              "Phi Vector Parameters",
+              'Phi Vector Parameters',
               calculationParams.phiVectorSpaceParameters,
-              "phiVectorSpaceParameters"
+              'phiVectorSpaceParameters',
             )}
             {renderVectorParameters(
-              "Theta Vector Parameters",
+              'Theta Vector Parameters',
               calculationParams.thetaVectorSpaceParameters,
-              "thetaVectorSpaceParameters"
+              'thetaVectorSpaceParameters',
             )}
           </div>
 

@@ -1,10 +1,10 @@
-import { nanosystemApiClient } from "../lib/axios";
+import { nanosystemApiClient } from '../lib/axios';
 
 export const downloadNanosystem = async (id: string) => {
   try {
     const response = await nanosystemApiClient.get('/nanosystem/download-nanosystem', {
       responseType: 'blob',
-      params: { id }
+      params: { id },
     });
 
     const url = window.URL.createObjectURL(new Blob([response.data]));

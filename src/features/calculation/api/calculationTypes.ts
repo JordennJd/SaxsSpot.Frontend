@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { ApiResponseListSchema } from "../../common/commonTypes.ts";
+import { ApiResponseListSchema } from '../../common/commonTypes.ts';
 
 // ==================== ENUMS AND SCHEMAS ====================
 
 export const ScaleMethodSchema = z.number().transform(val => {
     const mapping = {
         0: 'Step',
-        1: 'Length'
+        1: 'Length',
     };
     const result = mapping[val as keyof typeof mapping];
     if (!result) throw new Error(`Invalid ScaleMethod value: ${val}`);
@@ -16,7 +16,7 @@ export const ScaleMethodSchema = z.number().transform(val => {
 export const SpaceMethodSchema = z.number().transform(val => {
     const mapping = {
         0: 'Linear',
-        1: 'Log'
+        1: 'Log',
     };
     const result = mapping[val as keyof typeof mapping];
     if (!result) throw new Error(`Invalid SpaceMethod value: ${val}`);
@@ -27,7 +27,7 @@ export const SpaceMethodSchema = z.number().transform(val => {
 const DateTimeSchema = z.string().refine(val => {
     return !isNaN(Date.parse(val)) && val.includes('T');
 }, {
-    message: "Must be a valid ISO 8601 datetime string"
+    message: 'Must be a valid ISO 8601 datetime string',
 });
 
 export const CalculationDtoSchema = z.object({
@@ -62,7 +62,7 @@ export const PlotChartRequestSchema = z.object({
     YAxis: z.string(),
     CalculatesId: z.array(z.string().uuid()),
     ScaleMethodsX: SpaceMethodSchema,
-    ScaleMethodsY: SpaceMethodSchema
+    ScaleMethodsY: SpaceMethodSchema,
 });
 
 export const spaceParametersSchema = z.object({

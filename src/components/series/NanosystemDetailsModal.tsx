@@ -33,7 +33,7 @@ export const NanosystemDetailsModal = ({
   onCalculate,
   calculations,
   isCalculationsLoading,
-  onCalculationClick
+  onCalculationClick,
 }: NanosystemDetailsModalProps) => {
   if (!nanosystem) return null;
 

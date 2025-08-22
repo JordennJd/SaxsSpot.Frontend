@@ -3,7 +3,7 @@ import { useModal } from './useModal';
 import { CalculationService } from '@/services/calculationService';
 import type { 
   CalculationDto, 
-  RunCalculationRequest 
+  RunCalculationRequest, 
 } from '@/features/calculation/api/calculationTypes';
 import type { NanosystemDto } from '@/features/nanosystems/api/nanosystemTypes';
 
@@ -42,7 +42,7 @@ export function useCalculationModal(): UseCalculationModalReturn {
   const calculationFormModal = useModal();
   
   const [calculationParams, setCalculationParams] = useState<RunCalculationRequest>(
-    CalculationService.createDefaultCalculationParams('')
+    CalculationService.createDefaultCalculationParams(''),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 

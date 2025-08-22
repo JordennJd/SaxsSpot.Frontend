@@ -12,7 +12,7 @@ export const emailSchema = z.string().email('Invalid email format');
 export const dateSchema = z.string().refine(val => {
   return !isNaN(Date.parse(val));
 }, {
-  message: "Invalid date format"
+  message: 'Invalid date format',
 });
 
 // Pagination validation
@@ -34,16 +34,16 @@ export const nanosystemFiltersSchema = z.object({
   }
   return true;
 }, {
-  message: "Min particle count must be less than or equal to max particle count",
-  path: ["minParticleCount"]
+  message: 'Min particle count must be less than or equal to max particle count',
+  path: ['minParticleCount'],
 }).refine(data => {
   if (data.minGlobalSize && data.maxGlobalSize) {
     return data.minGlobalSize <= data.maxGlobalSize;
   }
   return true;
 }, {
-  message: "Min global size must be less than or equal to max global size",
-  path: ["minGlobalSize"]
+  message: 'Min global size must be less than or equal to max global size',
+  path: ['minGlobalSize'],
 });
 
 // Calculation validation schemas
@@ -54,8 +54,8 @@ export const vectorSpaceParametersSchema = z.object({
   start: z.number(),
   end: z.number(),
 }).refine(data => data.start < data.end, {
-  message: "Start value must be less than end value",
-  path: ["start"]
+  message: 'Start value must be less than end value',
+  path: ['start'],
 });
 
 export const calculationRequestSchema = z.object({
@@ -85,7 +85,7 @@ export type ValidationResult<T> = {
 
 export function validateData<T>(
   schema: z.ZodSchema<T>,
-  data: unknown
+  data: unknown,
 ): ValidationResult<T> {
   try {
     const result = schema.parse(data);
@@ -107,7 +107,7 @@ export function validateData<T>(
     
     return { 
       success: false, 
-      errors: { general: ['An unexpected validation error occurred'] } 
+      errors: { general: ['An unexpected validation error occurred'] }, 
     };
   }
 }

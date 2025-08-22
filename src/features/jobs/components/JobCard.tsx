@@ -1,5 +1,5 @@
-import {type Job, JobStatus} from "../api/jobTypes.ts";
-import {useState} from "react";
+import {type Job, JobStatus} from '../api/jobTypes.ts';
+import {useState} from 'react';
 
 interface InputJobCard {
     job: Job

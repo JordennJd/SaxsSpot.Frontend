@@ -1,20 +1,21 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useToastContext } from '../contexts/ToastContext';
 
 import { type NanosystemDto } from '../features/nanosystems/api/nanosystemTypes';
-import type { CalculationDto, RunCalculationRequest } from "../features/calculation/api/calculationTypes.ts";
-import { RunCalculation } from "../features/calculation/api/calculationApi.ts";
-import { CalculationDetailsCard } from "../features/calculation/components/CalculationCard.tsx";
+import type { CalculationDto, RunCalculationRequest } from '../features/calculation/api/calculationTypes.ts';
+import { RunCalculation } from '../features/calculation/api/calculationApi.ts';
+import { CalculationDetailsCard } from '../features/calculation/components/CalculationCard.tsx';
 import { 
   SeriesHeader, 
   NanosystemsTable, 
   NanosystemDetailsModal, 
-  CalculationModal 
+  CalculationModal, 
 } from '../components/series';
 import { 
   useSeriesData, 
   useNanosystemsData, 
-  useCalculationsData 
+  useCalculationsData, 
 } from '../hooks/useSeriesDetail';
 import { downloadNanosystem } from '../utils/seriesUtils';
 
@@ -22,7 +23,8 @@ import { downloadNanosystem } from '../utils/seriesUtils';
 
 // Main Component
 export const SeriesDetailPage = () => {
-  const { guid: seriesId = "" } = useParams<{ guid: string }>();
+  const { guid: seriesId = '' } = useParams<{ guid: string }>();
+  const { showSuccess, showError } = useToastContext();
   const [page, setPage] = useState(1);
   const [calculationPage] = useState(1);
   const pageSize = 10;
@@ -41,24 +43,24 @@ export const SeriesDetailPage = () => {
       scaleMethod: 0,
       spaceParameter: 0.01,
       start: 0.02,
-      end: 0.4
+      end: 0.4,
     },
     phiVectorSpaceParameters: {
       spaceMethod: 0,
       scaleMethod: 0,
       spaceParameter: 0.1,
       start: -1,
-      end: 1
+      end: 1,
     },
     thetaVectorSpaceParameters: {
       spaceMethod: 0,
       scaleMethod: 0,
       spaceParameter: 0.1,
       start: 0,
-      end: 6.28
+      end: 6.28,
     },
-    systemId: "",
-    requestId: ""
+    systemId: '',
+    requestId: '',
   });
 
   // Data fetching
@@ -67,7 +69,7 @@ export const SeriesDetailPage = () => {
   const { data: calculations, isLoading: isCalculationsLoading } = useCalculationsData(
     selectedNanosystem?.id,
     calculationPage,
-    pageSize
+    pageSize,
   );
 
   // Event handlers
@@ -90,7 +92,7 @@ export const SeriesDetailPage = () => {
     if (selectedNanosystem) {
       setCalculationParams(prev => ({
         ...prev,
-        systemId: selectedNanosystem.id
+        systemId: selectedNanosystem.id,
       }));
       setIsCalculateModalOpen(true);
     }
@@ -105,10 +107,10 @@ export const SeriesDetailPage = () => {
       console.log('Calculation started:', calculationParams);
       await RunCalculation(calculationParams);
       closeCalculateModal();
-      alert('Calculation started');
+      showSuccess('Calculation Started', 'Your calculation has been queued and will begin processing shortly.');
     } catch (error) {
       console.error('Error starting calculation:', error);
-      alert('Error starting calculation');
+      showError('Calculation Failed', 'Unable to start calculation. Please try again.');
     }
   };
 

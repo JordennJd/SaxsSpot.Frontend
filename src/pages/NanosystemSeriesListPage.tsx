@@ -5,5 +5,5 @@ export const NanosystemSeriesListPage = () => {
 
   return (
     <NanosystemsTable></NanosystemsTable>
-  )
+  );
 };

@@ -17,7 +17,7 @@ export const NanosystemsTable = ({
   onNanosystemClick, 
   currentPage, 
   pageSize, 
-  onPageChange 
+  onPageChange, 
 }: NanosystemsTableProps) => {
   if (isLoading) {
     return (

@@ -1,7 +1,7 @@
 // CalculationDetailsCard.tsx
 import { Dialog } from '@headlessui/react';
-import { type CalculationDto, type PlotChartRequest } from "../api/calculationTypes.ts";
-import { useNavigate } from "react-router-dom";
+import { type CalculationDto, type PlotChartRequest } from '../api/calculationTypes.ts';
+import { useNavigate } from 'react-router-dom';
 
 export const CalculationDetailsCard = ({
                                            calculation,
@@ -17,11 +17,11 @@ export const CalculationDetailsCard = ({
     const handleViewChart = async () => {
         const request: PlotChartRequest = {
             CalculatesId: [calculation.id],
-            ChartTitle: "Scattering",
-            XAxis: "Q",
-            YAxis: "I",
-            ScaleMethodsX: "Linear",
-            ScaleMethodsY: "Linear",
+            ChartTitle: 'Scattering',
+            XAxis: 'Q',
+            YAxis: 'I',
+            ScaleMethodsX: 'Linear',
+            ScaleMethodsY: 'Linear',
         };
         navigate(`/calculations/${calculation.id}/chart`, { state: { request } });
     };

@@ -42,7 +42,7 @@ export const JobSection = ({
   jobs, 
   visibleCount, 
   color, 
-  onLoadMore 
+  onLoadMore, 
 }: JobSectionProps) => {
   const styles = colorStyles[color];
   const visibleJobs = jobs.slice(0, visibleCount);

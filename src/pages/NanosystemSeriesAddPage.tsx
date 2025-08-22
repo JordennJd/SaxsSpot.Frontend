@@ -5,5 +5,5 @@ export const NanosystemSeriesAddPage = () => {
 
   return (
     <NanosystemSeriesForm></NanosystemSeriesForm>
-  )
+  );
 };
