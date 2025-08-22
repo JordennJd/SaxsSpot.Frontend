@@ -100,16 +100,16 @@ export const SeriesDetailPage = () => {
     phiVectorSpaceParameters: {
       spaceMethod: 0,
       scaleMethod: 0,
-      spaceParameter: 0.01,
-      start: 0.02,
-      end: 0.04
+      spaceParameter: 0.1,
+      start: -1,
+      end: 1
     },
     thetaVectorSpaceParameters: {
       spaceMethod: 0,
       scaleMethod: 0,
-      spaceParameter: 0.01,
-      start: 0.02,
-      end: 0.04
+      spaceParameter: 0.1,
+      start: 0,
+      end: 6.28
     },
     systemId: "",
     requestId: ""
