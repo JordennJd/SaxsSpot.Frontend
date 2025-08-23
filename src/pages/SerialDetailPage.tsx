@@ -27,7 +27,7 @@ export const SeriesDetailPage = () => {
   const { showSuccess, showError } = useToastContext();
   const [page, setPage] = useState(1);
   const [calculationPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 100;
 
   // Modal states
   const [selectedNanosystem, setSelectedNanosystem] = useState<NanosystemDto | null>(null);
@@ -49,15 +49,15 @@ export const SeriesDetailPage = () => {
       spaceMethod: 0,
       scaleMethod: 0,
       spaceParameter: 0.1,
-      start: -1,
-      end: 1,
+      start: 0,
+      end: 6.28,
     },
     thetaVectorSpaceParameters: {
       spaceMethod: 0,
       scaleMethod: 0,
       spaceParameter: 0.1,
-      start: 0,
-      end: 6.28,
+      start: -1,
+      end: 1,
     },
     systemId: '',
     requestId: '',
