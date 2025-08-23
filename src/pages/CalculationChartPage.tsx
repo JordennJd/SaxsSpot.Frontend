@@ -8,15 +8,18 @@ export const CalculationChartPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [chart, setChart] = useState<string>('');
-    const [request, setRequest] = useState<PlotChartRequest>(location.state?.request || {
-        CalculatesId: [id || ''],
-        ChartTitle: 'Scattering',
-        XAxis: 'Q',
-        YAxis: 'I',
-        ScaleMethodsX: 'Linear',
-        ScaleMethodsY: 'Linear',
-    });
+    const [request, setRequest] = useState<PlotChartRequest>(
+        location.state?.request || {
+            CalculatesId: [id || ''],
+            ChartTitle: 'Scattering',
+            XAxis: 'Q',
+            YAxis: 'I',
+            ScaleMethodsX: 'Linear',
+            ScaleMethodsY: 'Linear',
+        },
+    );
     const [isLoading, setIsLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState('chart');
 
     useEffect(() => {
         const fetchChart = async () => {
@@ -24,54 +27,64 @@ export const CalculationChartPage = () => {
             try {
                 const result = await PlotChart(request);
                 const fullHtml = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="utf-8">
-                        <title>Chart</title>
-                        <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
-                        <script src="https://cdn.jsdelivr.net/npm/mpld3@0.5.10/dist/mpld3.min.js"></script>
-                        <style>
-                            html, body {
-                                margin: 0;
-                                padding: 0;
-                                width: 100%;
-                                height: 100%;
-                                overflow: hidden;
-                            }
-                            #chart-container {
-                                width: 100%;
-                                height: 100%;
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                background: white;
-                                padding-bottom: 100px; /* Добавляем отступ снизу */
-                            }
-                            .mpld3-figure {
-                                margin: 0 auto;
-                                display: block;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div id="chart-container">${result}</div>
-                        <script>
-                            // Добавляем обработчик для ресайза
-                            window.addEventListener('resize', function() {
-                                if(window.mpld3) {
-                                    const figures = document.querySelectorAll('.mpld3-figure');
-                                    figures.forEach(fig => {
-                                        const id = fig.id;
-                                        const spec = JSON.parse(fig.dataset.mpld3 || '{}');
-                                        window.mpld3.draw_figure(id, spec);
-                                    });
-                                }
-                            });
-                        </script>
-                    </body>
-                    </html>
-                `;
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Chart</title>
+            <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/mpld3@0.5.10/dist/mpld3.min.js"></script>
+            <style>
+              html, body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background: #f8fafc;
+              }
+              #chart-container {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: white;
+                padding: 20px;
+                box-sizing: border-box;
+              }
+              .mpld3-figure {
+                margin: 0 auto;
+                display: block;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                padding: 16px;
+              }
+            </style>
+          </head>
+          <body>
+            <div id="chart-container">${result}</div>
+            <script>
+              // Добавляем обработчик для ресайза
+              let resizeTimer;
+              window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                  if(window.mpld3) {
+                    const figures = document.querySelectorAll('.mpld3-figure');
+                    figures.forEach(fig => {
+                      const id = fig.id;
+                      const spec = JSON.parse(fig.dataset.mpld3 || '{}');
+                      window.mpld3.draw_figure(id, spec);
+                    });
+                  }
+                }, 250);
+              });
+            </script>
+          </body>
+          </html>
+        `;
                 setChart(fullHtml);
             } catch (error) {
                 console.error('Error fetching chart:', error);
@@ -80,107 +93,265 @@ export const CalculationChartPage = () => {
             }
         };
 
-        fetchChart();
-    }, [request]);
+        if (activeTab === 'chart') {
+            fetchChart();
+        }
+    }, [request, activeTab]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setRequest(prev => ({
+        setRequest((prev) => ({
             ...prev,
             [name]: value,
         }));
     };
 
+    const handleScaleChange = (axis: 'X' | 'Y', method: 'Linear' | 'Log') => {
+        setRequest((prev) => ({
+            ...prev,
+            [`ScaleMethods${axis}`]: method,
+        }));
+    };
+
+    const axisOptions = [
+        { value: 'Q', label: 'Q vector' },
+        { value: 'I', label: 'Intensity (I)' },
+    ];
+
     return (
-        <div className="container mx-auto p-4 flex flex-col" style={{ minHeight: '100vh' }}>
-            <h1 className="text-2xl font-bold mb-4">Calculation Chart</h1>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-6">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">Calculation Visualization</h1>
+                        <p className="text-gray-600 mt-1">Explore and analyze your calculation results</p>
+                    </div>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="mt-4 sm:mt-0 flex items-center px-4 py-2 bg-white text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors shadow-sm"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
+                        Back to Details
+                    </button>
+                </div>
 
-            <div className="bg-white p-4 rounded-lg shadow-md mb-4">
-                <h2 className="text-lg font-semibold mb-2">Chart Parameters</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Chart Title</label>
-                        <input
-                            type="text"
-                            name="ChartTitle"
-                            value={request.ChartTitle}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
+                {/* Tabs */}
+                <div className="bg-white rounded-xl shadow-md mb-6 overflow-hidden">
+                    <div className="border-b border-gray-200">
+                        <nav className="flex -mb-px">
+                            <button
+                                onClick={() => setActiveTab('chart')}
+                                className={`py-4 px-6 text-center font-medium text-sm border-b-2 transition-colors ${
+                                    activeTab === 'chart'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                Chart Visualization
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('parameters')}
+                                className={`py-4 px-6 text-center font-medium text-sm border-b-2 transition-colors ${
+                                    activeTab === 'parameters'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                                </svg>
+                                Chart Parameters
+                            </button>
+                        </nav>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">X Axis</label>
-                        <input
-                            type="text"
-                            name="XAxis"
-                            value={request.XAxis}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
+
+                    {/* Parameters Panel */}
+                    {activeTab === 'parameters' && (
+                        <div className="p-6">
+                            <h2 className="text-xl font-semibold text-gray-900 mb-6">Customize Chart Appearance</h2>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Chart Title</label>
+                                    <input
+                                        type="text"
+                                        name="ChartTitle"
+                                        value={request.ChartTitle}
+                                        onChange={handleInputChange}
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                        placeholder="Enter chart title"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">X Axis</label>
+                                    <select
+                                        name="XAxis"
+                                        value={request.XAxis}
+                                        onChange={handleInputChange}
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                    >
+                                        {axisOptions.map(option => (
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Y Axis</label>
+                                    <select
+                                        name="YAxis"
+                                        value={request.YAxis}
+                                        onChange={handleInputChange}
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                                    >
+                                        {axisOptions.map(option => (
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Scale Type</label>
+                                    <div className="flex space-x-4">
+                                        <div className="flex-1">
+                                            <span className="block text-xs text-gray-500 mb-1">X Axis</span>
+                                            <div className="flex rounded-md shadow-sm">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleScaleChange('X', 'Linear')}
+                                                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-l-md border ${
+                                                        request.ScaleMethodsX === 'Linear'
+                                                            ? 'bg-blue-100 text-blue-700 border-blue-500'
+                                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    Linear
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleScaleChange('X', 'Log')}
+                                                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-r-md border border-l-0 ${
+                                                        request.ScaleMethodsX === 'Log'
+                                                            ? 'bg-blue-100 text-blue-700 border-blue-500'
+                                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    Log
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1">
+                                            <span className="block text-xs text-gray-500 mb-1">Y Axis</span>
+                                            <div className="flex rounded-md shadow-sm">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleScaleChange('Y', 'Linear')}
+                                                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-l-md border ${
+                                                        request.ScaleMethodsY === 'Linear'
+                                                            ? 'bg-blue-100 text-blue-700 border-blue-500'
+                                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    Linear
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleScaleChange('Y', 'Log')}
+                                                    className={`flex-1 py-2 px-4 text-sm font-medium rounded-r-md border border-l-0 ${
+                                                        request.ScaleMethodsY === 'Log'
+                                                            ? 'bg-blue-100 text-blue-700 border-blue-500'
+                                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    Log
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 bg-blue-50 p-4 rounded-lg">
+                                <div className="flex">
+                                    <div className="flex-shrink-0">
+                                        <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-medium text-blue-800">Pro Tip</h3>
+                                        <div className="mt-2 text-sm text-blue-700">
+                                            <p>Use logarithmic scales when your data spans several orders of magnitude. This can help reveal patterns that might be hidden in a linear scale.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Chart Visualization */}
+                {activeTab === 'chart' && (
+                    <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+                            <h2 className="text-xl font-semibold text-gray-900">Chart Visualization</h2>
+                            <div className="text-sm text-gray-500">
+                                {request.XAxis} vs {request.YAxis} ({request.ScaleMethodsX}/{request.ScaleMethodsY})
+                            </div>
+                        </div>
+
+                        {isLoading ? (
+                            <div className="flex flex-col items-center justify-center h-96">
+                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+                                <p className="text-gray-600">Generating your visualization...</p>
+                                <p className="text-sm text-gray-500 mt-1">This may take a moment</p>
+                            </div>
+                        ) : (
+                            <div className="relative" style={{ minHeight: '600px', height: '100vh' }}>
+                                <iframe
+                                    srcDoc={chart}
+                                    style={{ width: '100%', height: '100%', border: 'none' }}
+                                    sandbox="allow-scripts allow-same-origin"
+                                    className="absolute inset-0"
+                                    title="Chart visualization"
+                                />
+                                <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-md px-3 py-2 text-sm text-gray-600 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+                                    </svg>
+                                    Interactive Chart
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Y Axis</label>
-                        <input
-                            type="text"
-                            name="YAxis"
-                            value={request.YAxis}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">X Scale Method</label>
-                        <select
-                            name="ScaleMethodsX"
-                            value={request.ScaleMethodsX}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                            <option value="Linear">Linear</option>
-                            <option value="Log">Logarithmic</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Y Scale Method</label>
-                        <select
-                            name="ScaleMethodsY"
-                            value={request.ScaleMethodsY}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                            <option value="Linear">Linear</option>
-                            <option value="Log">Logarithmic</option>
-                        </select>
+                )}
+
+                {/* Info Card */}
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-md overflow-hidden text-white">
+                    <div className="p-6">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div className="ml-4">
+                                <h3 className="text-lg font-medium">About This Visualization</h3>
+                                <p className="mt-2 text-blue-100">
+                                    This interactive chart displays the results of your scattering calculation. You can customize the axes, scale type, and title to explore different aspects of your data.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                </div>
-            ) : (
-                <div className="flex-grow flex flex-col bg-white rounded-lg shadow-md overflow-hidden mb-4">
-                    <h2 className="text-lg font-semibold p-6 border-b">Chart Visualization</h2>
-                    <div className="flex-grow relative" style={{ minHeight: '600px', height: 'calc(100vh)' }}>
-                        <iframe
-                            srcDoc={chart}
-                            style={{ width: '100%', height: '100%', border: 'none' }}
-                            sandbox="allow-scripts allow-same-origin"
-                            className="absolute inset-0"
-                            title="Chart visualization"
-                        />
-                    </div>
-                </div>
-            )}
-
-            <div className="mt-auto mb-4">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                    Back to Details
-                </button>
             </div>
         </div>
     );
