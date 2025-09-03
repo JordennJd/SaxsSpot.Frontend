@@ -79,6 +79,7 @@ export const RunCalculationRequestSchema = z.object({
     thetaVectorSpaceParameters: spaceParametersSchema,
     systemId: z.string().uuid(),
     requestId: z.string(),
+    particleKind: z.number(),
 });
 
 // ==================== TYPES ====================

@@ -1,27 +1,15 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useToastContext } from '../contexts/ToastContext';
+import {useState} from 'react';
+import {useParams} from 'react-router-dom';
+import {useToastContext} from '../contexts/ToastContext';
 
-import { type NanosystemDto } from '../features/nanosystems/api/nanosystemTypes';
-import type { CalculationDto, RunCalculationRequest } from '../features/calculation/api/calculationTypes.ts';
-import { RunCalculation } from '../features/calculation/api/calculationApi.ts';
-import { CalculationDetailsCard } from '../features/calculation/components/CalculationCard.tsx';
-import { 
-  SeriesHeader, 
-  NanosystemsTable, 
-  NanosystemDetailsModal, 
-  CalculationModal, 
-} from '../components/series';
-import { 
-  useSeriesData, 
-  useNanosystemsData, 
-  useCalculationsData, 
-} from '../hooks/useSeriesDetail';
-import { downloadNanosystem } from '../utils/seriesUtils';
+import {type NanosystemDto} from '../features/nanosystems/api/nanosystemTypes';
+import type {CalculationDto, RunCalculationRequest} from '../features/calculation/api/calculationTypes.ts';
+import {RunCalculation} from '../features/calculation/api/calculationApi.ts';
+import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
+import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader} from '../components/series';
+import {useCalculationsData, useNanosystemsData, useSeriesData} from '../hooks/useSeriesDetail';
+import {downloadNanosystem} from '../utils/seriesUtils';
 
-
-
-// Main Component
 export const SeriesDetailPage = () => {
   const { guid: seriesId = '' } = useParams<{ guid: string }>();
   const { showSuccess, showError } = useToastContext();
@@ -61,6 +49,7 @@ export const SeriesDetailPage = () => {
     },
     systemId: '',
     requestId: '',
+    particleKind: 0,
   });
 
   // Data fetching
@@ -105,6 +94,8 @@ export const SeriesDetailPage = () => {
   const handleCalculate = async () => {
     try {
       console.log('Calculation started:', calculationParams);
+
+      calculationParams.particleKind = selectedNanosystem?.particleKind == 'Parallelepiped' ? 1 : 0;
       await RunCalculation(calculationParams);
       closeCalculateModal();
       showSuccess('Calculation Started', 'Your calculation has been queued and will begin processing shortly.');
