@@ -1,6 +1,7 @@
 // src/features/nanosystems/api/nanosystemApi.ts
 import type { GetNanosystemGenerationOptionsQuery, MassGenerateNanoSystemOptions, NanosystemDto, NanosystemSeriesDto } from './nanosystemTypes';
-import { CommonParticleGenerationParametersSchema, NanosystemDtoSchema, NanosystemSeriesDtoSchema } from './nanosystemTypes';
+// eslint-disable-next-line no-duplicate-imports
+import { NanosystemDtoSchema, CommonParticleGenerationParametersSchema, NanosystemSeriesDtoSchema } from './nanosystemTypes';
 
 import { z } from 'zod';
 import { nanosystemApiClient } from '../../../lib/axios';

@@ -118,6 +118,7 @@ export class CalculationService {
         end: 0.04,
       },
       systemId,
+      particleKind: 0,
       requestId: '',
     };
   }

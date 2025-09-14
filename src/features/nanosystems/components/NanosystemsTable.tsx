@@ -98,7 +98,7 @@ const TableHeader = () => (
       <TableHeaderCell>Count</TableHeaderCell>
       <TableHeaderCell>Size (nm)</TableHeaderCell>
       <TableHeaderCell>Concentration</TableHeaderCell>
-      <TableHeaderCell>K-factor</TableHeaderCell>
+      <TableHeaderCell>Excess</TableHeaderCell>
       <TableHeaderCell>Actions</TableHeaderCell>
     </tr>
   </thead>
@@ -119,7 +119,7 @@ const TableRow = ({ data }: { data: NanosystemSeriesDto }) => {
       {(data.numericalConcentrationFrom * 100).toFixed(1)} - {(data.numericalConcentrationTo * 100).toFixed(1)}%
     </TableCell>
     <TableCell>
-      {data.kFrom.toFixed(2)} - {data.kTo.toFixed(2)}
+      {data.excessFrom} - {data.excessTo}
     </TableCell>
     <TableCell >
       <DetailsButton id={data.id} />

@@ -20,6 +20,13 @@ export class ApiError extends Error {
 const addRequestInterceptor = (client: AxiosInstance, clientName: string) => {
   client.interceptors.request.use(
     (axiosConfig) => {
+      if (axiosConfig.method?.toLowerCase() === 'get') {
+        axiosConfig.params = {
+          ...axiosConfig.params,
+          dt: Date.now(),
+        };
+      }
+
       if (config.app.isDevelopment) {
         console.log(`[${clientName}] Request:`, {
           method: axiosConfig.method?.toUpperCase(),
@@ -85,11 +92,15 @@ const addResponseInterceptor = (client: AxiosInstance, clientName: string) => {
   );
 };
 
+
 // Nanosystem API Client
 export const nanosystemApiClient = axios.create({
   baseURL: config.api.nanosystem.baseURL,
   timeout: config.api.nanosystem.timeout,
-  headers: config.api.nanosystem.headers,
+  headers: {
+    ...config.api.nanosystem.headers,
+    'Cache-Control': 'no-cache',
+  },
 });
 
 addRequestInterceptor(nanosystemApiClient, 'Nanosystem API');
@@ -99,7 +110,10 @@ addResponseInterceptor(nanosystemApiClient, 'Nanosystem API');
 export const calculationApiClient = axios.create({
   baseURL: config.api.calculation.baseURL,
   timeout: config.api.calculation.timeout,
-  headers: config.api.calculation.headers,
+  headers: {
+    ...config.api.calculation.headers,
+    'Cache-Control': 'no-cache',
+  },
 });
 
 addRequestInterceptor(calculationApiClient, 'Calculation API');
@@ -113,6 +127,7 @@ export const jobApiClient = axios.create({
     ...config.api.job.headers,
     ...(config.api.job.authToken && {
       'Authorization': `Bearer ${config.api.job.authToken}`,
+      'Cache-Control': 'no-cache',
     }),
   },
 });

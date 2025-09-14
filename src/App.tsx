@@ -31,12 +31,12 @@ const queryClient = new QueryClient({
         const appError = handleError(error as Error);
         return getRetryDelay(appError, attemptIndex);
       },
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      staleTime: 3 * 1000, // 5 minutes
+      gcTime: 5 * 60 * 1000, // 10 minutes (formerly cacheTime)
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
       // Enable background refetch for better UX
-      refetchOnMount: true,
+      refetchOnMount: 'always',
     },
     mutations: {
       retry: (failureCount, error) => {

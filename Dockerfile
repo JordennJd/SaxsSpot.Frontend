@@ -21,6 +21,7 @@ COPY index.html ./
 COPY src ./src
 COPY public ./public
 COPY . .
+COPY .env.Docker .env
 
 # 5. Собираем проект
 RUN yarn run build

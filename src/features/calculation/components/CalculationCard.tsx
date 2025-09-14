@@ -59,7 +59,14 @@ export const CalculationDetailsCard = ({
         { label: 'Φ Scale Method', value: calculation.phiScaleMethod, icon: ScaleIcon },
         calculation.phiSpaceParameter !== null &&
         { label: 'Φ Space Parameter', value: calculation.phiSpaceParameter.toString(), icon: HashtagIcon },
-    ].filter(Boolean);
+    ].filter(Boolean).map(item => item as {
+        label: string
+        value: string
+        icon: React.ForwardRefExoticComponent<Omit<React.SVGProps<SVGSVGElement>, 'ref'> & {
+            title?: string
+            titleId?: string
+        } & React.RefAttributes<SVGSVGElement>>
+    });
 
     const thetaVectorInfo = [
         calculation.thetaVectorFrom !== null && calculation.thetaVectorTo !== null &&
@@ -70,7 +77,14 @@ export const CalculationDetailsCard = ({
         { label: 'θ Scale Method', value: calculation.thetaScaleMethod, icon: ScaleIcon },
         calculation.thetaSpaceParameter !== null &&
         { label: 'θ Space Parameter', value: calculation.thetaSpaceParameter.toString(), icon: HashtagIcon },
-    ].filter(Boolean);
+    ].filter(Boolean).map(item => item as {
+        label: string
+        value: string
+        icon: React.ForwardRefExoticComponent<Omit<React.SVGProps<SVGSVGElement>, 'ref'> & {
+            title?: string
+            titleId?: string
+        }>
+    });
 
     const timeInfo = [
         { label: 'Input Date', value: calculation.inputDate, icon: CalendarIcon },
