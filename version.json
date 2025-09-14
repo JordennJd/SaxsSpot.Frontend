@@ -1,0 +1,6 @@
+{
+  "version": "1.0.0",
+  "dockerImage": "jordenndev/saxsspot-web-ui",
+  "buildNumber": 0,
+  "description": "react frontend"
+}
