@@ -201,6 +201,7 @@ export const NanosystemSeriesForm = () => {
                     <Input
                         id="maxParticleSizeFrom"
                         type="number"
+                        step="0.01"
                         {...register("maxParticleSizeFrom", { valueAsNumber: true })}
                         error={getError("maxParticleSizeFrom")}
                     />
@@ -210,6 +211,7 @@ export const NanosystemSeriesForm = () => {
                     <Input
                         id="maxParticleSizeTo"
                         type="number"
+                        step="0.01"
                         {...register("maxParticleSizeTo", { valueAsNumber: true })}
                         error={getError("maxParticleSizeTo")}
                     />
@@ -219,6 +221,7 @@ export const NanosystemSeriesForm = () => {
                     <Input
                         id="minParticleSizeFrom"
                         type="number"
+                        step="0.01"
                         {...register("minParticleSizeFrom", { valueAsNumber: true })}
                         error={getError("minParticleSizeFrom")}
                     />
@@ -228,6 +231,7 @@ export const NanosystemSeriesForm = () => {
                     <Input
                         id="minParticleSizeTo"
                         type="number"
+                        step="0.01"
                         {...register("minParticleSizeTo", { valueAsNumber: true })}
                         error={getError("minParticleSizeTo")}
                     />
@@ -263,6 +267,7 @@ export const NanosystemSeriesForm = () => {
                           <Input
                               id="NumericalConcentrationFrom"
                               type="number"
+                              step="0.0001"
                               {...register("numericalConcentrationFrom", { valueAsNumber: true })}
                               error={getError("numericalConcentrationFrom")}
                           />
@@ -272,6 +277,7 @@ export const NanosystemSeriesForm = () => {
                           <Input
                               id="NumericalConcentrationTo"
                               type="number"
+                              step="0.0001"
                               {...register("numericalConcentrationTo", { valueAsNumber: true })}
                               error={getError("numericalConcentrationTo")}
                           />
@@ -284,6 +290,7 @@ export const NanosystemSeriesForm = () => {
                           <Input
                               id="globalSizeFrom"
                               type="number"
+                              step="0.01"
                               {...register("globalSizeFrom", { valueAsNumber: true })}
                               error={getError("globalSizeFrom")}
                           />
@@ -293,6 +300,7 @@ export const NanosystemSeriesForm = () => {
                           <Input
                               id="globalSizeTo"
                               type="number"
+                              step="0.01"
                               {...register("globalSizeTo", { valueAsNumber: true })}
                               error={getError("globalSizeTo")}
                           />
@@ -311,6 +319,7 @@ export const NanosystemSeriesForm = () => {
                         <Input
                             id="EpsilonFrom"
                             type="number"
+                            step="0.01"
                             {...register("epsilonFrom", { valueAsNumber: true })}
                             error={getError("epsilonFrom")}
                         />
@@ -320,6 +329,7 @@ export const NanosystemSeriesForm = () => {
                         <Input
                             id="EpsilonTo"
                             type="number"
+                            step="0.01"
                             {...register("epsilonTo", { valueAsNumber: true })}
                             error={getError("epsilonTo")}
                         />
@@ -337,6 +347,7 @@ export const NanosystemSeriesForm = () => {
                     <Input
                         id="ExcessFrom"
                         type="number"
+                        step="0.01"
                         {...register("excessFrom", { valueAsNumber: true })}
                         error={getError("excessFrom")}
                     />
@@ -346,6 +357,7 @@ export const NanosystemSeriesForm = () => {
                     <Input
                         id="ExcessTo"
                         type="number"
+                        step="0.01"
                         {...register("excessTo", { valueAsNumber: true })}
                         error={getError("excessTo")}
                     />
@@ -362,6 +374,7 @@ export const NanosystemSeriesForm = () => {
                     <Input
                         id="KFrom"
                         type="number"
+                        step="0.01"
                         {...register("kFrom", { valueAsNumber: true })}
                         error={getError("kFrom")}
                     />
@@ -371,6 +384,7 @@ export const NanosystemSeriesForm = () => {
                     <Input
                         id="KTo"
                         type="number"
+                        step="0.01"
                         {...register("kTo", { valueAsNumber: true })}
                         error={getError("kTo")}
                     />
@@ -387,6 +401,7 @@ export const NanosystemSeriesForm = () => {
                     <Input
                         id="ThetaFrom"
                         type="number"
+                        step="0.1"
                         {...register("thetaFrom", { valueAsNumber: true })}
                         error={getError("thetaFrom")}
                     />
@@ -396,6 +411,7 @@ export const NanosystemSeriesForm = () => {
                     <Input
                         id="ThetaTo"
                         type="number"
+                        step="0.1"
                         {...register("thetaTo", { valueAsNumber: true })}
                         error={getError("thetaTo")}
                     />
@@ -463,6 +479,7 @@ export const NanosystemSeriesForm = () => {
                                 <Label>Min Size</Label>
                                 <Input
                                     type="number"
+                                    step="0.01"
                                     value={option.minSize}
                                     onChange={(e) => updateOptionField(index, 'minSize', Number(e.target.value))}
                                 />
@@ -471,6 +488,7 @@ export const NanosystemSeriesForm = () => {
                                 <Label>Max Size</Label>
                                 <Input
                                     type="number"
+                                    step="0.01"
                                     value={option.maxSize}
                                     onChange={(e) => updateOptionField(index, 'maxSize', Number(e.target.value))}
                                 />
@@ -480,6 +498,7 @@ export const NanosystemSeriesForm = () => {
                                     <Label>Epsilon</Label>
                                     <Input
                                         type="number"
+                                        step="0.01"
                                         value={option.epsilon || ''}
                                         onChange={(e) => updateOptionField(index, 'epsilon', Number(e.target.value))}
                                     />
@@ -489,6 +508,7 @@ export const NanosystemSeriesForm = () => {
                                 <Label>Excess</Label>
                                 <Input
                                     type="number"
+                                    step="0.01"
                                     value={option.excess}
                                     onChange={(e) => updateOptionField(index, 'excess', Number(e.target.value))}
                                 />
@@ -497,6 +517,7 @@ export const NanosystemSeriesForm = () => {
                                 <Label>K</Label>
                                 <Input
                                     type="number"
+                                    step="0.01"
                                     value={option.k}
                                     onChange={(e) => updateOptionField(index, 'k', Number(e.target.value))}
                                 />
@@ -505,6 +526,7 @@ export const NanosystemSeriesForm = () => {
                                 <Label>Theta</Label>
                                 <Input
                                     type="number"
+                                    step="0.1"
                                     value={option.theta}
                                     onChange={(e) => updateOptionField(index, 'theta', Number(e.target.value))}
                                 />
@@ -514,6 +536,7 @@ export const NanosystemSeriesForm = () => {
                                     <Label>Concentration</Label>
                                     <Input
                                         type="number"
+                                        step="0.0001"
                                         value={option.numericalConcentration}
                                         onChange={(e) => updateOptionField(index, 'numericalConcentration', Number(e.target.value))}
                                     />
@@ -523,6 +546,7 @@ export const NanosystemSeriesForm = () => {
                                     <Label>Global Size</Label>
                                     <Input
                                         type="number"
+                                        step="0.01"
                                         value={option.globalSize || ''}
                                         onChange={(e) => updateOptionField(index, 'globalSize', Number(e.target.value))}
                                     />
