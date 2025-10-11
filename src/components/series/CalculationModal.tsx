@@ -44,7 +44,7 @@ export const CalculationModal = ({
       title: string,
       params: any,
       prefix: string,
-      description: string
+      description: string,
   ) => (
       <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
         <div>
@@ -161,21 +161,21 @@ export const CalculationModal = ({
                   'Q Vector Parameters',
                   calculationParams.qVectorSpaceParameters,
                   'qVectorSpaceParameters',
-                  'Parameters for momentum transfer vector Q'
+                  'Parameters for momentum transfer vector Q',
               )}
 
               {activeTab === 'phi' && renderVectorParameters(
                   'Phi Vector Parameters',
                   calculationParams.phiVectorSpaceParameters,
                   'phiVectorSpaceParameters',
-                  'Parameters for azimuthal angle φ'
+                  'Parameters for azimuthal angle φ',
               )}
 
               {activeTab === 'theta' && renderVectorParameters(
                   'Theta Vector Parameters',
                   calculationParams.thetaVectorSpaceParameters,
                   'thetaVectorSpaceParameters',
-                  'Parameters for polar angle θ'
+                  'Parameters for polar angle θ',
               )}
             </div>
 

@@ -1,27 +1,29 @@
 import { useQuery } from '@tanstack/react-query';
-import { type NanosystemDto, type NanosystemSeriesDto } from '../features/nanosystems/api/nanosystemTypes';
+import {
+  type ApiResponseListNanosystemDto,
+  type NanosystemSeriesDto,
+} from '../features/nanosystems/api/nanosystemTypes';
 import { fetchNanosystemList, fetchSeriesNanosystems } from '../features/nanosystems/api/nanosystemApi';
 import { fetchCalculationsByNanosystem } from '../features/calculation/api/calculationApi';
 import type { CalculationDto } from '../features/calculation/api/calculationTypes';
-import type { PaginatedResponse } from '../features/nanosystems/api/common/commonTypes';
 
 // API Functions
 const fetchSeries = async (seriesId: string): Promise<NanosystemSeriesDto> => {
   const response = await fetchSeriesNanosystems('id=' + seriesId, 1, 1);
-  if (response.data.length === 0) {
+  if (response.result.data.length === 0) {
     throw new Error('Series not found');
   }
-  return response.data[0];
+  return response.result.data[0];
 };
 
 const fetchNanosystems = async (
   gridifyQuery?: string,
   page: number = 1,
   pageSize: number = 10,
-): Promise<PaginatedResponse<NanosystemDto>> => {
+): Promise<ApiResponseListNanosystemDto> => {
   try {
     const response = await fetchNanosystemList(gridifyQuery, page, pageSize);
-    if (response.data.length === 0) {
+    if (response.result.data.length === 0) {
       throw new Error('Nanosystem List query error');
     }
     return response;
@@ -40,7 +42,7 @@ export const useSeriesData = (seriesId: string) => {
 };
 
 export const useNanosystemsData = (seriesId: string, page: number, pageSize: number) => {
-  return useQuery<PaginatedResponse<NanosystemDto>>({
+  return useQuery<ApiResponseListNanosystemDto>({
     queryKey: ['nanosystems', seriesId, page, pageSize],
     queryFn: () => fetchNanosystems(`seriesId=${seriesId}`, page, pageSize),
     placeholderData: (previousData) => previousData,

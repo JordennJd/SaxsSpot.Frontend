@@ -2,10 +2,8 @@ import React from 'react';
 import { NanosystemFilters } from './NanosystemFilters';
 import { useNavigate } from 'react-router-dom';
 import { useNanosystemSeries } from '../hooks/useNanosystems';
-import {Pagination} from '../../../components/ui/Pagination.tsx';
+import {Pagination, LoadingSkeleton, ParticleKindBadge} from '@/components';
 import type {NanosystemSeriesDto} from '../api/nanosystemTypes.ts';
-import {LoadingSkeleton} from '../../../components/ui/nanosystems/LoadingSkeleton.tsx';
-import {ParticleKindBadge} from '../../../components/ui/nanosystems/ParticleKindBadge.tsx';
 import {EyeIcon} from '@heroicons/react/16/solid';
 
 interface NanosystemsTableProps {
@@ -37,7 +35,7 @@ export const NanosystemsTable: React.FC<NanosystemsTableProps> = ({
           </h2>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              Total: {data?.count || 0}
+              Total: {data?.result.count || 0}
             </span>
           </div>
 
@@ -51,7 +49,7 @@ export const NanosystemsTable: React.FC<NanosystemsTableProps> = ({
       <div className="overflow-x-auto">
         <TableContent 
           isLoading={isLoading}
-          data={data?.data}
+          data={data?.result.data}
           pageSize={pageSize}
         />
       </div>
@@ -59,7 +57,7 @@ export const NanosystemsTable: React.FC<NanosystemsTableProps> = ({
       {/* Pagination */}
       <Pagination
         currentPage={page}
-        totalItems={data?.count || 0}
+        totalItems={data?.result.count || 0}
         onPageChange={setPage}
         pageSize={pageSize}
       />

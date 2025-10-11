@@ -1,9 +1,13 @@
 // src/features/nanosystems/api/nanosystemApi.ts
-import type { GetNanosystemGenerationOptionsQuery, MassGenerateNanoSystemOptions, NanosystemDto, NanosystemSeriesDto } from './nanosystemTypes';
-// eslint-disable-next-line no-duplicate-imports
-import { NanosystemDtoSchema, CommonParticleGenerationParametersSchema, NanosystemSeriesDtoSchema } from './nanosystemTypes';
+import {
+  type ApiResponseMassGenerateNanoSystemOptions,
+  ApiResponseMassGenerateNanoSystemOptionsSchema,
+  type GetNanosystemGenerationOptionsQuery,
+  type MassGenerateNanoSystemOptions,
+  type NanosystemSeriesListApiResponse,
+  NanosystemSeriesListApiResponseSchema, ApiResponseListNanosystemDtoSchema, type ApiResponseListNanosystemDto,
+} from './nanosystemTypes';
 
-import { z } from 'zod';
 import { nanosystemApiClient } from '../../../lib/axios';
 import type { PaginatedResponse } from './common/commonTypes';
 import { handleError } from '../../../lib/errorHandler';
@@ -14,9 +18,9 @@ export const fetchSeriesNanosystems = async (
   gridifyQuery?: string,
   page: number = 1,
   pageSize: number = 10,
-): Promise<PaginatedResponse<NanosystemSeriesDto>> => {
+): Promise<NanosystemSeriesListApiResponse> => {
   try {
-    const response = await nanosystemApiClient.get<PaginatedResponse<NanosystemSeriesDto>>(
+    const response = await nanosystemApiClient.get<NanosystemSeriesListApiResponse>(
       '/nanosystem/get-nanosystem-series-list',
       {
         params: { 
@@ -31,14 +35,9 @@ export const fetchSeriesNanosystems = async (
     );
     
     // Validate response data with Zod
-    const validatedData = z.array(NanosystemSeriesDtoSchema).parse(response.data.data);
+    const validatedData = NanosystemSeriesListApiResponseSchema.parse(response.data);
     
-    return {
-      ...response.data,
-      data: validatedData,
-      pageSize: response.data.pageSize,
-      page: response.data.page,
-    };
+    return validatedData;
   } catch (error) {
     const appError = handleError(error as Error);
     throw appError;
@@ -47,9 +46,9 @@ export const fetchSeriesNanosystems = async (
 
 export const fetchNanosystemMassGenerationParameters = async (
   query: GetNanosystemGenerationOptionsQuery,
-): Promise<MassGenerateNanoSystemOptions> => {
+): Promise<ApiResponseMassGenerateNanoSystemOptions> => {
   try {
-    const response = await nanosystemApiClient.get<MassGenerateNanoSystemOptions>(
+    const response = await nanosystemApiClient.get<ApiResponseMassGenerateNanoSystemOptions>(
       '/nanosystem/get-nanosystem-mass-generation-parameters',
       {
         params: { ...query },    
@@ -60,11 +59,15 @@ export const fetchNanosystemMassGenerationParameters = async (
     );
     
     // Validate response data with Zod
-    const validatedOptions = z.array(CommonParticleGenerationParametersSchema).parse(response.data.options);
+    const validatedOptions = ApiResponseMassGenerateNanoSystemOptionsSchema.parse(response.data);
     
     return {
-      nanoSystemsKind: response.data.nanoSystemsKind,
-      options: validatedOptions,
+      isSuccess: validatedOptions.isSuccess,
+      result: {
+        options: validatedOptions.result.options,
+        nanoSystemsKind: response.data.result.nanoSystemsKind,
+      },
+      errors: validatedOptions.errors,
     };
   } catch (error) {
     const appError = handleError(error as Error);
@@ -76,9 +79,9 @@ export const fetchNanosystemList = async (
   gridifyQuery?: string,
   page: number = 1,
   pageSize: number = 10,
-): Promise<PaginatedResponse<NanosystemDto>> => {
+): Promise<ApiResponseListNanosystemDto> => {
   try {
-    const response = await nanosystemApiClient.get<PaginatedResponse<NanosystemDto>>(
+    const response = await nanosystemApiClient.get<ApiResponseListNanosystemDto>(
       '/nanosystem/get-nanosystem-list',
       {
         params: { 
@@ -92,15 +95,9 @@ export const fetchNanosystemList = async (
       },
     );
     
-    // Validate response data with Zod
-    const validatedData = z.array(NanosystemDtoSchema).parse(response.data.data);
+    const validatedData = ApiResponseListNanosystemDtoSchema.parse(response.data);
     
-    return {
-      ...response.data,
-      data: validatedData,
-      pageSize: response.data.pageSize,
-      page: response.data.page,
-    };
+    return validatedData;
   } catch (error) {
     const appError = handleError(error as Error);
     throw appError;

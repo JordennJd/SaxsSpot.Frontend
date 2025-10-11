@@ -41,6 +41,16 @@ export const RunCalculation = async (
     return response.data;
 };
 
+export const RunSeriesCalculation = async (
+    options: RunCalculationRequest,
+): Promise<string> => {
+    const response = await calculationApiClient.post<string>(
+        '/calculation/run-series-calculation', options,
+    );
+
+    return response.data;
+};
+
 export const PlotChart = async (request: PlotChartRequest): Promise<string> => {
     const response = await calculationApiClient
         .get<ApiResponse<string>>(

@@ -1,9 +1,8 @@
-import { type NanosystemDto } from '../../features/nanosystems/api/nanosystemTypes';
+import {type ApiResponseListNanosystemDto, type NanosystemDto} from '../../features/nanosystems/api/nanosystemTypes';
 import { Pagination } from '../ui/Pagination';
-import type { PaginatedResponse } from '../../features/nanosystems/api/common/commonTypes';
 
 interface NanosystemsTableProps {
-  nanosystems: PaginatedResponse<NanosystemDto>;
+  nanosystems: ApiResponseListNanosystemDto;
   isLoading: boolean;
   onNanosystemClick: (system: NanosystemDto) => void;
   currentPage: number;
@@ -30,7 +29,7 @@ export const NanosystemsTable = ({
     );
   }
 
-  if (nanosystems?.count === 0) {
+  if (nanosystems?.result.count === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
@@ -61,7 +60,7 @@ export const NanosystemsTable = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {nanosystems?.data.map((system) => (
+            {nanosystems?.result.data.map((system) => (
               <tr
                 key={system.id}
                 className="hover:bg-gray-50 cursor-pointer"
@@ -102,7 +101,7 @@ export const NanosystemsTable = ({
             currentPage={currentPage}
             pageSize={pageSize}
             onPageChange={onPageChange}
-            totalItems={nanosystems.count}
+            totalItems={nanosystems.result.count}
           />
         </div>
       )}

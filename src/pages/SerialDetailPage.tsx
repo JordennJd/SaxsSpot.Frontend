@@ -2,9 +2,9 @@ import {useState} from 'react';
 import {useParams} from 'react-router-dom';
 import {useToastContext} from '../contexts/ToastContext';
 
-import {type NanosystemDto} from '../features/nanosystems/api/nanosystemTypes';
+import {type ApiResponseListNanosystemDto, type NanosystemDto} from '../features/nanosystems/api/nanosystemTypes';
 import type {CalculationDto, RunCalculationRequest} from '../features/calculation/api/calculationTypes.ts';
-import {RunCalculation} from '../features/calculation/api/calculationApi.ts';
+import {RunCalculation, RunSeriesCalculation} from '../features/calculation/api/calculationApi.ts';
 import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
 import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader} from '../components/series';
 import {useCalculationsData, useNanosystemsData, useSeriesData} from '../hooks/useSeriesDetail';
@@ -23,6 +23,7 @@ export const SeriesDetailPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCalculationModalOpen, setIsCalculationModalOpen] = useState(false);
   const [isCalculateModalOpen, setIsCalculateModalOpen] = useState(false);
+  const [isSeriesCalculateModalOpen, setIsSeriesCalculateModalOpen] = useState(false);
 
   // Calculation parameters
   const [calculationParams, setCalculationParams] = useState<RunCalculationRequest>({
@@ -77,26 +78,35 @@ export const SeriesDetailPage = () => {
     setIsCalculationModalOpen(true);
   };
 
-  const openCalculateModal = () => {
-    if (selectedNanosystem) {
+  const openCalculateModal = (seriesId: string | null = null) => {
+    if (selectedNanosystem || seriesId) {
       setCalculationParams(prev => ({
         ...prev,
-        systemId: selectedNanosystem.id,
+        systemId: seriesId ?? selectedNanosystem!.id,
       }));
-      setIsCalculateModalOpen(true);
+      if(seriesId === null){
+        setIsCalculateModalOpen(true);
+      }
+      else{
+        setIsSeriesCalculateModalOpen(true);
+      }
     }
   };
 
   const closeCalculateModal = () => {
     setIsCalculateModalOpen(false);
+    setIsSeriesCalculateModalOpen(false);
   };
 
-  const handleCalculate = async () => {
+  const handleCalculate = async (isSeries: boolean = false) => {
     try {
       console.log('Calculation started:', calculationParams);
 
       calculationParams.particleKind = selectedNanosystem?.particleKind == 'Parallelepiped' ? 1 : 0;
-      await RunCalculation(calculationParams);
+      if(isSeries) {
+        await RunSeriesCalculation(calculationParams);
+      } else await RunCalculation(calculationParams);
+
       closeCalculateModal();
       showSuccess('Calculation Started', 'Your calculation has been queued and will begin processing shortly.');
     } catch (error) {
@@ -143,9 +153,12 @@ export const SeriesDetailPage = () => {
   return (
     <div className="space-y-6">
       <SeriesHeader series={series} />
-
+      <button
+          className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
+          onClick={() => openCalculateModal(seriesId)}>Start calculation
+      </button>
       <NanosystemsTable
-        nanosystems={nanosystems || { data: [], count: 0, page: 1, pageSize: 10 }}
+        nanosystems={nanosystems as ApiResponseListNanosystemDto}
         isLoading={isNanosystemsLoading}
         onNanosystemClick={openNanosystemDetails}
         currentPage={page}
@@ -170,6 +183,15 @@ export const SeriesDetailPage = () => {
         calculationParams={calculationParams}
         onParamChange={handleParamChange}
         onCalculate={handleCalculate}
+
+      />
+
+      <CalculationModal
+          isOpen={isSeriesCalculateModalOpen}
+          onClose={closeCalculateModal}
+          calculationParams={{...calculationParams, systemId: seriesId}}
+          onParamChange={handleParamChange}
+          onCalculate={() => handleCalculate(true)}
       />
 
       {selectedCalculation && (

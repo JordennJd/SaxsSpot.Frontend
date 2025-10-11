@@ -1,5 +1,6 @@
 // src/features/nanosystems/api/nanosystemTypes.ts
 import { z } from 'zod';
+import {ApiResponseListSchema, ApiResponseSchema} from '@/features/common/commonTypes.ts';
 
 export const ParticleKindMap = {
   0: 'Sphere',
@@ -61,6 +62,8 @@ export const MassGenerateNanoSystemOptionsSchema = z.object({
   nanoSystemsKind: ParticleKindSchema,
 });
 export type CommonParticleGenerationParameters = z.infer<typeof CommonParticleGenerationParametersSchema>;
+export const ApiResponseMassGenerateNanoSystemOptionsSchema = ApiResponseSchema(MassGenerateNanoSystemOptionsSchema);
+export type ApiResponseMassGenerateNanoSystemOptions = z.infer<typeof ApiResponseMassGenerateNanoSystemOptionsSchema>;
 export type MassGenerateNanoSystemOptions = z.infer<typeof MassGenerateNanoSystemOptionsSchema>;
 
 export const GetNanosystemGenerationOptionsQuerySchema = z.object({
@@ -121,3 +124,7 @@ export const NanosystemDtoSchema = z.object({
 
 // Тип TypeScript на основе схемы
 export type NanosystemDto = z.infer<typeof NanosystemDtoSchema>;
+export const ApiResponseListNanosystemDtoSchema = ApiResponseListSchema(NanosystemDtoSchema);
+export const NanosystemSeriesListApiResponseSchema = ApiResponseListSchema(NanosystemSeriesDtoSchema);
+export type NanosystemSeriesListApiResponse = z.infer<typeof NanosystemSeriesListApiResponseSchema>;
+export type ApiResponseListNanosystemDto = z.infer<typeof ApiResponseListNanosystemDtoSchema>;
