@@ -105,7 +105,9 @@ export const SeriesDetailPage = () => {
       calculationParams.particleKind = selectedNanosystem?.particleKind == 'Parallelepiped' ? 1 : 0;
       if(isSeries) {
         await RunSeriesCalculation(calculationParams);
-      } else await RunCalculation(calculationParams);
+      } else {
+        await RunCalculation(calculationParams);
+      }
 
       closeCalculateModal();
       showSuccess('Calculation Started', 'Your calculation has been queued and will begin processing shortly.');
@@ -211,7 +213,7 @@ export const SeriesDetailPage = () => {
         isOpen={isModalOpen}
         onClose={closeModal}
         onDownload={handleDownload}
-        onCalculate={openCalculateModal}
+        onCalculate={() => openCalculateModal()}
         calculations={calculations || []}
         isCalculationsLoading={isCalculationsLoading}
         onCalculationClick={openCalculationDetails}
@@ -231,7 +233,8 @@ export const SeriesDetailPage = () => {
           onClose={closeCalculateModal}
           calculationParams={{...calculationParams, systemId: seriesId}}
           onParamChange={handleParamChange}
-          onCalculate={() => handleCalculate(true)}
+          onCalculate={handleCalculate}
+          isSeries={true}
       />
 
       {selectedCalculation && (

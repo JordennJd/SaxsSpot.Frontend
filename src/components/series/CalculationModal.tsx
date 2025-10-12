@@ -7,8 +7,9 @@ interface CalculationModalProps {
   onClose: () => void;
   calculationParams: RunCalculationRequest;
   onParamChange: (path: string, value: unknown) => void;
-  onCalculate: () => void;
+  onCalculate: (isSeries: boolean) => void;
   isCalculating?: boolean;
+  isSeries?: boolean
 }
 
 export const CalculationModal = ({
@@ -17,6 +18,7 @@ export const CalculationModal = ({
                                    calculationParams,
                                    onParamChange,
                                    onCalculate,
+                                   isSeries = false,
                                    isCalculating = false,
                                  }: CalculationModalProps) => {
   const [activeTab, setActiveTab] = useState('q');
@@ -37,7 +39,7 @@ export const CalculationModal = ({
 
   const handleCalculate = () => {
     setIsDirty(false);
-    onCalculate();
+    onCalculate(isSeries);
   };
 
   const renderVectorParameters = (
