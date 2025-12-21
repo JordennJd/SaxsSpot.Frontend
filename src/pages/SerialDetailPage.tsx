@@ -2,12 +2,14 @@ import {useState} from 'react';
 import {useParams} from 'react-router-dom';
 import {useToastContext} from '../contexts/ToastContext';
 
-import {type ApiResponseListNanosystemDto, type NanosystemDto} from '../features/nanosystems/api/nanosystemTypes';
+import {type ApiResponseListNanosystemDto, type NanosystemDto, type RadialAnalysisDto} from '../features/nanosystems/api/nanosystemTypes';
 import type {CalculationDto, RunCalculationRequest} from '../features/calculation/api/calculationTypes.ts';
 import {RunCalculation, RunSeriesCalculation} from '../features/calculation/api/calculationApi.ts';
+import {runRadialAnalysis, type RunRadialAnalysisRequest} from '../features/nanosystems/api/nanosystemApi.ts';
 import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
-import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader} from '../components/series';
-import {useCalculationsData, useNanosystemsData, useSeriesData} from '../hooks/useSeriesDetail';
+import {RadialAnalysisDetailsCard} from '../features/nanosystems/components/RadialAnalysisCard.tsx';
+import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader, RadialAnalysisModal} from '../components/series';
+import {useCalculationsData, useNanosystemsData, useSeriesData, useRadialAnalysisData} from '../hooks/useSeriesDetail';
 import {downloadNanosystem} from '../utils/seriesUtils';
 
 export const SeriesDetailPage = () => {
@@ -20,10 +22,13 @@ export const SeriesDetailPage = () => {
   // Modal states
   const [selectedNanosystem, setSelectedNanosystem] = useState<NanosystemDto | null>(null);
   const [selectedCalculation, setSelectedCalculation] = useState<CalculationDto | null>(null);
+  const [selectedRadialAnalysis, setSelectedRadialAnalysis] = useState<RadialAnalysisDto | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCalculationModalOpen, setIsCalculationModalOpen] = useState(false);
+  const [isRadialAnalysisDetailsModalOpen, setIsRadialAnalysisDetailsModalOpen] = useState(false);
   const [isCalculateModalOpen, setIsCalculateModalOpen] = useState(false);
   const [isSeriesCalculateModalOpen, setIsSeriesCalculateModalOpen] = useState(false);
+  const [isRadialAnalysisModalOpen, setIsRadialAnalysisModalOpen] = useState(false);
 
   // Calculation parameters
   const [calculationParams, setCalculationParams] = useState<RunCalculationRequest>({
@@ -53,10 +58,22 @@ export const SeriesDetailPage = () => {
     particleKind: 0,
   });
 
+  // Radial analysis parameters
+  const [radialAnalysisParams, setRadialAnalysisParams] = useState<RunRadialAnalysisRequest>({
+    nanosystemId: '',
+    pointCount: 10000,
+    layerCount: 10,
+  });
+
   // Data fetching
   const { data: series, isLoading: isSeriesLoading } = useSeriesData(seriesId);
   const { data: nanosystems, isLoading: isNanosystemsLoading } = useNanosystemsData(seriesId, page, pageSize);
-  const { data: calculations, isLoading: isCalculationsLoading } = useCalculationsData(
+  const { data: calculations, isLoading: isCalculationsLoading, isError: isCalculationsError } = useCalculationsData(
+    selectedNanosystem?.id,
+    calculationPage,
+    pageSize,
+  );
+  const { data: radialAnalyses, isLoading: isRadialAnalysesLoading, isError: isRadialAnalysesError } = useRadialAnalysisData(
     selectedNanosystem?.id,
     calculationPage,
     pageSize,
@@ -78,6 +95,11 @@ export const SeriesDetailPage = () => {
     setIsCalculationModalOpen(true);
   };
 
+  const openRadialAnalysisDetails = (analysis: RadialAnalysisDto) => {
+    setSelectedRadialAnalysis(analysis);
+    setIsRadialAnalysisDetailsModalOpen(true);
+  };
+
   const openCalculateModal = (seriesId: string | null = null) => {
     if (selectedNanosystem || seriesId) {
       setCalculationParams(prev => ({
@@ -96,6 +118,20 @@ export const SeriesDetailPage = () => {
   const closeCalculateModal = () => {
     setIsCalculateModalOpen(false);
     setIsSeriesCalculateModalOpen(false);
+  };
+
+  const openRadialAnalysisModal = () => {
+    if (selectedNanosystem) {
+      setRadialAnalysisParams(prev => ({
+        ...prev,
+        nanosystemId: selectedNanosystem.id,
+      }));
+      setIsRadialAnalysisModalOpen(true);
+    }
+  };
+
+  const closeRadialAnalysisModal = () => {
+    setIsRadialAnalysisModalOpen(false);
   };
 
   const handleCalculate = async (isSeries: boolean = false) => {
@@ -131,6 +167,34 @@ export const SeriesDetailPage = () => {
       current[keys[keys.length - 1]] = value;
       return newParams;
     });
+  };
+
+  const handleRadialAnalysisParamChange = (path: string, value: unknown) => {
+    setRadialAnalysisParams(prev => {
+      const keys = path.split('.');
+      const newParams = { ...prev };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let current: any = newParams;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        current = current[keys[i]];
+      }
+
+      current[keys[keys.length - 1]] = value;
+      return newParams;
+    });
+  };
+
+  const handleRadialAnalysis = async () => {
+    try {
+      console.log('Radial analysis started:', radialAnalysisParams);
+      await runRadialAnalysis(radialAnalysisParams);
+      closeRadialAnalysisModal();
+      showSuccess('Radial Analysis Started', 'Your radial analysis has been queued and will begin processing shortly.');
+    } catch (error) {
+      console.error('Error starting radial analysis:', error);
+      showError('Radial Analysis Failed', 'Unable to start radial analysis. Please try again.');
+    }
   };
 
   const handleDownload = async () => {
@@ -214,9 +278,15 @@ export const SeriesDetailPage = () => {
         onClose={closeModal}
         onDownload={handleDownload}
         onCalculate={() => openCalculateModal()}
+        onAnalyse={openRadialAnalysisModal}
         calculations={calculations || []}
         isCalculationsLoading={isCalculationsLoading}
+        isCalculationsError={isCalculationsError}
         onCalculationClick={openCalculationDetails}
+        radialAnalyses={radialAnalyses || []}
+        isRadialAnalysesLoading={isRadialAnalysesLoading}
+        isRadialAnalysesError={isRadialAnalysesError}
+        onRadialAnalysisClick={openRadialAnalysisDetails}
       />
 
       <CalculationModal
@@ -237,11 +307,27 @@ export const SeriesDetailPage = () => {
           isSeries={true}
       />
 
+      <RadialAnalysisModal
+        isOpen={isRadialAnalysisModalOpen}
+        onClose={closeRadialAnalysisModal}
+        analysisParams={radialAnalysisParams}
+        onParamChange={handleRadialAnalysisParamChange}
+        onAnalyse={handleRadialAnalysis}
+      />
+
       {selectedCalculation && (
         <CalculationDetailsCard
           calculation={selectedCalculation}
           isOpen={isCalculationModalOpen}
           onClose={() => setIsCalculationModalOpen(false)}
+        />
+      )}
+
+      {selectedRadialAnalysis && (
+        <RadialAnalysisDetailsCard
+          analysis={selectedRadialAnalysis}
+          isOpen={isRadialAnalysisDetailsModalOpen}
+          onClose={() => setIsRadialAnalysisDetailsModalOpen(false)}
         />
       )}
     </div>

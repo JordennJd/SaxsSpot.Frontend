@@ -91,13 +91,16 @@ export const ErrorNotification = ({
   };
 
   return (
-    <div className={`
-      fixed top-4 right-4 z-50 max-w-md w-full
-      border rounded-lg shadow-lg p-4
-      transition-all duration-300 ease-in-out
-      ${getNotificationStyles(severity)}
-      ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
-    `}>
+    <div 
+      className={`
+        fixed top-4 right-4 max-w-md w-full
+        border rounded-lg shadow-lg p-4
+        transition-all duration-300 ease-in-out
+        ${getNotificationStyles(severity)}
+        ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
+      `}
+      style={{ zIndex: 100000 }}
+    >
       <div className="flex items-start">
         <div className="flex-shrink-0">
           <span className="text-lg" role="img" aria-label="Error icon">

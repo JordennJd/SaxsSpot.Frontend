@@ -1,5 +1,5 @@
 import { Dialog } from '@headlessui/react';
-import { type NanosystemDto } from '../../features/nanosystems/api/nanosystemTypes';
+import { type NanosystemDto, type RadialAnalysisDto } from '../../features/nanosystems/api/nanosystemTypes';
 import type { CalculationDto } from '../../features/calculation/api/calculationTypes';
 import {
   XMarkIcon,
@@ -11,6 +11,7 @@ import {
   ScaleIcon,
   ArrowsRightLeftIcon,
   BeakerIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 
 interface DetailItemProps {
@@ -25,9 +26,15 @@ interface NanosystemDetailsModalProps {
   onClose: () => void;
   onDownload: () => void;
   onCalculate: () => void;
+  onAnalyse: () => void;
   calculations: CalculationDto[];
   isCalculationsLoading: boolean;
+  isCalculationsError?: boolean;
   onCalculationClick: (calculation: CalculationDto) => void;
+  radialAnalyses: RadialAnalysisDto[];
+  isRadialAnalysesLoading: boolean;
+  isRadialAnalysesError?: boolean;
+  onRadialAnalysisClick: (analysis: RadialAnalysisDto) => void;
 }
 
 const DetailItem = ({ label, value, icon: Icon }: DetailItemProps) => (
@@ -48,9 +55,15 @@ export const NanosystemDetailsModal = ({
                                          onClose,
                                          onDownload,
                                          onCalculate,
+                                         onAnalyse,
                                          calculations,
                                          isCalculationsLoading,
+                                         isCalculationsError,
                                          onCalculationClick,
+                                         radialAnalyses,
+                                         isRadialAnalysesLoading,
+                                         isRadialAnalysesError,
+                                         onRadialAnalysisClick,
                                        }: NanosystemDetailsModalProps) => {
   if (!nanosystem) return null;
 
@@ -88,9 +101,9 @@ export const NanosystemDetailsModal = ({
   ];
 
   return (
-      <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
+      <Dialog open={isOpen} onClose={onClose} style={{ zIndex: 99999 }}>
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" style={{ zIndex: 99998 }} aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 99999 }}>
           <Dialog.Panel className="w-full max-w-4xl rounded-xl bg-white shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-5 rounded-t-xl flex justify-between items-start">
@@ -192,6 +205,11 @@ export const NanosystemDetailsModal = ({
                         Loading calculations...
                       </div>
                     </div>
+                ) : isCalculationsError ? (
+                    <div className="text-center py-4 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
+                      <CalculatorIcon className="h-8 w-8 mx-auto text-gray-400" />
+                      <p className="mt-2">Service unavailable</p>
+                    </div>
                 ) : calculations?.length === 0 ? (
                     <div className="text-center py-4 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
                       <CalculatorIcon className="h-8 w-8 mx-auto text-gray-400" />
@@ -227,6 +245,60 @@ export const NanosystemDetailsModal = ({
                     </div>
                 )}
               </div>
+
+              {/* Radial Analyses Section */}
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300 flex items-center gap-2">
+                  <div className="h-2 w-2 bg-purple-500 rounded-full"></div>
+                  Radial Analyses
+                </h3>
+                {isRadialAnalysesLoading ? (
+                    <div className="text-center py-4">
+                      <div className="inline-flex items-center px-4 py-2 text-sm text-gray-600">
+                        <div className="animate-spin mr-2 h-4 w-4 border-2 border-purple-500 border-t-transparent rounded-full"></div>
+                        Loading radial analyses...
+                      </div>
+                    </div>
+                ) : isRadialAnalysesError ? (
+                    <div className="text-center py-4 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
+                      <ChartBarIcon className="h-8 w-8 mx-auto text-gray-400" />
+                      <p className="mt-2">Service unavailable</p>
+                    </div>
+                ) : radialAnalyses?.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
+                      <ChartBarIcon className="h-8 w-8 mx-auto text-gray-400" />
+                      <p className="mt-2">No radial analyses found</p>
+                    </div>
+                ) : (
+                    <div className="h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                      <ul className="space-y-2">
+                        {radialAnalyses?.map((analysis) => (
+                            <li
+                                key={analysis.id}
+                                className="p-3 bg-white rounded-lg border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
+                                onClick={() => onRadialAnalysisClick(analysis)}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <ClockIcon className="h-4 w-4 text-gray-400" />
+                                    <span className="text-sm font-medium text-gray-700">{analysis.startDate}</span>
+                                  </div>
+                                  <p className="text-xs font-mono text-purple-600 mb-1">{analysis.id}</p>
+                                  <p className="text-xs text-gray-500">
+                                    Points: {analysis.pointCount}, Layers: {analysis.layerCount}
+                                  </p>
+                                </div>
+                                <span className="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full bg-purple-100 text-purple-800">
+                            Analysis
+                          </span>
+                              </div>
+                            </li>
+                        ))}
+                      </ul>
+                    </div>
+                )}
+              </div>
             </div>
 
             {/* Footer */}
@@ -245,6 +317,13 @@ export const NanosystemDetailsModal = ({
                 >
                   <CalculatorIcon className="h-5 w-5" />
                   Calculate
+                </button>
+                <button
+                    onClick={onAnalyse}
+                    className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                >
+                  <ChartBarIcon className="h-5 w-5" />
+                  Analyse
                 </button>
                 <button
                     onClick={onClose}

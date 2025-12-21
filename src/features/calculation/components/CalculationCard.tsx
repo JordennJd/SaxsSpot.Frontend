@@ -93,9 +93,9 @@ export const CalculationDetailsCard = ({
     ];
 
     return (
-        <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
-            <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Dialog open={isOpen} onClose={onClose} style={{ zIndex: 99999 }}>
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" style={{ zIndex: 99998 }} aria-hidden="true" />
+            <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 99999 }}>
                 <Dialog.Panel className="w-full max-w-3xl rounded-xl bg-white shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-5 rounded-t-xl flex justify-between items-start">

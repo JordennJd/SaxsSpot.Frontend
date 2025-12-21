@@ -128,3 +128,23 @@ export const ApiResponseListNanosystemDtoSchema = ApiResponseListSchema(Nanosyst
 export const NanosystemSeriesListApiResponseSchema = ApiResponseListSchema(NanosystemSeriesDtoSchema);
 export type NanosystemSeriesListApiResponse = z.infer<typeof NanosystemSeriesListApiResponseSchema>;
 export type ApiResponseListNanosystemDto = z.infer<typeof ApiResponseListNanosystemDtoSchema>;
+
+// Radial Analysis Types
+const DateTimeSchema = z.string().refine(val => {
+  return !isNaN(Date.parse(val)) && val.includes('T');
+}, {
+  message: 'Must be a valid ISO 8601 datetime string',
+});
+
+export const RadialAnalysisDtoSchema = z.object({
+  id: z.string().uuid(),
+  nanosystemId: z.string().uuid(),
+  pointCount: z.number(),
+  layerCount: z.number(),
+  startDate: DateTimeSchema,
+  endDate: DateTimeSchema.nullable(),
+});
+
+export type RadialAnalysisDto = z.infer<typeof RadialAnalysisDtoSchema>;
+export const RadialAnalysisApiResponseSchema = ApiResponseListSchema(RadialAnalysisDtoSchema);
+export type RadialAnalysisApiResponse = z.infer<typeof RadialAnalysisApiResponseSchema>;

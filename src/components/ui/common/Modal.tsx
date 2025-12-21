@@ -35,7 +35,7 @@ const ModalComponent = ({
   }, [onClose]);
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={handleClose}>
+      <Dialog as="div" style={{ zIndex: 99999 }} onClose={handleClose}>
         <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
@@ -45,10 +45,10 @@ const ModalComponent = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" style={{ zIndex: 99998 }} />
         </TransitionChild>
 
-        <div className="fixed inset-0 overflow-y-auto">
+        <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 99999 }}>
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <TransitionChild
               as={Fragment}

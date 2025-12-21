@@ -6,6 +6,8 @@ import {
   type MassGenerateNanoSystemOptions,
   type NanosystemSeriesListApiResponse,
   NanosystemSeriesListApiResponseSchema, ApiResponseListNanosystemDtoSchema, type ApiResponseListNanosystemDto,
+  type RadialAnalysisApiResponse,
+  RadialAnalysisApiResponseSchema,
 } from './nanosystemTypes';
 
 import { nanosystemApiClient } from '../../../lib/axios';
@@ -114,6 +116,94 @@ export const runMassGeneration = async (
     );
 
     return response.data;
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
+  }
+};
+
+export interface RunRadialAnalysisRequest {
+  nanosystemId: string;
+  pointCount: number;
+  layerCount: number;
+}
+
+export const runRadialAnalysis = async (
+  request: RunRadialAnalysisRequest,
+): Promise<string> => {
+  try {
+    const response = await nanosystemApiClient.post<string>(
+      '/radial-analysis/run-radial-analysis',
+      request,
+    );
+
+    return response.data;
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
+  }
+};
+
+export const fetchRadialAnalysisList = async (
+  nanosystemId: string,
+  page: number = 1,
+  pageSize: number = 10,
+  filter?: string,
+  sortBy?: string,
+): Promise<RadialAnalysisApiResponse> => {
+  try {
+    const params: Record<string, string | number> = {
+      page,
+      pageSize,
+    };
+    
+    // Формируем filter: если передан filter, используем его, иначе добавляем nanosystemId
+    if (filter) {
+      params.filter = filter;
+    } else {
+      // Если filter не передан, добавляем nanosystemId в filter
+      params.filter = `nanosystemId=${nanosystemId}`;
+    }
+    
+    if (sortBy) {
+      params.sortBy = sortBy;
+    }
+
+    const response = await nanosystemApiClient.get<RadialAnalysisApiResponse>(
+      '/radial-analysis/get-radial-analysis-list',
+      {
+        params,
+        paramsSerializer: (params) => {
+          return new URLSearchParams(params as Record<string, string>).toString();
+        },
+      },
+    );
+
+    // Validate response data with Zod
+    const validatedData = RadialAnalysisApiResponseSchema.parse(response.data);
+
+    return validatedData;
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
+  }
+};
+
+export const downloadRadialAnalysis = async (id: string): Promise<void> => {
+  try {
+    const response = await nanosystemApiClient.get('/radial-analysis/download-radial-analysis', {
+      responseType: 'blob',
+      params: { id },
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `radial-analysis-${id}`);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(url);
   } catch (error) {
     const appError = handleError(error as Error);
     throw appError;
