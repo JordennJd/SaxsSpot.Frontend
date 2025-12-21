@@ -8,7 +8,7 @@ export const RadialAnalysisChartPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [chart, setChart] = useState<string>('');
-    const [request, setRequest] = useState<PlotAnalyseRequest>(
+    const [request] = useState<PlotAnalyseRequest>(
         location.state?.request || {
             RadialAnalysisId: id || '',
             ChartTitle: 'Radial Analysis',
@@ -19,7 +19,6 @@ export const RadialAnalysisChartPage = () => {
         },
     );
     const [isLoading, setIsLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState('chart');
 
     useEffect(() => {
         const fetchChart = async () => {
@@ -93,10 +92,8 @@ export const RadialAnalysisChartPage = () => {
             }
         };
 
-        if (activeTab === 'chart') {
-            fetchChart();
-        }
-    }, [request, activeTab]);
+        fetchChart();
+    }, [request]);
 
     return (
         <div className="h-screen w-full flex flex-col bg-gray-50">
