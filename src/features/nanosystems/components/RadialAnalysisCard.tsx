@@ -1,7 +1,9 @@
 // RadialAnalysisDetailsCard.tsx
 import { Dialog } from '@headlessui/react';
+import { useNavigate } from 'react-router-dom';
 import { type RadialAnalysisDto } from '../api/nanosystemTypes';
 import { downloadRadialAnalysis } from '../api/nanosystemApi';
+import type { PlotAnalyseRequest } from '../../calculation/api/calculationTypes';
 import {
     XMarkIcon,
     CalendarIcon,
@@ -20,12 +22,26 @@ export const RadialAnalysisDetailsCard = ({
     isOpen: boolean;
     onClose: () => void;
 }) => {
+    const navigate = useNavigate();
+
     const handleDownload = async () => {
         try {
             await downloadRadialAnalysis(analysis.id);
         } catch (error) {
             console.error('Download failed:', error);
         }
+    };
+
+    const handleViewChart = () => {
+        const request: PlotAnalyseRequest = {
+            RadialAnalysisId: analysis.id,
+            ChartTitle: 'Radial Analysis',
+            XAxis: 'Index',
+            YAxis: 'Value',
+            ScaleMethodsX: 0, // Linear
+            ScaleMethodsY: 0, // Linear
+        };
+        navigate(`/radial-analyses/${analysis.id}/chart`, { state: { request } });
     };
     // Группируем данные для лучшей организации
     const basicInfo = [
@@ -100,13 +116,22 @@ export const RadialAnalysisDetailsCard = ({
 
                     {/* Footer */}
                     <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center rounded-b-xl">
-                        <button
-                            onClick={handleDownload}
-                            className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
-                        >
-                            <ArrowDownTrayIcon className="h-5 w-5" />
-                            Download
-                        </button>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleViewChart}
+                                className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                            >
+                                <ChartBarIcon className="h-5 w-5" />
+                                View Chart
+                            </button>
+                            <button
+                                onClick={handleDownload}
+                                className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                            >
+                                <ArrowDownTrayIcon className="h-5 w-5" />
+                                Download
+                            </button>
+                        </div>
                         <button
                             onClick={onClose}
                             className="px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all shadow-md hover:shadow-lg"

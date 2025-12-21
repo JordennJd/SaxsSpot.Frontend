@@ -7,6 +7,7 @@ import { NanosystemSeriesAddPage } from './pages/NanosystemSeriesAddPage';
 import { SeriesDetailPage } from './pages/SerialDetailPage';
 import JobManagementDashboard from './pages/JobManagementDashboard';
 import { CalculationChartPage } from './pages/CalculationChartPage';
+import { RadialAnalysisChartPage } from './pages/RadialAnalysisChartPage';
 import { ErrorBoundary } from './components/ui/common/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
 import { config } from './lib/config';
@@ -66,6 +67,7 @@ function App() {
                 <Route path="/series/:guid" element={<SeriesDetailPage />} />
                 <Route path="/jobs" element={<JobManagementDashboard />} />
                 <Route path="/calculations/:guid/chart" element={<CalculationChartPage />} />
+                <Route path="/radial-analyses/:guid/chart" element={<RadialAnalysisChartPage />} />
               </Routes>
             </Layout>
           </Router>

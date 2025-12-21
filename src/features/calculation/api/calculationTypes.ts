@@ -65,6 +65,15 @@ export const PlotChartRequestSchema = z.object({
     ScaleMethodsY: SpaceMethodSchema,
 });
 
+export const PlotAnalyseRequestSchema = z.object({
+    RadialAnalysisId: z.string().uuid(),
+    ChartTitle: z.string(),
+    XAxis: z.string(),
+    YAxis: z.string(),
+    ScaleMethodsX: z.number(),
+    ScaleMethodsY: z.number(),
+});
+
 export const spaceParametersSchema = z.object({
     spaceMethod: z.number(),
     scaleMethod: z.number(),
@@ -91,3 +100,4 @@ export type CalculationDto = z.infer<typeof CalculationDtoSchema>;
 export const CalculationApiResponseSchema = ApiResponseListSchema(CalculationDtoSchema);
 export type CalculationApiResponse = z.infer<typeof CalculationApiResponseSchema>;
 export type PlotChartRequest = z.infer<typeof PlotChartRequestSchema>;
+export type PlotAnalyseRequest = z.infer<typeof PlotAnalyseRequestSchema>;

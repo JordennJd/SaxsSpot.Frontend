@@ -1,7 +1,7 @@
 import {calculationApiClient} from '../../../lib/axios.ts';
 import {
     type CalculationApiResponse,
-    CalculationApiResponseSchema, type PlotChartRequest, type RunCalculationRequest,
+    CalculationApiResponseSchema, type PlotChartRequest, type RunCalculationRequest, type PlotAnalyseRequest,
 } from './calculationTypes.ts';
 import type {ApiResponse} from '../../common/commonTypes.ts';
 
@@ -59,6 +59,29 @@ export const PlotChart = async (request: PlotChartRequest): Promise<string> => {
                 params: {...request},
                 paramsSerializer: (params) => {
                     return new URLSearchParams(params).toString();
+                },
+            },
+        );
+
+    console.log(response);
+    return response.data.result;
+};
+
+export const PlotAnalyse = async (request: PlotAnalyseRequest): Promise<string> => {
+    const response = await calculationApiClient
+        .get<ApiResponse<string>>(
+            '/calculation/plot-analyse',
+            {
+                params: {
+                    RadialAnalysisId: request.RadialAnalysisId,
+                    ChartTitle: request.ChartTitle,
+                    XAxis: request.XAxis,
+                    YAxis: request.YAxis,
+                    ScaleMethodsX: request.ScaleMethodsX,
+                    ScaleMethodsY: request.ScaleMethodsY,
+                },
+                paramsSerializer: (params) => {
+                    return new URLSearchParams(params as Record<string, string>).toString();
                 },
             },
         );
