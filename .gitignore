@@ -30,6 +30,9 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+# Allow template env files
+!.env.docker
+!.env.devspot
 
 # Build output
 build/
