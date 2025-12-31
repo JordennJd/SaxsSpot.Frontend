@@ -209,3 +209,19 @@ export const downloadRadialAnalysis = async (id: string): Promise<void> => {
     throw appError;
   }
 };
+
+export interface CancelOperationRequest {
+  operationId: string;
+  operationType?: string;
+}
+
+export const cancelOperation = async (
+  request: CancelOperationRequest,
+): Promise<void> => {
+  try {
+    await nanosystemApiClient.post('/nanosystem/cancel-operation', request);
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
+  }
+};

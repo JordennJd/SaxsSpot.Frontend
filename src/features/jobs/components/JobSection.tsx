@@ -8,6 +8,7 @@ interface JobSectionProps {
   visibleCount: number;
   color: 'blue' | 'yellow' | 'green' | 'red';
   onLoadMore: () => void;
+  onCancel?: () => void;
 }
 
 const colorStyles = {
@@ -42,7 +43,8 @@ export const JobSection = ({
   jobs, 
   visibleCount, 
   color, 
-  onLoadMore, 
+  onLoadMore,
+  onCancel,
 }: JobSectionProps) => {
   const styles = colorStyles[color];
   const visibleJobs = jobs.slice(0, visibleCount);
@@ -50,8 +52,8 @@ export const JobSection = ({
 
   if (jobs.length === 0) {
     return (
-      <div className={`rounded-xl border ${styles.border} ${styles.bg} p-6`}>
-        <h3 className={`text-lg font-semibold mb-4 ${styles.text}`}>
+      <div className={`rounded-xl border ${styles.border} ${styles.bg} p-4 sm:p-6`}>
+        <h3 className={`text-base sm:text-lg font-semibold mb-3 sm:mb-4 ${styles.text}`}>
           {title} ({jobs.length})
         </h3>
         <EmptyState
@@ -64,24 +66,25 @@ export const JobSection = ({
   }
 
   return (
-    <div className={`rounded-xl border ${styles.border} ${styles.bg} p-6`}>
-      <h3 className={`text-lg font-semibold mb-4 ${styles.text}`}>
+    <div className={`rounded-xl border ${styles.border} ${styles.bg} p-4 sm:p-6`}>
+      <h3 className={`text-base sm:text-lg font-semibold mb-3 sm:mb-4 ${styles.text}`}>
         {title} ({jobs.length})
       </h3>
       
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {visibleJobs.map((job) => (
-          <JobCard key={job.id} job={job} />
+          <JobCard key={job.id} job={job} onCancel={onCancel} />
         ))}
       </div>
       
       {hasMore && (
-        <div className="mt-4 text-center">
+        <div className="mt-3 sm:mt-4 text-center">
           <button
             onClick={onLoadMore}
-            className={`px-4 py-2 ${styles.button} text-white rounded-md transition-colors`}
+            className={`px-4 py-2.5 sm:px-4 sm:py-2 text-sm sm:text-base ${styles.button} text-white rounded-md transition-colors touch-manipulation active:opacity-80`}
           >
-            Load More ({jobs.length - visibleCount} remaining)
+            <span className="hidden sm:inline">Load More ({jobs.length - visibleCount} remaining)</span>
+            <span className="sm:hidden">Load More ({jobs.length - visibleCount})</span>
           </button>
         </div>
       )}
