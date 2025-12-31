@@ -42,21 +42,22 @@ export const NanosystemsTable = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-        <h3 className="font-medium text-gray-800">Generated Nanosystems</h3>
+      <div className="bg-gray-50 px-3 sm:px-6 py-2 sm:py-3 border-b border-gray-200">
+        <h3 className="text-sm sm:text-base font-medium text-gray-800">Generated Nanosystems</h3>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Particles</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concentration</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Excess</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Generated</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Particles</th>
+              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concentration</th>
+              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Excess</th>
+              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Generated</th>
+              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -66,25 +67,25 @@ export const NanosystemsTable = ({
                 className="hover:bg-gray-50 cursor-pointer"
                 onClick={() => onNanosystemClick(system)}
               >
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">
+                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">
                   {system.id.slice(0, 8)}...
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {system.particleCount.toLocaleString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {system.globalSize.toFixed(2)} nm
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {system.numericalConcentration}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {system.excess}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {system.generationStart}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                     Generated
                   </span>
@@ -94,9 +95,54 @@ export const NanosystemsTable = ({
           </tbody>
         </table>
       </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden divide-y divide-gray-200">
+        {nanosystems?.result.data.map((system) => (
+          <div
+            key={system.id}
+            className="p-3 hover:bg-gray-50 cursor-pointer active:bg-gray-100 touch-manipulation"
+            onClick={() => onNanosystemClick(system)}
+          >
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-mono text-blue-600 truncate">
+                  ID: {system.id.slice(0, 8)}...
+                </p>
+              </div>
+              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800 flex-shrink-0 ml-2">
+                Generated
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span className="text-gray-500">Particles:</span>
+                <span className="ml-1 font-medium text-gray-900">{system.particleCount.toLocaleString()}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Size:</span>
+                <span className="ml-1 font-medium text-gray-900">{system.globalSize.toFixed(2)} nm</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Concentration:</span>
+                <span className="ml-1 font-medium text-gray-900">{system.numericalConcentration}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Excess:</span>
+                <span className="ml-1 font-medium text-gray-900">{system.excess}</span>
+              </div>
+            </div>
+            {system.generationStart && (
+              <div className="mt-2 text-xs text-gray-500">
+                Generated: {system.generationStart}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
       
       {nanosystems && (
-        <div className="px-6 py-3 border-t border-gray-200">
+        <div className="px-3 sm:px-6 py-2 sm:py-3 border-t border-gray-200">
           <Pagination
             currentPage={currentPage}
             pageSize={pageSize}

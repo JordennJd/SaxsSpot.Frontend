@@ -11,12 +11,12 @@ interface SeriesHeaderProps {
 }
 
 const ParameterBlock = ({ title, value, icon }: ParameterBlockProps) => (
-  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-    <div className="flex items-center space-x-3">
-      <span className="text-2xl">{icon}</span>
-      <div>
-        <h4 className="text-sm font-medium text-gray-500">{title}</h4>
-        <p className="text-lg font-mono font-semibold text-gray-900">{value}</p>
+  <div className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200">
+    <div className="flex items-center space-x-2 sm:space-x-3">
+      <span className="text-xl sm:text-2xl flex-shrink-0">{icon}</span>
+      <div className="min-w-0 flex-1">
+        <h4 className="text-xs sm:text-sm font-medium text-gray-500">{title}</h4>
+        <p className="text-sm sm:text-base md:text-lg font-mono font-semibold text-gray-900 break-words">{value}</p>
       </div>
     </div>
   </div>
@@ -24,12 +24,12 @@ const ParameterBlock = ({ title, value, icon }: ParameterBlockProps) => (
 
 export const SeriesHeader = ({ series }: SeriesHeaderProps) => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <div className="bg-gradient-to-r from-blue-800 to-indigo-800 px-6 py-4">
-      <h2 className="text-xl font-bold text-white">Series: {series.id}</h2>
-      <p className="text-blue-200">Particle kind: {series.particleKind}</p>
+    <div className="bg-gradient-to-r from-blue-800 to-indigo-800 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+      <h2 className="text-base sm:text-lg md:text-xl font-bold text-white break-words">Series: {series.id}</h2>
+      <p className="text-sm sm:text-base text-blue-200 mt-1">Particle kind: {series.particleKind}</p>
     </div>
 
-    <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="p-3 sm:p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
       <ParameterBlock
         title="Particle Count"
         value={`${series.particleCountFrom} - ${series.particleCountTo}`}

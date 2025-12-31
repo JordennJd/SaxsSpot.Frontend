@@ -28,21 +28,20 @@ export const NanosystemsTable: React.FC<NanosystemsTableProps> = ({
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg overflow-hidden transition-all duration-300">
       {/* Header and Search */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+      <div className="p-3 sm:p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
             Nanosystem Series
           </h2>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
               Total: {data?.result.count || 0}
             </span>
           </div>
-
         </div>
-        <span>
+        <div>
           <NanosystemFilters onFilterChange={setSearchQuery}></NanosystemFilters>
-        </span>
+        </div>
       </div>
 
       {/* Table */}
@@ -55,12 +54,14 @@ export const NanosystemsTable: React.FC<NanosystemsTableProps> = ({
       </div>
 
       {/* Pagination */}
-      <Pagination
-        currentPage={page}
-        totalItems={data?.result.count || 0}
-        onPageChange={setPage}
-        pageSize={pageSize}
-      />
+      <div className="p-3 sm:p-4 md:p-6 border-t border-gray-200 dark:border-gray-700">
+        <Pagination
+          currentPage={page}
+          totalItems={data?.result.count || 0}
+          onPageChange={setPage}
+          pageSize={pageSize}
+        />
+      </div>
     </div>
   );
 };
@@ -78,14 +79,26 @@ const TableContent = ({
   if (!data?.length) return <EmptyState />;
 
   return (
-    <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
-      <TableHeader />
-      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+    <>
+      {/* Desktop Table View */}
+      <div className="hidden md:block">
+        <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <TableHeader />
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            {data.map((ns) => (
+              <TableRow key={ns.id} data={ns} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
         {data.map((ns) => (
-          <TableRow key={ns.id} data={ns} />
+          <MobileCardRow key={ns.id} data={ns} />
         ))}
-      </tbody>
-    </table>
+      </div>
+    </>
   );
 };
 
@@ -129,40 +142,81 @@ const TableRow = ({ data }: { data: NanosystemSeriesDto }) => {
 const DetailsButton = ({ id }: { id: string }) => {
   const navigate = useNavigate();
     return (<button 
-      className="flex items-center gap-1 px-3 py-1.5 rounded-md 
+      className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-md 
                 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300
-                hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                hover:bg-blue-100 dark:hover:bg-blue-900/50 active:bg-blue-200 dark:active:bg-blue-900/70
+                transition-colors touch-manipulation"
                 onClick={() => navigate(`/series/${id}`)}
       >
-      <EyeIcon className="h-4 w-4" />
+      <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4" />
       <span>Details</span>
     </button>
   );
+};
 
+const MobileCardRow = ({ data }: { data: NanosystemSeriesDto }) => {
+  const navigate = useNavigate();
+  return (
+    <div 
+      className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
+      onClick={() => navigate(`/series/${data.id}`)}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <ParticleKindBadge kind={data.particleKind} />
+        <DetailsButton id={data.id} />
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <span className="text-gray-500 dark:text-gray-400">Count:</span>
+          <span className="ml-1 font-medium text-gray-800 dark:text-gray-200">
+            {data.particleCountFrom} - {data.particleCountTo}
+          </span>
+        </div>
+        <div>
+          <span className="text-gray-500 dark:text-gray-400">Size:</span>
+          <span className="ml-1 font-medium text-gray-800 dark:text-gray-200">
+            {data.globalSizeFrom.toFixed(2)} - {data.globalSizeTo.toFixed(2)} nm
+          </span>
+        </div>
+        <div>
+          <span className="text-gray-500 dark:text-gray-400">Concentration:</span>
+          <span className="ml-1 font-medium text-gray-800 dark:text-gray-200">
+            {(data.numericalConcentrationFrom * 100).toFixed(1)} - {(data.numericalConcentrationTo * 100).toFixed(1)}%
+          </span>
+        </div>
+        <div>
+          <span className="text-gray-500 dark:text-gray-400">Excess:</span>
+          <span className="ml-1 font-medium text-gray-800 dark:text-gray-200">
+            {data.excessFrom} - {data.excessTo}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // Вспомогательные компоненты
 const TableHeaderCell = ({ children }: { children: React.ReactNode }) => (
-  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+  <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
     {children}
   </th>
 );
 
 const TableCell = ({ children }: { children: React.ReactNode }) => (
-  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200 transition-colors duration-150">
+  <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200 transition-colors duration-150">
     {children}
   </td>
 );
 
 
 const EmptyState = () => (
-  <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+  <div className="p-4 sm:p-6 md:p-8 text-center text-sm sm:text-base text-gray-500 dark:text-gray-400">
     No data available
   </div>
 );
 
 const ErrorState = () => (
-  <div className="p-8 text-center text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl">
+  <div className="p-4 sm:p-6 md:p-8 text-center text-sm sm:text-base text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl">
     Error loading data. Please try again later.
   </div>
 );
