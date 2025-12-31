@@ -222,6 +222,7 @@ export const cancelOperation = async (
     await nanosystemApiClient.post('/nanosystem/cancel-operation', request);
   } catch (error) {
     const appError = handleError(error as Error);
-    throw appError;
+    // Throw an Error with the specific message so it can be caught and displayed
+    throw new Error(appError.message);
   }
 };

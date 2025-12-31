@@ -67,9 +67,10 @@ export class ErrorHandler {
   // Transform errors to AppError
   private transformError(error: ApiError | Error): AppError {
     if (error instanceof ApiError) {
+      const responseData = error.response?.data;
       return {
         type: this.getErrorType(error.status, error.code),
-        message: this.getErrorMessage(error.status, error.message),
+        message: this.getErrorMessage(error.status, error.message, responseData),
         details: error.response,
         code: error.code,
         timestamp: new Date(),
@@ -109,10 +110,42 @@ export class ErrorHandler {
   }
 
   // Get user-friendly error messages
-  private getErrorMessage(status?: number, originalMessage?: string): string {
+  private getErrorMessage(status?: number, originalMessage?: string, responseData?: any): string {
+    // For 400 errors, try to extract specific error messages from ResultDto
+    if (status === 400 && responseData) {
+      // Check if it's a ResultDto with errors array
+      if (responseData.errors && Array.isArray(responseData.errors) && responseData.errors.length > 0) {
+        // Return the first error message or join all errors
+        return responseData.errors.join('. ') || responseData.errors[0];
+      }
+      // Check if it's a ResultDto with errorMessage
+      if (responseData.errorMessage) {
+        return responseData.errorMessage;
+      }
+      // Check if it's a ProblemDetails with detail
+      if (responseData.detail) {
+        return responseData.detail;
+      }
+      // Check if it's a ProblemDetails with errors
+      if (responseData.errors && typeof responseData.errors === 'object') {
+        const errorMessages: string[] = [];
+        for (const key in responseData.errors) {
+          const value = responseData.errors[key];
+          if (Array.isArray(value)) {
+            errorMessages.push(...value);
+          } else if (typeof value === 'string') {
+            errorMessages.push(value);
+          }
+        }
+        if (errorMessages.length > 0) {
+          return errorMessages.join('. ');
+        }
+      }
+    }
+
     switch (status) {
       case 400:
-        return 'Invalid request. Please check your input.';
+        return originalMessage || 'Invalid request. Please check your input.';
       case 401:
         return 'Authentication required. Please log in.';
       case 403:

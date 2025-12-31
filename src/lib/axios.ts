@@ -59,12 +59,28 @@ const addResponseInterceptor = (client: AxiosInstance, clientName: string) => {
     },
     (error: AxiosError) => {
       const status = error.response?.status;
-      const message = (error.response?.data as any)?.message || error.message || 'Unknown error';
+      const responseData = error.response?.data as any;
+      
+      // Try to extract error message from response data
+      let message = error.message || 'Unknown error';
+      if (responseData) {
+        // Check for ResultDto structure (errors array or errorMessage)
+        if (responseData.errors && Array.isArray(responseData.errors) && responseData.errors.length > 0) {
+          message = responseData.errors.join('. ') || responseData.errors[0];
+        } else if (responseData.errorMessage) {
+          message = responseData.errorMessage;
+        } else if (responseData.detail) {
+          message = responseData.detail;
+        } else if (responseData.message) {
+          message = responseData.message;
+        }
+      }
       
       if (config.app.isDevelopment) {
         console.error(`[${clientName}] Response Error:`, {
           status,
           message,
+          responseData,
           url: error.config?.url,
         });
       }
