@@ -49,7 +49,6 @@ export class CalculationService {
       <html>
       <head>
           <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
           <title>Chart</title>
           <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
           <script src="https://cdn.jsdelivr.net/npm/mpld3@0.5.10/dist/mpld3.min.js"></script>
@@ -59,50 +58,27 @@ export class CalculationService {
                   padding: 0;
                   width: 100%;
                   height: 100%;
-                  overflow: auto;
-                  background: #f8fafc;
-                  -webkit-overflow-scrolling: touch;
+                  overflow: hidden;
               }
               #chart-container {
                   width: 100%;
-                  min-height: 100%;
+                  height: 100%;
                   display: flex;
                   justify-content: center;
-                  align-items: flex-start;
+                  align-items: center;
                   background: white;
-                  padding: 10px;
-                  box-sizing: border-box;
+                  padding-bottom: 100px;
               }
               .mpld3-figure {
                   margin: 0 auto;
                   display: block;
-                  background: white;
-                  border-radius: 8px;
-                  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                  padding: 8px;
-                  max-width: 100%;
-                  width: 100%;
-                  height: auto;
-              }
-              .mpld3-figure svg {
-                  max-width: 100%;
-                  height: auto;
-              }
-              @media (max-width: 640px) {
-                  #chart-container {
-                      padding: 5px;
-                  }
-                  .mpld3-figure {
-                      padding: 4px;
-                  }
               }
           </style>
       </head>
       <body>
           <div id="chart-container">${chartData}</div>
           <script>
-              let resizeTimer;
-              function redrawCharts() {
+              window.addEventListener('resize', function() {
                   if(window.mpld3) {
                       const figures = document.querySelectorAll('.mpld3-figure');
                       figures.forEach(fig => {
@@ -111,15 +87,7 @@ export class CalculationService {
                           window.mpld3.draw_figure(id, spec);
                       });
                   }
-              }
-              window.addEventListener('resize', function() {
-                  clearTimeout(resizeTimer);
-                  resizeTimer = setTimeout(redrawCharts, 250);
               });
-              window.addEventListener('orientationchange', function() {
-                  setTimeout(redrawCharts, 500);
-              });
-              setTimeout(redrawCharts, 100);
           </script>
       </body>
       </html>
