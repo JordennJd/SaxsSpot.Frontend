@@ -124,10 +124,10 @@ const TableRow = ({ data }: { data: NanosystemSeriesDto }) => {
       {data.particleCountFrom} - {data.particleCountTo}
     </TableCell>
     <TableCell>
-      {data.globalSizeFrom.toFixed(2)} - {data.globalSizeTo.toFixed(2)}
+      {data.globalSizeFrom} - {data.globalSizeTo}
     </TableCell>
     <TableCell>
-      {(data.numericalConcentrationFrom * 100).toFixed(1)} - {(data.numericalConcentrationTo * 100).toFixed(1)}%
+      {(data.numericalConcentrationFrom * 100)} - {(data.numericalConcentrationTo * 100)}%
     </TableCell>
     <TableCell>
       {data.excessFrom} - {data.excessTo}
@@ -175,13 +175,13 @@ const MobileCardRow = ({ data }: { data: NanosystemSeriesDto }) => {
         <div>
           <span className="text-gray-500 dark:text-gray-400">Size:</span>
           <span className="ml-1 font-medium text-gray-800 dark:text-gray-200">
-            {data.globalSizeFrom.toFixed(2)} - {data.globalSizeTo.toFixed(2)} nm
+            {data.globalSizeFrom} - {data.globalSizeTo} nm
           </span>
         </div>
         <div>
           <span className="text-gray-500 dark:text-gray-400">Concentration:</span>
           <span className="ml-1 font-medium text-gray-800 dark:text-gray-200">
-            {(data.numericalConcentrationFrom * 100).toFixed(1)} - {(data.numericalConcentrationTo * 100).toFixed(1)}%
+            {(data.numericalConcentrationFrom * 100)} - {(data.numericalConcentrationTo * 100)}%
           </span>
         </div>
         <div>

@@ -108,7 +108,7 @@ export const CalculationModal = ({
             </div>
             <div className="ml-3">
               <p className="text-sm text-blue-700">
-                This will generate {Math.floor((params.end - params.start) / params.spaceParameter) + 1} values from {params.start} to {params.end}
+                This will generate {((params.end - params.start) / params.spaceParameter) + 1} values from {params.start} to {params.end}
               </p>
             </div>
           </div>

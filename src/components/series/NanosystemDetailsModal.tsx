@@ -77,9 +77,9 @@ export const NanosystemDetailsModal = ({
 
   const sizeInfo = [
     { label: 'Particle Count', value: nanosystem.particleCount.toLocaleString(), icon: HashtagIcon },
-    { label: 'Global Size', value: `${nanosystem.globalSize.toFixed(2)} nm`, icon: ScaleIcon },
-    { label: 'Max Particle Size', value: `${nanosystem.maxParticleSize.toFixed(2)} nm`, icon: ArrowsRightLeftIcon },
-    { label: 'Min Particle Size', value: `${nanosystem.minParticleSize.toFixed(2)} nm`, icon: ArrowsRightLeftIcon },
+    { label: 'Global Size', value: `${nanosystem.globalSize} nm`, icon: ScaleIcon },
+    { label: 'Max Particle Size', value: `${nanosystem.maxParticleSize} nm`, icon: ArrowsRightLeftIcon },
+    { label: 'Min Particle Size', value: `${nanosystem.minParticleSize} nm`, icon: ArrowsRightLeftIcon },
   ];
 
   const generationInfo = [
@@ -89,9 +89,9 @@ export const NanosystemDetailsModal = ({
   ];
 
   const parametersInfo = [
-    { label: 'Excess', value: nanosystem.excess.toFixed(2), icon: ScaleIcon },
-    { label: 'K Parameter', value: nanosystem.k.toFixed(2), icon: ScaleIcon },
-    { label: 'Theta', value: nanosystem.theta.toFixed(1), icon: ScaleIcon },
+    { label: 'Excess', value: nanosystem.excess.toString(), icon: ScaleIcon },
+    { label: 'K Parameter', value: nanosystem.k.toString(), icon: ScaleIcon },
+    { label: 'Theta', value: nanosystem.theta.toString(), icon: ScaleIcon },
   ];
 
   const timeInfo = [
