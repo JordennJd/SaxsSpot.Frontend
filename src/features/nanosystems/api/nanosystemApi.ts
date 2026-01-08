@@ -10,7 +10,7 @@ import {
   RadialAnalysisApiResponseSchema,
 } from './nanosystemTypes';
 
-import { nanosystemApiClient } from '../../../lib/axios';
+import { nanosystemApiClient, calculationApiClient } from '../../../lib/axios';
 import type { PaginatedResponse } from './common/commonTypes';
 import { handleError } from '../../../lib/errorHandler';
 
@@ -30,8 +30,8 @@ export const fetchSeriesNanosystems = async (
           page,
           pageSize,
         },    
-        paramsSerializer: (params) => {
-          return new URLSearchParams(params).toString();
+        paramsSerializer: (params: Record<string, unknown>) => {
+          return new URLSearchParams(params as Record<string, string>).toString();
         },
       },
     );
@@ -54,8 +54,8 @@ export const fetchNanosystemMassGenerationParameters = async (
       '/nanosystem/get-nanosystem-mass-generation-parameters',
       {
         params: { ...query },    
-        paramsSerializer: (params) => {
-          return new URLSearchParams(params).toString();
+        paramsSerializer: (params: Record<string, unknown>) => {
+          return new URLSearchParams(params as Record<string, string>).toString();
         },
       },
     );
@@ -91,8 +91,8 @@ export const fetchNanosystemList = async (
           page,
           pageSize,
         },    
-        paramsSerializer: (params) => {
-          return new URLSearchParams(params).toString();
+        paramsSerializer: (params: Record<string, unknown>) => {
+          return new URLSearchParams(params as Record<string, string>).toString();
         },
       },
     );
@@ -110,12 +110,18 @@ export const runMassGeneration = async (
   options: MassGenerateNanoSystemOptions,
 ): Promise<string> => {
   try {
-    const response = await nanosystemApiClient.post<string>(
+    const response = await calculationApiClient.post<{ isSuccess: boolean; result: string; errors?: unknown[] }>(
       '/nanosystem/run-mass-generation', 
       options,
     );
 
-    return response.data;
+    // Extract result from ResultDto structure
+    if (response.data && typeof response.data === 'object' && 'result' in response.data) {
+      return response.data.result;
+    }
+    
+    // Fallback: if response is already a string (for backward compatibility)
+    return typeof response.data === 'string' ? response.data : String(response.data);
   } catch (error) {
     const appError = handleError(error as Error);
     throw appError;
@@ -173,7 +179,7 @@ export const fetchRadialAnalysisList = async (
       '/radial-analysis/get-radial-analysis-list',
       {
         params,
-        paramsSerializer: (params) => {
+        paramsSerializer: (params: Record<string, unknown>) => {
           return new URLSearchParams(params as Record<string, string>).toString();
         },
       },
