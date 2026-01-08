@@ -16,7 +16,7 @@ export function formatDate(date: string | Date): string {
 }
 
 // Format file size
-export function formatBytes(bytes: number, decimals = 2): string {
+export function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
 
   const k = 1024;
@@ -37,7 +37,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number,
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
+  let timeout: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
