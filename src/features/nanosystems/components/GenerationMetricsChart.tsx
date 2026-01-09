@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, type ChangeEvent } from 'react';
+import { useState, useMemo, type ChangeEvent } from 'react';
 import {
   LineChart,
   Line,
@@ -67,32 +67,31 @@ export const GenerationMetricsChart = ({ nanosystemId }: GenerationMetricsChartP
   const [selectedMetrics, setSelectedMetrics] = useState<Set<MetricKey>>(new Set(['insertionEfficiency', 'generationTimeMs']));
   const [indexRanges, setIndexRanges] = useState<IndexRange[]>([{ fromIndex: 0, toIndex: 0 }]);
 
-  useEffect(() => {
-    const loadMetrics = async () => {
-      setLoading(true);
-      try {
-        // Filter out empty ranges and validate ranges
-        const validRanges = indexRanges
-          .filter((range: IndexRange) => range.fromIndex !== undefined && range.toIndex !== undefined && range.fromIndex <= range.toIndex)
-          .map((range: IndexRange) => ({ fromIndex: range.fromIndex, toIndex: range.toIndex }));
-        
-        const query: GetGenerationMetricsQuery = {
-          nanosystemId,
-          particleIndexRanges: validRanges.length > 0 ? validRanges : undefined,
-        };
-        const data = await fetchGenerationMetrics(query);
-        setMetrics(data);
-      } catch (error) {
-        showError('Failed to load metrics', (error as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (nanosystemId) {
-      loadMetrics();
+  const loadMetrics = async () => {
+    if (!nanosystemId) {
+      showError('Error', 'Nanosystem ID is required');
+      return;
     }
-  }, [nanosystemId, indexRanges, showError]);
+
+    setLoading(true);
+    try {
+      // Filter out empty ranges and validate ranges
+      const validRanges = indexRanges
+        .filter((range: IndexRange) => range.fromIndex !== undefined && range.toIndex !== undefined && range.fromIndex <= range.toIndex)
+        .map((range: IndexRange) => ({ fromIndex: range.fromIndex, toIndex: range.toIndex }));
+      
+      const query: GetGenerationMetricsQuery = {
+        nanosystemId,
+        particleIndexRanges: validRanges.length > 0 ? validRanges : undefined,
+      };
+      const data = await fetchGenerationMetrics(query);
+      setMetrics(data);
+    } catch (error) {
+      showError('Failed to load metrics', (error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const chartData = useMemo(() => {
     return metrics.map((metric: GenerationMetrics) => {
@@ -139,7 +138,31 @@ export const GenerationMetricsChart = ({ nanosystemId }: GenerationMetricsChartP
     <div className="w-full space-y-4">
       {/* Controls */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-        <h3 className="text-lg font-semibold mb-4">Chart Controls</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Chart Controls</h3>
+          <button
+            onClick={loadMetrics}
+            disabled={loading || !nanosystemId}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+              </>
+            ) : (
+              <>
+                <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Load Metrics
+              </>
+            )}
+          </button>
+        </div>
         
         {/* Index Range Selection - Multiple Ranges */}
         <div className="mb-4">
