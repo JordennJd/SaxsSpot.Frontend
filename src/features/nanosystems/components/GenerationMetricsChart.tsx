@@ -20,20 +20,24 @@ interface GenerationMetricsChartProps {
 type MetricKey = 
   | 'totalAttempts'
   | 'positiveAttempts'
-  | 'insertionEfficiency'
   | 'generationTimeMs'
   | 'volume'
   | 'diameter'
   | 'particlesCheckedForIntersection'
   | 'outOfZoneAttempts'
-  | 'firstNodeIntersectionEfficiency'
+  | 'firstNodeIntersectionFindTimes'
   | 'averageNeighborsCheckedPerAttempt'
-  | 'diagonalDistanceCheckEfficiency'
-  | 'sidesDistanceCheckEfficiency'
-  | 'elementaryIntersectionNewTransformationEfficiency'
-  | 'elementaryIntersectionOldTransformationEfficiency'
-  | 'backRotateMatrixReusedEfficiency'
-  | 'satCheckEfficiency'
+  | 'isInterCenterDistanceMoreThenDiagonalCheckTimesTotal'
+  | 'isInterCenterDistanceMoreThenDiagonalCheckTimesPositive'
+  | 'isInterCenterDistanceLessThenSidesCheckTimesTotal'
+  | 'isInterCenterDistanceLessThenSidesCheckTimesPositive'
+  | 'elementaryIntersectCheckOnlyBordersNewTransformationTimesTotal'
+  | 'elementaryIntersectCheckOnlyBordersNewTransformationTimesPositive'
+  | 'elementaryIntersectCheckOnlyBordersOldTransformationTimesTotal'
+  | 'elementaryIntersectCheckOnlyBordersOldTransformationTimesPositive'
+  | 'backRotateMatrixReused'
+  | 'satCheckTimesTotal'
+  | 'satCheckTimesPositive'
   | 'averageParticlesCheckedPerAttempt'
   | 'outOfZoneAttemptsRatio'
   | 'inZoneAttempts';
@@ -41,20 +45,24 @@ type MetricKey =
 const METRIC_OPTIONS: { key: MetricKey; label: string; color: string }[] = [
   { key: 'totalAttempts', label: 'Total Attempts', color: '#8884d8' },
   { key: 'positiveAttempts', label: 'Positive Attempts', color: '#82ca9d' },
-  { key: 'insertionEfficiency', label: 'Insertion Efficiency', color: '#ffc658' },
   { key: 'generationTimeMs', label: 'Generation Time (ms)', color: '#ff7300' },
   { key: 'volume', label: 'Volume', color: '#00ff00' },
   { key: 'diameter', label: 'Diameter', color: '#0088fe' },
   { key: 'particlesCheckedForIntersection', label: 'Particles Checked For Intersection', color: '#ff00ff' },
   { key: 'outOfZoneAttempts', label: 'Out Of Zone Attempts', color: '#00ffff' },
-  { key: 'firstNodeIntersectionEfficiency', label: 'First Node Intersection Efficiency', color: '#ff0080' },
+  { key: 'firstNodeIntersectionFindTimes', label: 'First Node Intersection Find Times', color: '#ff0080' },
   { key: 'averageNeighborsCheckedPerAttempt', label: 'Avg Neighbors Checked', color: '#8000ff' },
-  { key: 'diagonalDistanceCheckEfficiency', label: 'Diagonal Distance Check Efficiency', color: '#ff8000' },
-  { key: 'sidesDistanceCheckEfficiency', label: 'Sides Distance Check Efficiency', color: '#008080' },
-  { key: 'elementaryIntersectionNewTransformationEfficiency', label: 'Elementary Intersection New Efficiency', color: '#808000' },
-  { key: 'elementaryIntersectionOldTransformationEfficiency', label: 'Elementary Intersection Old Efficiency', color: '#800080' },
-  { key: 'backRotateMatrixReusedEfficiency', label: 'Back Rotate Matrix Reused Efficiency', color: '#008000' },
-  { key: 'satCheckEfficiency', label: 'SAT Check Efficiency', color: '#804000' },
+  { key: 'isInterCenterDistanceMoreThenDiagonalCheckTimesTotal', label: 'Diagonal Distance Check Total', color: '#ff8000' },
+  { key: 'isInterCenterDistanceMoreThenDiagonalCheckTimesPositive', label: 'Diagonal Distance Check Positive', color: '#ff8040' },
+  { key: 'isInterCenterDistanceLessThenSidesCheckTimesTotal', label: 'Sides Distance Check Total', color: '#008080' },
+  { key: 'isInterCenterDistanceLessThenSidesCheckTimesPositive', label: 'Sides Distance Check Positive', color: '#0080c0' },
+  { key: 'elementaryIntersectCheckOnlyBordersNewTransformationTimesTotal', label: 'Elementary Intersection New Total', color: '#808000' },
+  { key: 'elementaryIntersectCheckOnlyBordersNewTransformationTimesPositive', label: 'Elementary Intersection New Positive', color: '#80c000' },
+  { key: 'elementaryIntersectCheckOnlyBordersOldTransformationTimesTotal', label: 'Elementary Intersection Old Total', color: '#800080' },
+  { key: 'elementaryIntersectCheckOnlyBordersOldTransformationTimesPositive', label: 'Elementary Intersection Old Positive', color: '#8000c0' },
+  { key: 'backRotateMatrixReused', label: 'Back Rotate Matrix Reused', color: '#008000' },
+  { key: 'satCheckTimesTotal', label: 'SAT Check Total', color: '#804000' },
+  { key: 'satCheckTimesPositive', label: 'SAT Check Positive', color: '#806000' },
   { key: 'averageParticlesCheckedPerAttempt', label: 'Avg Particles Checked Per Attempt', color: '#408080' },
   { key: 'outOfZoneAttemptsRatio', label: 'Out Of Zone Attempts Ratio', color: '#808040' },
   { key: 'inZoneAttempts', label: 'In Zone Attempts', color: '#408040' },
@@ -64,7 +72,7 @@ export const GenerationMetricsChart = ({ nanosystemId }: GenerationMetricsChartP
   const { showError } = useToast();
   const [metrics, setMetrics] = useState<GenerationMetrics[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedMetrics, setSelectedMetrics] = useState<Set<MetricKey>>(new Set(['insertionEfficiency', 'generationTimeMs']));
+  const [selectedMetrics, setSelectedMetrics] = useState<Set<MetricKey>>(new Set(['totalAttempts', 'positiveAttempts']));
   const [indexRanges, setIndexRanges] = useState<IndexRange[]>([{ fromIndex: 0, toIndex: 0 }]);
 
   const loadMetrics = async () => {
