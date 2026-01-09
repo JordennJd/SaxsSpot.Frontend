@@ -272,7 +272,7 @@ export const fetchGenerationMetrics = async (
       return [];
     }
 
-    return validatedData.result.data;
+    return validatedData.result;
   } catch (error) {
     const appError = handleError(error as Error);
     throw appError;

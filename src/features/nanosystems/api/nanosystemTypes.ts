@@ -172,7 +172,7 @@ export const GenerationMetricsSchema = z.object({
 
 export type GenerationMetrics = z.infer<typeof GenerationMetricsSchema>;
 
-export const ApiResponseGenerationMetricsSchema = ApiResponseListSchema(GenerationMetricsSchema);
+export const ApiResponseGenerationMetricsSchema = ApiResponseSchema(z.array(GenerationMetricsSchema));
 export type ApiResponseGenerationMetrics = z.infer<typeof ApiResponseGenerationMetricsSchema>;
 
 // Radial Analysis Types
