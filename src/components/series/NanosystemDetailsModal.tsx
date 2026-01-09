@@ -1,6 +1,7 @@
 import { Dialog } from '@headlessui/react';
 import { type NanosystemDto, type RadialAnalysisDto } from '../../features/nanosystems/api/nanosystemTypes';
 import type { CalculationDto } from '../../features/calculation/api/calculationTypes';
+import { GenerationMetricsChart } from '../../features/nanosystems/components/GenerationMetricsChart';
 import {
   XMarkIcon,
   CalculatorIcon,
@@ -245,6 +246,17 @@ export const NanosystemDetailsModal = ({
                     </div>
                 )}
               </div>
+
+              {/* Generation Metrics Chart Section */}
+              {nanosystem && (
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 mt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300 flex items-center gap-2">
+                    <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                    Generation Metrics
+                  </h3>
+                  <GenerationMetricsChart nanosystemId={nanosystem.id} />
+                </div>
+              )}
 
               {/* Radial Analyses Section */}
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">

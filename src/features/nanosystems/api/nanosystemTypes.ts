@@ -61,6 +61,7 @@ export const MassGenerateNanoSystemOptionsSchema = z.object({
   nanoSystemsKind: ParticleKindSchema,
   zoneCount: z.number().optional(),
   needAnalysis: z.boolean().optional(),
+  needMetrics: z.boolean().optional(),
   pointCounts: z.array(z.number()).optional(),
 });
 export type CommonParticleGenerationParameters = z.infer<typeof CommonParticleGenerationParametersSchema>;
@@ -128,6 +129,51 @@ export const ApiResponseListNanosystemDtoSchema = ApiResponseListSchema(Nanosyst
 export const NanosystemSeriesListApiResponseSchema = ApiResponseListSchema(NanosystemSeriesDtoSchema);
 export type NanosystemSeriesListApiResponse = z.infer<typeof NanosystemSeriesListApiResponseSchema>;
 export type ApiResponseListNanosystemDto = z.infer<typeof ApiResponseListNanosystemDtoSchema>;
+
+// Generation Metrics Types
+export const GenerationMetricsSchema = z.object({
+  id: z.string().uuid(),
+  nanosystemId: z.string().uuid(),
+  particleIndex: z.number(),
+  totalAttempts: z.number(),
+  positiveAttempts: z.number(),
+  totalChangePositionAttempts: z.number(),
+  generationTimeMs: z.number(),
+  volume: z.number(),
+  diameter: z.number(),
+  particlesCheckedForIntersection: z.number(),
+  outOfZoneAttempts: z.number(),
+  firstNodeIntersectionFindTimes: z.number(),
+  totalNeighborsNodesCheckedCount: z.number(),
+  isInterCenterDistanceMoreThenDiagonalCheckTimesPositive: z.number(),
+  isInterCenterDistanceMoreThenDiagonalCheckTimesTotal: z.number(),
+  isInterCenterDistanceLessThenSidesCheckTimesPositive: z.number(),
+  isInterCenterDistanceLessThenSidesCheckTimesTotal: z.number(),
+  elementaryIntersectCheckOnlyBordersNewTransformationTimesPositive: z.number(),
+  elementaryIntersectCheckOnlyBordersNewTransformationTimesTotal: z.number(),
+  elementaryIntersectCheckOnlyBordersOldTransformationTimesPositive: z.number(),
+  elementaryIntersectCheckOnlyBordersOldTransformationTimesTotal: z.number(),
+  backRotateMatrixReused: z.number(),
+  satCheckTimesPositive: z.number(),
+  satCheckTimesTotal: z.number(),
+  insertionEfficiency: z.number(),
+  firstNodeIntersectionEfficiency: z.number(),
+  averageNeighborsCheckedPerAttempt: z.number(),
+  diagonalDistanceCheckEfficiency: z.number(),
+  sidesDistanceCheckEfficiency: z.number(),
+  elementaryIntersectionNewTransformationEfficiency: z.number(),
+  elementaryIntersectionOldTransformationEfficiency: z.number(),
+  backRotateMatrixReusedEfficiency: z.number(),
+  satCheckEfficiency: z.number(),
+  averageParticlesCheckedPerAttempt: z.number(),
+  outOfZoneAttemptsRatio: z.number(),
+  inZoneAttempts: z.number(),
+});
+
+export type GenerationMetrics = z.infer<typeof GenerationMetricsSchema>;
+
+export const ApiResponseGenerationMetricsSchema = ApiResponseListSchema(GenerationMetricsSchema);
+export type ApiResponseGenerationMetrics = z.infer<typeof ApiResponseGenerationMetricsSchema>;
 
 // Radial Analysis Types
 const DateTimeSchema = z.string().refine(val => {

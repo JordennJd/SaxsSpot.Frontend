@@ -9,6 +9,9 @@ import {
   NanosystemSeriesListApiResponseSchema, ApiResponseListNanosystemDtoSchema, type ApiResponseListNanosystemDto,
   type RadialAnalysisApiResponse,
   RadialAnalysisApiResponseSchema,
+  type ApiResponseGenerationMetrics,
+  ApiResponseGenerationMetricsSchema,
+  type GenerationMetrics,
 } from './nanosystemTypes';
 
 import { nanosystemApiClient, calculationApiClient } from '../../../lib/axios';
@@ -237,5 +240,41 @@ export const cancelOperation = async (
     const appError = handleError(error as Error);
     // Throw an Error with the specific message so it can be caught and displayed
     throw new Error(appError.message);
+  }
+};
+
+export interface IndexRange {
+  fromIndex: number;
+  toIndex: number;
+}
+
+export interface GetGenerationMetricsQuery {
+  nanosystemId: string;
+  indexRanges?: IndexRange[];
+}
+
+export const fetchGenerationMetrics = async (
+  query: GetGenerationMetricsQuery,
+): Promise<GenerationMetrics[]> => {
+  try {
+    const response = await nanosystemApiClient.post<ApiResponseGenerationMetrics>(
+      '/nanosystem/get-generation-metrics',
+      {
+        nanosystemId: query.nanosystemId,
+        indexRanges: query.indexRanges,
+      },
+    );
+
+    // Validate response data with Zod
+    const validatedData = ApiResponseGenerationMetricsSchema.parse(response.data);
+
+    if (!validatedData.isSuccess || !validatedData.result) {
+      return [];
+    }
+
+    return validatedData.result;
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
   }
 };
