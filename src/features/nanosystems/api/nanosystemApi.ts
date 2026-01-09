@@ -2,6 +2,7 @@
 import {
   type ApiResponseMassGenerateNanoSystemOptions,
   ApiResponseMassGenerateNanoSystemOptionsSchema,
+  type CommonParticleGenerationParameters,
   type GetNanosystemGenerationOptionsQuery,
   type MassGenerateNanoSystemOptions,
   type NanosystemSeriesListApiResponse,
@@ -63,10 +64,16 @@ export const fetchNanosystemMassGenerationParameters = async (
     // Validate response data with Zod
     const validatedOptions = ApiResponseMassGenerateNanoSystemOptionsSchema.parse(response.data);
     
+    // Add pointCount to each option from pointCounts array (if pointCounts is provided)
+    const optionsWithPointCount = validatedOptions.result.options.map((option: CommonParticleGenerationParameters, index: number) => ({
+      ...option,
+      pointCount: response.data.result.pointCounts?.[index] ?? undefined,
+    }));
+    
     return {
       isSuccess: validatedOptions.isSuccess,
       result: {
-        options: validatedOptions.result.options,
+        options: optionsWithPointCount,
         nanoSystemsKind: response.data.result.nanoSystemsKind,
       },
       errors: validatedOptions.errors,

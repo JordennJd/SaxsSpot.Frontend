@@ -49,17 +49,19 @@ export const CommonParticleGenerationParametersSchema = z.object({
   count: z.number(),
   numericalConcentration: z.number().nullable(),
   globalSize: z.number().nullable(),
-  minSize: z.number(),
-  maxSize: z.number(),
   theta: z.number(),
   k: z.number(),
   excess: z.number(),
   epsilon: z.number().nullable(),
+  pointCount: z.number().optional(),
 });
 
 export const MassGenerateNanoSystemOptionsSchema = z.object({
   options: z.array(CommonParticleGenerationParametersSchema),
   nanoSystemsKind: ParticleKindSchema,
+  zoneCount: z.number().optional(),
+  needAnalysis: z.boolean().optional(),
+  pointCounts: z.array(z.number()).optional(),
 });
 export type CommonParticleGenerationParameters = z.infer<typeof CommonParticleGenerationParametersSchema>;
 export const ApiResponseMassGenerateNanoSystemOptionsSchema = ApiResponseSchema(MassGenerateNanoSystemOptionsSchema);
@@ -79,14 +81,12 @@ export const GetNanosystemGenerationOptionsQuerySchema = z.object({
   numericalConcentrationTo: z.number().nullable(),
   excessFrom: z.number().nullable(),
   excessTo: z.number().nullable(),
-  maxParticleSizeFrom: z.number(),
-  maxParticleSizeTo: z.number(),
-  minParticleSizeFrom: z.number(),
-  minParticleSizeTo: z.number(),
   kFrom: z.number(),
   kTo: z.number(),
   thetaFrom: z.number(),
   thetaTo: z.number(),
+  pointCountFrom: z.number().int().optional(),
+  pointCountTo: z.number().int().optional(),
 });
 
 export type GetNanosystemGenerationOptionsQuery = z.infer<typeof GetNanosystemGenerationOptionsQuerySchema>;
