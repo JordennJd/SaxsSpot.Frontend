@@ -250,7 +250,7 @@ export interface IndexRange {
 
 export interface GetGenerationMetricsQuery {
   nanosystemId: string;
-  indexRanges?: IndexRange[];
+  particleIndexRanges?: IndexRange[];
 }
 
 export const fetchGenerationMetrics = async (
@@ -261,7 +261,7 @@ export const fetchGenerationMetrics = async (
       '/nanosystem/get-generation-metrics',
       {
         nanosystemId: query.nanosystemId,
-        indexRanges: query.indexRanges,
+        particleIndexRanges: query.particleIndexRanges,
       },
     );
 
@@ -272,7 +272,7 @@ export const fetchGenerationMetrics = async (
       return [];
     }
 
-    return validatedData.result;
+    return validatedData.result.data;
   } catch (error) {
     const appError = handleError(error as Error);
     throw appError;

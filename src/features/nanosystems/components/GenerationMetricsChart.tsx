@@ -78,7 +78,7 @@ export const GenerationMetricsChart = ({ nanosystemId }: GenerationMetricsChartP
         
         const query: GetGenerationMetricsQuery = {
           nanosystemId,
-          indexRanges: validRanges.length > 0 ? validRanges : undefined,
+          particleIndexRanges: validRanges.length > 0 ? validRanges : undefined,
         };
         const data = await fetchGenerationMetrics(query);
         setMetrics(data);
