@@ -84,3 +84,21 @@ export const PlotAnalyse = async (request: PlotAnalyseRequest): Promise<string> 
 
     return response.data.result;
 };
+
+export const PlotAnalyseAverage = async (request: PlotAnalyseRequest): Promise<string> => {
+    const params = new URLSearchParams();
+    request.RadialAnalysisIds.forEach((id) => params.append('RadialAnalysisIds', id));
+    params.set('ChartTitle', request.ChartTitle);
+    params.set('XAxis', request.XAxis);
+    params.set('YAxis', request.YAxis);
+    params.set('ScaleMethodsX', String(request.ScaleMethodsX));
+    params.set('ScaleMethodsY', String(request.ScaleMethodsY));
+
+    const response = await calculationApiClient
+        .get<ApiResponse<string>>(
+            '/calculation/plot-analyse-average',
+            { params },
+        );
+
+    return response.data.result;
+};

@@ -1,11 +1,11 @@
-import {useState} from 'react';
-import {useParams} from 'react-router-dom';
+import {useState, useCallback} from 'react';
+import {useParams, useNavigate} from 'react-router-dom';
 import {useToastContext} from '../contexts/ToastContext';
 
 import {type ApiResponseListNanosystemDto, type NanosystemDto, type RadialAnalysisDto} from '../features/nanosystems/api/nanosystemTypes';
-import type {CalculationDto, RunCalculationRequest} from '../features/calculation/api/calculationTypes.ts';
+import type {CalculationDto, PlotAnalyseRequest, RunCalculationRequest} from '../features/calculation/api/calculationTypes.ts';
 import {RunCalculation, RunSeriesCalculation} from '../features/calculation/api/calculationApi.ts';
-import {runRadialAnalysis, type RunRadialAnalysisRequest} from '../features/nanosystems/api/nanosystemApi.ts';
+import {runRadialAnalysis, fetchNanosystemList, fetchRadialAnalysisList, type RunRadialAnalysisRequest} from '../features/nanosystems/api/nanosystemApi.ts';
 import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
 import {RadialAnalysisDetailsCard} from '../features/nanosystems/components/RadialAnalysisCard.tsx';
 import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader, RadialAnalysisModal} from '../components/series';
@@ -14,6 +14,7 @@ import {downloadNanosystem} from '../utils/seriesUtils';
 
 export const SeriesDetailPage = () => {
   const { guid: seriesId = '' } = useParams<{ guid: string }>();
+  const navigate = useNavigate();
   const { showSuccess, showError } = useToastContext();
   const [page, setPage] = useState(1);
   const [calculationPage] = useState(1);
@@ -29,6 +30,7 @@ export const SeriesDetailPage = () => {
   const [isCalculateModalOpen, setIsCalculateModalOpen] = useState(false);
   const [isSeriesCalculateModalOpen, setIsSeriesCalculateModalOpen] = useState(false);
   const [isRadialAnalysisModalOpen, setIsRadialAnalysisModalOpen] = useState(false);
+  const [isSeriesAverageChartLoading, setIsSeriesAverageChartLoading] = useState(false);
 
   // Calculation parameters
   const [calculationParams, setCalculationParams] = useState<RunCalculationRequest>({
@@ -207,6 +209,56 @@ export const SeriesDetailPage = () => {
     }
   };
 
+  const handleViewChartSelected = useCallback((analysisIds: string[]) => {
+    const request: PlotAnalyseRequest = {
+      RadialAnalysisIds: analysisIds,
+      ChartTitle: 'Radial Analysis',
+      XAxis: 'Index',
+      YAxis: 'Value',
+      ScaleMethodsX: 0,
+      ScaleMethodsY: 0,
+    };
+    navigate(`/radial-analyses/${analysisIds[0]}/chart`, { state: { request } });
+  }, [navigate]);
+
+  const handleViewSeriesAverageChart = useCallback(async () => {
+    setIsSeriesAverageChartLoading(true);
+    try {
+      const res = await fetchNanosystemList(`seriesId=${seriesId}`, 1, 500);
+      const nanosystems = res.result.data;
+      if (nanosystems.length === 0) {
+        showError('No systems', 'This series has no nanosystems.');
+        return;
+      }
+      const firstAnalysisIds = await Promise.all(
+        nanosystems.map((ns) =>
+          fetchRadialAnalysisList(ns.id, 1, 1, undefined, 'startDate').then(
+            (r) => r.result.data[0]?.id,
+          ),
+        ),
+      );
+      const ids = firstAnalysisIds.filter((id): id is string => id != null);
+      if (ids.length === 0) {
+        showError('No analyses', 'No radial analyses found for systems in this series. Run radial analysis for at least one system.');
+        return;
+      }
+      const request: PlotAnalyseRequest = {
+        RadialAnalysisIds: ids,
+        ChartTitle: 'Series average (first analyses)',
+        XAxis: 'Index',
+        YAxis: 'Value',
+        ScaleMethodsX: 0,
+        ScaleMethodsY: 0,
+      };
+      navigate(`/radial-analyses/${ids[0]}/chart`, { state: { request, isAverage: true } });
+    } catch (error) {
+      console.error('Error loading series average chart:', error);
+      showError('Chart error', 'Failed to load first analyses for the series.');
+    } finally {
+      setIsSeriesAverageChartLoading(false);
+    }
+  }, [seriesId, navigate, showError]);
+
   // Loading and error states
   if (isSeriesLoading) {
     return <div className="text-center py-8">Loading series data...</div>;
@@ -263,6 +315,42 @@ export const SeriesDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Series average chart: one graph = average of first analysis per system */}
+      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800 p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Chart: average of first analyses
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              Build one chart with the average value across the first radial analysis of each system in this series.
+            </p>
+          </div>
+          <div className="flex-shrink-0">
+            <button
+              type="button"
+              disabled={isSeriesAverageChartLoading}
+              onClick={handleViewSeriesAverageChart}
+              className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-700 text-white rounded-xl shadow-lg hover:from-purple-700 hover:to-pink-800 focus:outline-none focus:ring-4 focus:ring-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 font-semibold text-lg hover:shadow-2xl transform hover:scale-105 active:scale-95 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative z-10 flex items-center gap-3">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <div className="text-left">
+                  <div className="font-bold">
+                    {isSeriesAverageChartLoading ? 'Loading…' : 'View series average chart'}
+                  </div>
+                  <div className="text-xs opacity-90 font-normal">First analysis per system, averaged</div>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <NanosystemsTable
         nanosystems={nanosystems as ApiResponseListNanosystemDto}
         isLoading={isNanosystemsLoading}
@@ -288,6 +376,7 @@ export const SeriesDetailPage = () => {
         isRadialAnalysesLoading={isRadialAnalysesLoading}
         isRadialAnalysesError={isRadialAnalysesError}
         onRadialAnalysisClick={openRadialAnalysisDetails}
+        onViewChartSelected={handleViewChartSelected}
       />
 
       <CalculationModal

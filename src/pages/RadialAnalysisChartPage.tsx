@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { PlotAnalyse } from '../features/calculation/api/calculationApi';
+import { PlotAnalyse, PlotAnalyseAverage } from '../features/calculation/api/calculationApi';
 import type { PlotAnalyseRequest } from '../features/calculation/api/calculationTypes';
 
 export const RadialAnalysisChartPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
+    const isAverage = (location.state as { isAverage?: boolean } | null)?.isAverage ?? false;
     const [chart, setChart] = useState<string>('');
     const [request] = useState<PlotAnalyseRequest>(
         location.state?.request || {
@@ -26,7 +27,9 @@ export const RadialAnalysisChartPage = () => {
         const fetchChart = async () => {
             setIsLoading(true);
             try {
-                const result = await PlotAnalyse(request);
+                const result = isAverage
+                    ? await PlotAnalyseAverage(request)
+                    : await PlotAnalyse(request);
                 const fullHtml = `
           <!DOCTYPE html>
           <html>
@@ -95,18 +98,22 @@ export const RadialAnalysisChartPage = () => {
         };
 
         fetchChart();
-    }, [request]);
+    }, [request, isAverage]);
 
     return (
         <div className="h-screen w-full flex flex-col bg-gray-50">
             <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Radial Analysis Chart</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                        {isAverage ? 'Series average (first analyses)' : 'Radial Analysis Chart'}
+                    </h1>
                     <p className="text-sm text-gray-500 mt-1">
-                    {request.RadialAnalysisIds.length === 1
-                        ? `Analysis ID: ${request.RadialAnalysisIds[0]}`
-                        : `${request.RadialAnalysisIds.length} analyses`}
-                </p>
+                        {isAverage
+                            ? `Average of ${request.RadialAnalysisIds.length} first analyses`
+                            : request.RadialAnalysisIds.length === 1
+                                ? `Analysis ID: ${request.RadialAnalysisIds[0]}`
+                                : `${request.RadialAnalysisIds.length} analyses`}
+                    </p>
                 </div>
                 <button
                     onClick={() => navigate(-1)}
