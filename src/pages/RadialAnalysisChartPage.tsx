@@ -10,7 +10,7 @@ export const RadialAnalysisChartPage = () => {
     const [chart, setChart] = useState<string>('');
     const [request] = useState<PlotAnalyseRequest>(
         location.state?.request || {
-            RadialAnalysisId: id || '',
+            RadialAnalysisIds: id ? [id] : [],
             ChartTitle: 'Radial Analysis',
             XAxis: 'Index',
             YAxis: 'Value',
@@ -21,6 +21,8 @@ export const RadialAnalysisChartPage = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        if (request.RadialAnalysisIds.length === 0) return;
+
         const fetchChart = async () => {
             setIsLoading(true);
             try {
@@ -100,7 +102,11 @@ export const RadialAnalysisChartPage = () => {
             <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Radial Analysis Chart</h1>
-                    <p className="text-sm text-gray-500 mt-1">Analysis ID: {id}</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                    {request.RadialAnalysisIds.length === 1
+                        ? `Analysis ID: ${request.RadialAnalysisIds[0]}`
+                        : `${request.RadialAnalysisIds.length} analyses`}
+                </p>
                 </div>
                 <button
                     onClick={() => navigate(-1)}
@@ -124,6 +130,12 @@ export const RadialAnalysisChartPage = () => {
                         className="w-full h-full border-0"
                         title="Radial Analysis Chart"
                     />
+                ) : request.RadialAnalysisIds.length === 0 ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center text-gray-500">
+                            <p>Select at least one radial analysis to display the chart</p>
+                        </div>
+                    </div>
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-center text-gray-500">

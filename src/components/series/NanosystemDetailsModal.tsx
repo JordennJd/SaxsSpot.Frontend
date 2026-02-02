@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { Dialog } from '@headlessui/react';
 import { type NanosystemDto, type RadialAnalysisDto } from '../../features/nanosystems/api/nanosystemTypes';
 import type { CalculationDto } from '../../features/calculation/api/calculationTypes';
@@ -12,6 +13,7 @@ import {
   ArrowsRightLeftIcon,
   BeakerIcon,
   ChartBarIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 
 interface DetailItemProps {
@@ -35,6 +37,7 @@ interface NanosystemDetailsModalProps {
   isRadialAnalysesLoading: boolean;
   isRadialAnalysesError?: boolean;
   onRadialAnalysisClick: (analysis: RadialAnalysisDto) => void;
+  onViewChartSelected?: (analysisIds: string[]) => void;
 }
 
 const DetailItem = ({ label, value, icon: Icon }: DetailItemProps) => (
@@ -64,7 +67,30 @@ export const NanosystemDetailsModal = ({
                                          isRadialAnalysesLoading,
                                          isRadialAnalysesError,
                                          onRadialAnalysisClick,
+                                         onViewChartSelected,
                                        }: NanosystemDetailsModalProps) => {
+  const [selectedAnalysisIds, setSelectedAnalysisIds] = useState<Set<string>>(new Set());
+
+  const toggleAnalysisSelection = useCallback((e: React.MouseEvent, analysisId: string) => {
+    e.stopPropagation();
+    setSelectedAnalysisIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(analysisId)) next.delete(analysisId);
+      else next.add(analysisId);
+      return next;
+    });
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setSelectedAnalysisIds(new Set());
+    onClose();
+  }, [onClose]);
+
+  const handleViewChartSelected = useCallback(() => {
+    const ids = Array.from(selectedAnalysisIds);
+    if (ids.length > 0 && onViewChartSelected) onViewChartSelected(ids);
+  }, [selectedAnalysisIds, onViewChartSelected]);
+
   if (!nanosystem) return null;
 
   // Группируем данные для лучшей организации
@@ -101,7 +127,7 @@ export const NanosystemDetailsModal = ({
   ];
 
   return (
-      <Dialog open={isOpen} onClose={onClose} style={{ zIndex: 99999 }}>
+      <Dialog open={isOpen} onClose={handleClose} style={{ zIndex: 99999 }}>
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" style={{ zIndex: 99998 }} aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 99999 }}>
           <Dialog.Panel className="w-full max-w-4xl rounded-xl bg-white shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
@@ -118,7 +144,7 @@ export const NanosystemDetailsModal = ({
                 </p>
               </div>
               <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
               >
                 <XMarkIcon className="h-6 w-6" />
@@ -275,23 +301,33 @@ export const NanosystemDetailsModal = ({
                         {radialAnalyses?.map((analysis) => (
                             <li
                                 key={analysis.id}
-                                className="p-3 bg-white rounded-lg border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
+                                className="p-3 bg-white rounded-lg border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer flex items-start gap-3"
                                 onClick={() => onRadialAnalysisClick(analysis)}
                             >
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <ClockIcon className="h-4 w-4 text-gray-400" />
-                                    <span className="text-sm font-medium text-gray-700">{analysis.startDate}</span>
+                              <input
+                                  type="checkbox"
+                                  checked={selectedAnalysisIds.has(analysis.id)}
+                                  onChange={() => {}}
+                                  onClick={(e) => toggleAnalysisSelection(e, analysis.id)}
+                                  className="mt-1 h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                                  aria-label={`Select analysis ${analysis.id}`}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex justify-between items-start">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <ClockIcon className="h-4 w-4 text-gray-400" />
+                                      <span className="text-sm font-medium text-gray-700">{analysis.startDate}</span>
+                                    </div>
+                                    <p className="text-xs font-mono text-purple-600 mb-1 truncate">{analysis.id}</p>
+                                    <p className="text-xs text-gray-500">
+                                      Points: {analysis.pointCount}, Layers: {analysis.layerCount}
+                                    </p>
                                   </div>
-                                  <p className="text-xs font-mono text-purple-600 mb-1">{analysis.id}</p>
-                                  <p className="text-xs text-gray-500">
-                                    Points: {analysis.pointCount}, Layers: {analysis.layerCount}
-                                  </p>
+                                  <span className="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full bg-purple-100 text-purple-800 shrink-0">
+                                    Analysis
+                                  </span>
                                 </div>
-                                <span className="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full bg-purple-100 text-purple-800">
-                            Analysis
-                          </span>
                               </div>
                             </li>
                         ))}
@@ -302,14 +338,26 @@ export const NanosystemDetailsModal = ({
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center rounded-b-xl">
-              <button
-                  onClick={onDownload}
-                  className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
-              >
-                <CubeIcon className="h-5 w-5" />
-                Download
-              </button>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-wrap justify-between items-center gap-3 rounded-b-xl">
+              <div className="flex flex-wrap gap-3">
+                <button
+                    onClick={onDownload}
+                    className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                >
+                  <CubeIcon className="h-5 w-5" />
+                  Download
+                </button>
+                {onViewChartSelected && (
+                    <button
+                        onClick={handleViewChartSelected}
+                        disabled={selectedAnalysisIds.size === 0}
+                        className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Squares2X2Icon className="h-5 w-5" />
+                      View chart ({selectedAnalysisIds.size} selected)
+                    </button>
+                )}
+              </div>
               <div className="flex space-x-3">
                 <button
                     onClick={onCalculate}
@@ -326,7 +374,7 @@ export const NanosystemDetailsModal = ({
                   Analyse
                 </button>
                 <button
-                    onClick={onClose}
+                    onClick={handleClose}
                     className="px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all shadow-md hover:shadow-lg"
                 >
                   Close

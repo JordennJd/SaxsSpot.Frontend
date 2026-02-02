@@ -66,7 +66,7 @@ export const PlotChartRequestSchema = z.object({
 });
 
 export const PlotAnalyseRequestSchema = z.object({
-    RadialAnalysisId: z.string().uuid(),
+    RadialAnalysisIds: z.array(z.string().uuid()).min(1),
     ChartTitle: z.string(),
     XAxis: z.string(),
     YAxis: z.string(),

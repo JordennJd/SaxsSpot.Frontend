@@ -34,7 +34,7 @@ export const RadialAnalysisDetailsCard = ({
 
     const handleViewChart = () => {
         const request: PlotAnalyseRequest = {
-            RadialAnalysisId: analysis.id,
+            RadialAnalysisIds: [analysis.id],
             ChartTitle: 'Radial Analysis',
             XAxis: 'Index',
             YAxis: 'Value',
