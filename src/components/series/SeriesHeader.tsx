@@ -37,7 +37,7 @@ export const SeriesHeader = ({ series }: SeriesHeaderProps) => (
       />
       <ParameterBlock
         title="Global Size"
-        value={`${series.globalSizeFrom.toFixed(2)} - ${series.globalSizeTo.toFixed(2)} nm`}
+        value={`${series.globalSizeFrom} - ${series.globalSizeTo} nm`}
         icon="📏"
       />
       <ParameterBlock
@@ -47,22 +47,22 @@ export const SeriesHeader = ({ series }: SeriesHeaderProps) => (
       />
       <ParameterBlock
         title="Particle Size"
-        value={`${series.minParticleSizeFrom.toFixed(2)} - ${series.maxParticleSizeTo.toFixed(2)} nm`}
+        value={`${series.minParticleSizeFrom} - ${series.maxParticleSizeTo} nm`}
         icon="🔬"
       />
       <ParameterBlock
         title="Excess"
-        value={series.excessFrom ? `${series.excessFrom.toFixed(2)} - ${series.excessTo?.toFixed(2)}` : 'N/A'}
+        value={series.excessFrom ? `${series.excessFrom} - ${series.excessTo}` : 'N/A'}
         icon="⚖️"
       />
       <ParameterBlock
         title="K Parameter"
-        value={`${series.kFrom.toFixed(2)} - ${series.kTo.toFixed(2)}`}
+        value={`${series.kFrom} - ${series.kTo}`}
         icon="𝛋"
       />
       <ParameterBlock
         title="Theta"
-        value={`${series.thetaFrom.toFixed(1)} - ${series.thetaTo.toFixed(1)}`}
+        value={`${series.thetaFrom} - ${series.thetaTo}`}
         icon="∠"
       />
     </div>

@@ -74,7 +74,7 @@ export const NanosystemsTable = ({
                   {system.particleCount.toLocaleString()}
                 </td>
                 <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {system.globalSize.toFixed(2)} nm
+                  {system.globalSize} nm
                 </td>
                 <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {system.numericalConcentration}
@@ -121,7 +121,7 @@ export const NanosystemsTable = ({
               </div>
               <div>
                 <span className="text-gray-500">Size:</span>
-                <span className="ml-1 font-medium text-gray-900">{system.globalSize.toFixed(2)} nm</span>
+                <span className="ml-1 font-medium text-gray-900">{system.globalSize} nm</span>
               </div>
               <div>
                 <span className="text-gray-500">Concentration:</span>

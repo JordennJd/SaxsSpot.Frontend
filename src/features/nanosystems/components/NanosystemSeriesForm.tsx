@@ -42,14 +42,12 @@ export const NanosystemSeriesForm = () => {
       numericalConcentrationTo: 0.2,
       excessFrom: 1,
       excessTo: 1.1,
-      maxParticleSizeFrom: 3,
-      maxParticleSizeTo: 3,
-      minParticleSizeFrom: 1,
-      minParticleSizeTo: 1,
       kFrom: 2,
       kTo: 2,
       thetaFrom: 3,
-      thetaTo: 3
+      thetaTo: 3,
+      pointCountFrom: 5000000,
+      pointCountTo: 5000000
     }
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,6 +55,9 @@ export const NanosystemSeriesForm = () => {
   const particleKind = watch("particleKind");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationOptions, setGenerationOptions] = useState<MassGenerateNanoSystemOptions | null>(null);
+  const [zoneCount, setZoneCount] = useState<number>(20);
+  const [needAnalysis, setNeedAnalysis] = useState<boolean>(true);
+  const [needMetrics, setNeedMetrics] = useState<boolean>(false);
 
   const onSubmit = async (data: GetNanosystemGenerationOptionsQuery) => {
     try{
@@ -75,7 +76,12 @@ export const NanosystemSeriesForm = () => {
 
     try {
       setIsGenerating(true);
-      const runResult = await runMassGeneration(generationOptions)
+      const runResult = await runMassGeneration({
+        ...generationOptions,
+        zoneCount,
+        needAnalysis,
+        needMetrics
+      })
       showSuccess(
           'Generation Started',
           `Nanosystem generation job has been queued successfully with ID: ${runResult}`,
@@ -187,53 +193,6 @@ export const NanosystemSeriesForm = () => {
                         type="number"
                         {...register("particleCountTo", { valueAsNumber: true })}
                         error={getError("particleCountTo")}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Size Parameters */}
-              <div className="md:col-span-2">
-                <SectionTitle icon={ArrowsRightLeftIcon}>Size Parameters</SectionTitle>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
-                  <div>
-                    <Label htmlFor="maxParticleSizeFrom">Max Size From</Label>
-                    <Input
-                        id="maxParticleSizeFrom"
-                        type="number"
-                        step="any"
-                        {...register("maxParticleSizeFrom", { valueAsNumber: true })}
-                        error={getError("maxParticleSizeFrom")}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="MaxParticleSizeTo">Max Size To</Label>
-                    <Input
-                        id="maxParticleSizeTo"
-                        type="number"
-                        step="any"
-                        {...register("maxParticleSizeTo", { valueAsNumber: true })}
-                        error={getError("maxParticleSizeTo")}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="minParticleSizeFrom">Min Size From</Label>
-                    <Input
-                        id="minParticleSizeFrom"
-                        type="number"
-                        step="any"
-                        {...register("minParticleSizeFrom", { valueAsNumber: true })}
-                        error={getError("minParticleSizeFrom")}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="MinParticleSizeTo">Min Size To</Label>
-                    <Input
-                        id="minParticleSizeTo"
-                        type="number"
-                        step="any"
-                        {...register("minParticleSizeTo", { valueAsNumber: true })}
-                        error={getError("minParticleSizeTo")}
                     />
                   </div>
                 </div>
@@ -418,6 +377,62 @@ export const NanosystemSeriesForm = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Analysis Parameters */}
+              <div className="md:col-span-2">
+                <SectionTitle icon={VariableIcon}>Analysis Parameters</SectionTitle>
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                  <div>
+                    <Label htmlFor="zoneCount">Zone Count</Label>
+                    <Input
+                        id="zoneCount"
+                        type="number"
+                        value={zoneCount}
+                        onChange={(e) => setZoneCount(Number(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="pointCountFrom">Point Count From</Label>
+                    <Input
+                        id="pointCountFrom"
+                        type="number"
+                        {...register("pointCountFrom", { valueAsNumber: true })}
+                        error={getError("pointCountFrom")}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="pointCountTo">Point Count To</Label>
+                    <Input
+                        id="pointCountTo"
+                        type="number"
+                        {...register("pointCountTo", { valueAsNumber: true })}
+                        error={getError("pointCountTo")}
+                    />
+                  </div>
+                  <div className="flex items-center">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                          type="checkbox"
+                          checked={needAnalysis}
+                          onChange={(e) => setNeedAnalysis(e.target.checked)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Need Analysis</span>
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                          type="checkbox"
+                          checked={needMetrics}
+                          onChange={(e) => setNeedMetrics(e.target.checked)}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Need Metrics</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -473,24 +488,6 @@ export const NanosystemSeriesForm = () => {
                                     type="number"
                                     value={option.count}
                                     onChange={(e: any) => updateOptionField(index, 'count', Number(e.target.value))}
-                                />
-                              </div>
-                              <div>
-                                <Label>Min Size</Label>
-                                <Input
-                                    type="number"
-                                    step="any"
-                                    value={option.minSize}
-                                    onChange={(e) => updateOptionField(index, 'minSize', Number(e.target.value))}
-                                />
-                              </div>
-                              <div>
-                                <Label>Max Size</Label>
-                                <Input
-                                    type="number"
-                                    step="any"
-                                    value={option.maxSize}
-                                    onChange={(e) => updateOptionField(index, 'maxSize', Number(e.target.value))}
                                 />
                               </div>
                               {particleKind !== 0 && (

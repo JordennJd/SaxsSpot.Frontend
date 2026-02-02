@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { Dialog } from '@headlessui/react';
 import { type NanosystemDto, type RadialAnalysisDto } from '../../features/nanosystems/api/nanosystemTypes';
 import type { CalculationDto } from '../../features/calculation/api/calculationTypes';
+import { GenerationMetricsChart } from '../../features/nanosystems/components/GenerationMetricsChart';
 import {
   XMarkIcon,
   CalculatorIcon,
@@ -103,9 +104,9 @@ export const NanosystemDetailsModal = ({
 
   const sizeInfo = [
     { label: 'Particle Count', value: nanosystem.particleCount.toLocaleString(), icon: HashtagIcon },
-    { label: 'Global Size', value: `${nanosystem.globalSize.toFixed(2)} nm`, icon: ScaleIcon },
-    { label: 'Max Particle Size', value: `${nanosystem.maxParticleSize.toFixed(2)} nm`, icon: ArrowsRightLeftIcon },
-    { label: 'Min Particle Size', value: `${nanosystem.minParticleSize.toFixed(2)} nm`, icon: ArrowsRightLeftIcon },
+    { label: 'Global Size', value: `${nanosystem.globalSize} nm`, icon: ScaleIcon },
+    { label: 'Max Particle Size', value: `${nanosystem.maxParticleSize} nm`, icon: ArrowsRightLeftIcon },
+    { label: 'Min Particle Size', value: `${nanosystem.minParticleSize} nm`, icon: ArrowsRightLeftIcon },
   ];
 
   const generationInfo = [
@@ -115,9 +116,9 @@ export const NanosystemDetailsModal = ({
   ];
 
   const parametersInfo = [
-    { label: 'Excess', value: nanosystem.excess.toFixed(2), icon: ScaleIcon },
-    { label: 'K Parameter', value: nanosystem.k.toFixed(2), icon: ScaleIcon },
-    { label: 'Theta', value: nanosystem.theta.toFixed(1), icon: ScaleIcon },
+    { label: 'Excess', value: nanosystem.excess.toString(), icon: ScaleIcon },
+    { label: 'K Parameter', value: nanosystem.k.toString(), icon: ScaleIcon },
+    { label: 'Theta', value: nanosystem.theta.toString(), icon: ScaleIcon },
   ];
 
   const timeInfo = [
@@ -271,6 +272,17 @@ export const NanosystemDetailsModal = ({
                     </div>
                 )}
               </div>
+
+              {/* Generation Metrics Chart Section */}
+              {nanosystem && (
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 mt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300 flex items-center gap-2">
+                    <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                    Generation Metrics
+                  </h3>
+                  <GenerationMetricsChart nanosystemId={nanosystem.id} />
+                </div>
+              )}
 
               {/* Radial Analyses Section */}
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">

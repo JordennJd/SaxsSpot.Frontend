@@ -102,7 +102,7 @@ export const SeriesDetailPage = () => {
 
   const openCalculateModal = (seriesId: string | null = null) => {
     if (selectedNanosystem || seriesId) {
-      setCalculationParams(prev => ({
+      setCalculationParams((prev: RunCalculationRequest) => ({
         ...prev,
         systemId: seriesId ?? selectedNanosystem!.id,
       }));
@@ -122,7 +122,7 @@ export const SeriesDetailPage = () => {
 
   const openRadialAnalysisModal = () => {
     if (selectedNanosystem) {
-      setRadialAnalysisParams(prev => ({
+      setRadialAnalysisParams((prev: RunRadialAnalysisRequest) => ({
         ...prev,
         nanosystemId: selectedNanosystem.id,
       }));
@@ -154,7 +154,7 @@ export const SeriesDetailPage = () => {
   };
 
   const handleParamChange = (path: string, value: unknown) => {
-    setCalculationParams(prev => {
+    setCalculationParams((prev: RunCalculationRequest) => {
       const keys = path.split('.');
       const newParams = { ...prev };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -170,7 +170,7 @@ export const SeriesDetailPage = () => {
   };
 
   const handleRadialAnalysisParamChange = (path: string, value: unknown) => {
-    setRadialAnalysisParams(prev => {
+    setRadialAnalysisParams((prev: RunRadialAnalysisRequest) => {
       const keys = path.split('.');
       const newParams = { ...prev };
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -271,6 +271,7 @@ export const SeriesDetailPage = () => {
         pageSize={pageSize}
         onPageChange={setPage}
       />
+
 
       <NanosystemDetailsModal
         nanosystem={selectedNanosystem}

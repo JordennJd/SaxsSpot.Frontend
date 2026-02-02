@@ -49,17 +49,20 @@ export const CommonParticleGenerationParametersSchema = z.object({
   count: z.number(),
   numericalConcentration: z.number().nullable(),
   globalSize: z.number().nullable(),
-  minSize: z.number(),
-  maxSize: z.number(),
   theta: z.number(),
   k: z.number(),
   excess: z.number(),
   epsilon: z.number().nullable(),
+  pointCount: z.number().optional(),
 });
 
 export const MassGenerateNanoSystemOptionsSchema = z.object({
   options: z.array(CommonParticleGenerationParametersSchema),
   nanoSystemsKind: ParticleKindSchema,
+  zoneCount: z.number().optional(),
+  needAnalysis: z.boolean().optional(),
+  needMetrics: z.boolean().optional(),
+  pointCounts: z.array(z.number()).optional(),
 });
 export type CommonParticleGenerationParameters = z.infer<typeof CommonParticleGenerationParametersSchema>;
 export const ApiResponseMassGenerateNanoSystemOptionsSchema = ApiResponseSchema(MassGenerateNanoSystemOptionsSchema);
@@ -79,14 +82,12 @@ export const GetNanosystemGenerationOptionsQuerySchema = z.object({
   numericalConcentrationTo: z.number().nullable(),
   excessFrom: z.number().nullable(),
   excessTo: z.number().nullable(),
-  maxParticleSizeFrom: z.number(),
-  maxParticleSizeTo: z.number(),
-  minParticleSizeFrom: z.number(),
-  minParticleSizeTo: z.number(),
   kFrom: z.number(),
   kTo: z.number(),
   thetaFrom: z.number(),
   thetaTo: z.number(),
+  pointCountFrom: z.number().int().optional(),
+  pointCountTo: z.number().int().optional(),
 });
 
 export type GetNanosystemGenerationOptionsQuery = z.infer<typeof GetNanosystemGenerationOptionsQuerySchema>;
@@ -128,6 +129,43 @@ export const ApiResponseListNanosystemDtoSchema = ApiResponseListSchema(Nanosyst
 export const NanosystemSeriesListApiResponseSchema = ApiResponseListSchema(NanosystemSeriesDtoSchema);
 export type NanosystemSeriesListApiResponse = z.infer<typeof NanosystemSeriesListApiResponseSchema>;
 export type ApiResponseListNanosystemDto = z.infer<typeof ApiResponseListNanosystemDtoSchema>;
+
+// Generation Metrics Types
+export const GenerationMetricsSchema = z.object({
+  id: z.string().uuid(),
+  nanosystemId: z.string().uuid(),
+  particleIndex: z.number(),
+  totalAttempts: z.number(),
+  positiveAttempts: z.number(),
+  totalChangePositionAttempts: z.number(),
+  generationTimeMs: z.number(),
+  volume: z.number(),
+  diameter: z.number(),
+  particlesCheckedForIntersection: z.number(),
+  outOfZoneAttempts: z.number(),
+  firstNodeIntersectionFindTimes: z.number(),
+  totalNeighborsNodesCheckedCount: z.number(),
+  isInterCenterDistanceMoreThenDiagonalCheckTimesPositive: z.number(),
+  isInterCenterDistanceMoreThenDiagonalCheckTimesTotal: z.number(),
+  isInterCenterDistanceLessThenSidesCheckTimesPositive: z.number(),
+  isInterCenterDistanceLessThenSidesCheckTimesTotal: z.number(),
+  elementaryIntersectCheckOnlyBordersNewTransformationTimesPositive: z.number(),
+  elementaryIntersectCheckOnlyBordersNewTransformationTimesTotal: z.number(),
+  elementaryIntersectCheckOnlyBordersOldTransformationTimesPositive: z.number(),
+  elementaryIntersectCheckOnlyBordersOldTransformationTimesTotal: z.number(),
+  backRotateMatrixReused: z.number(),
+  satCheckTimesPositive: z.number(),
+  satCheckTimesTotal: z.number(),
+  averageNeighborsCheckedPerAttempt: z.number(),
+  averageParticlesCheckedPerAttempt: z.number(),
+  outOfZoneAttemptsRatio: z.number(),
+  inZoneAttempts: z.number(),
+});
+
+export type GenerationMetrics = z.infer<typeof GenerationMetricsSchema>;
+
+export const ApiResponseGenerationMetricsSchema = ApiResponseSchema(z.array(GenerationMetricsSchema));
+export type ApiResponseGenerationMetrics = z.infer<typeof ApiResponseGenerationMetricsSchema>;
 
 // Radial Analysis Types
 const DateTimeSchema = z.string().refine(val => {
