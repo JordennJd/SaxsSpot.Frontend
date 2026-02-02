@@ -21,10 +21,14 @@ const addRequestInterceptor = (client: AxiosInstance, clientName: string) => {
   client.interceptors.request.use(
     (axiosConfig) => {
       if (axiosConfig.method?.toLowerCase() === 'get') {
-        axiosConfig.params = {
-          ...axiosConfig.params,
-          dt: Date.now(),
-        };
+        if (axiosConfig.params instanceof URLSearchParams) {
+          axiosConfig.params.append('dt', String(Date.now()));
+        } else {
+          axiosConfig.params = {
+            ...axiosConfig.params,
+            dt: Date.now(),
+          };
+        }
       }
 
       if (config.app.isDevelopment) {

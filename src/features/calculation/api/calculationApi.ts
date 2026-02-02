@@ -79,7 +79,7 @@ export const PlotAnalyse = async (request: PlotAnalyseRequest): Promise<string> 
     const response = await calculationApiClient
         .get<ApiResponse<string>>(
             '/calculation/plot-analyse',
-            { params },
+            { params, paramsSerializer: (p) => (p instanceof URLSearchParams ? p.toString() : '') },
         );
 
     return response.data.result;
@@ -97,7 +97,7 @@ export const PlotAnalyseAverage = async (request: PlotAnalyseRequest): Promise<s
     const response = await calculationApiClient
         .get<ApiResponse<string>>(
             '/calculation/plot-analyse-average',
-            { params },
+            { params, paramsSerializer: (p) => (p instanceof URLSearchParams ? p.toString() : '') },
         );
 
     return response.data.result;

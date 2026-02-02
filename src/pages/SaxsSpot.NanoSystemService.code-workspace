@@ -1,0 +1,30 @@
+{
+	"folders": [
+		{
+			"path": "../../../../SaxsSpot.NanoSystemService"
+		},
+		{
+			"path": "../../../../SaxsSpot.NanoSystemGeneration"
+		},
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../SaxsSpot.Orchestrator"
+		}
+	],
+	"settings": {
+		"dotnet.defaultSolution": "SaxsSpot.NanoSystemService.sln",
+		"omnisharp.enableEditorConfigSupport": true,
+		"csharp.format.enable": true,
+		"emmet.includeLanguages": {
+			"razor": "html",
+			"aspnetcorerazor": "html"
+		},
+		"files.associations": {
+			"*.cshtml": "aspnetcorerazor"
+		},
+		"dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
+		"dotnet.formatting.organizeImportsOnFormat": true
+	}
+}
