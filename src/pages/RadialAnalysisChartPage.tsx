@@ -13,8 +13,8 @@ export const RadialAnalysisChartPage = () => {
         location.state?.request || {
             RadialAnalysisIds: id ? [id] : [],
             ChartTitle: 'Radial Analysis',
-            XAxis: 'Index',
-            YAxis: 'Value',
+            XAxis: 'Layer',
+            YAxis: 'NumericalConcentration',
             ScaleMethodsX: 0, // Linear
             ScaleMethodsY: 0, // Linear
         },

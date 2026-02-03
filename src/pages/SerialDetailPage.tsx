@@ -213,8 +213,8 @@ export const SeriesDetailPage = () => {
     const request: PlotAnalyseRequest = {
       RadialAnalysisIds: analysisIds,
       ChartTitle: 'Radial Analysis',
-      XAxis: 'Index',
-      YAxis: 'Value',
+      XAxis: 'Li',
+      YAxis: 'NumericalConcentration',
       ScaleMethodsX: 0,
       ScaleMethodsY: 0,
     };
@@ -245,8 +245,8 @@ export const SeriesDetailPage = () => {
       const request: PlotAnalyseRequest = {
         RadialAnalysisIds: ids,
         ChartTitle: 'Series average (first analyses)',
-        XAxis: 'Index',
-        YAxis: 'Value',
+        XAxis: 'Li',
+        YAxis: 'NumericalConcentration',
         ScaleMethodsX: 0,
         ScaleMethodsY: 0,
       };
