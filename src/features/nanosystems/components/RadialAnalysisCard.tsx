@@ -36,8 +36,8 @@ export const RadialAnalysisDetailsCard = ({
         const request: PlotAnalyseRequest = {
             RadialAnalysisIds: [analysis.id],
             ChartTitle: 'Radial Analysis',
-            XAxis: 'Layer',
-            YAxis: 'NumericalConcentration',
+            XAxis: 'r, nm',
+            YAxis: 'Numerical concentration',
             ScaleMethodsX: 0, // Linear
             ScaleMethodsY: 0, // Linear
         };
