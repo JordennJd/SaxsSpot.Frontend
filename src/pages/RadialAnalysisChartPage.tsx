@@ -123,7 +123,7 @@ export const RadialAnalysisChartPage = () => {
                 </button>
             </div>
 
-            <div className="flex-1 relative">
+            <div className="flex-1 relative min-h-[85vh]">
                 {isLoading ? (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-center">
