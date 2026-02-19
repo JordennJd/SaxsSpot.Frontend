@@ -28,7 +28,6 @@ export const NanosystemsTable: React.FC<NanosystemsTableProps> = ({
     pageSize,
   );
   const { showSuccess, showError } = useToastContext();
-  const navigate = useNavigate();
 
   const handleDeleteSeries = async (password?: string) => {
     if (!seriesToDelete) return;
@@ -229,7 +228,6 @@ const DeleteButton = ({ seriesId, onDelete }: { seriesId: string; onDelete: (ser
 };
 
 const MobileCardRow = ({ data, onDelete }: { data: NanosystemSeriesDto; onDelete?: (seriesId: string) => void }) => {
-  const navigate = useNavigate();
   return (
     <div 
       className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
