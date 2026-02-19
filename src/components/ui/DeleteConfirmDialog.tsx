@@ -3,7 +3,7 @@ import { useState } from 'react';
 interface DeleteConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (password?: string) => void;
+  onConfirm: (password?: string) => void | Promise<void>;
   title: string;
   message: string;
   confirmButtonText?: string;
@@ -24,13 +24,13 @@ export const DeleteConfirmDialog = ({
 
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (requirePassword && password !== '123') {
       setError('Invalid password');
       return;
     }
     setError('');
-    onConfirm(password);
+    await onConfirm(password);
     setPassword('');
   };
 

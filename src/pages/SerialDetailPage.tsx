@@ -225,8 +225,12 @@ export const SeriesDetailPage = () => {
     navigate(`/radial-analyses/${analysisIds[0]}/chart`, { state: { request } });
   }, [navigate]);
 
-  const handleDeleteNanosystem = async (password: string) => {
+  const handleDeleteNanosystem = async (password?: string) => {
     if (!nanosystemToDelete) return;
+    if (!password) {
+      showError('Password Required', 'Password is required to delete a nanosystem.');
+      return;
+    }
     try {
       await deleteNanosystem({ nanosystemId: nanosystemToDelete, password });
       setIsDeleteNanosystemDialogOpen(false);
