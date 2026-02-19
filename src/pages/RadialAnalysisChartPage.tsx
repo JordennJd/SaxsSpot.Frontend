@@ -35,56 +35,106 @@ export const RadialAnalysisChartPage = () => {
           <html>
           <head>
             <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
             <title>Radial Analysis Chart</title>
-            <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/mpld3@0.5.10/dist/mpld3.min.js"></script>
             <style>
+              * { box-sizing: border-box; }
               html, body {
                 margin: 0;
                 padding: 0;
+                padding-bottom: 52px;
                 width: 100%;
                 height: 100%;
-                overflow: hidden;
+                overflow: auto;
+                -webkit-overflow-scrolling: touch;
                 background: #f8fafc;
               }
               #chart-container {
                 width: 100%;
-                height: 100%;
+                min-height: 100%;
                 display: flex;
                 justify-content: center;
+                align-items: flex-start;
+                background: white;
+                padding: 12px;
+              }
+              #chart-container .plotly-graph-div {
+                max-width: 100% !important;
+              }
+              #chart-actions {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 52px;
+                display: flex;
                 align-items: center;
-                background: white;
-                padding: 20px;
-                box-sizing: border-box;
+                justify-content: center;
+                background: #fff;
+                border-top: 1px solid #e5e7eb;
+                padding: 8px 16px;
+                z-index: 1000;
               }
-              .mpld3-figure {
-                margin: 0 auto;
-                display: block;
-                background: white;
+              #btn-download-png {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 20px;
+                font-size: 16px;
+                font-weight: 500;
+                color: #fff;
+                background: #7c3aed;
+                border: none;
                 border-radius: 8px;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                padding: 16px;
+                cursor: pointer;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2);
               }
+              #btn-download-png:hover { background: #6d28d9; }
+              #btn-download-png:active { transform: scale(0.98); }
             </style>
           </head>
           <body>
             <div id="chart-container">${result}</div>
+            <div id="chart-actions">
+              <button type="button" id="btn-download-png">Скачать PNG</button>
+            </div>
             <script>
-              // Добавляем обработчик для ресайза
-              let resizeTimer;
-              window.addEventListener('resize', function() {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(function() {
-                  if(window.mpld3) {
-                    const figures = document.querySelectorAll('.mpld3-figure');
-                    figures.forEach(fig => {
-                      const id = fig.id;
-                      const spec = JSON.parse(fig.dataset.mpld3 || '{}');
-                      window.mpld3.draw_figure(id, spec);
+              (function() {
+                function runWhenPlotlyReady() {
+                  var gd = document.querySelector('.plotly-graph-div');
+                  if (!gd || !window.Plotly) return false;
+                  var container = document.getElementById('chart-container');
+                  var w = container.clientWidth;
+                  var h = Math.max(300, window.innerHeight - 70);
+                  try { Plotly.relayout(gd, { width: w, height: h }); } catch (e) {}
+                  var btn = document.getElementById('btn-download-png');
+                  if (btn && !btn._bound) {
+                    btn._bound = true;
+                    btn.addEventListener('click', function() {
+                      try {
+                        Plotly.downloadImage(gd, { format: 'png', width: gd.offsetWidth, height: gd.offsetHeight, filename: 'radial-analysis' });
+                      } catch (err) { console.error(err); }
                     });
                   }
-                }, 250);
-              });
+                  return true;
+                }
+                function tryRun() {
+                  if (runWhenPlotlyReady()) return;
+                  setTimeout(tryRun, 100);
+                }
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', function() { setTimeout(tryRun, 150); });
+                } else {
+                  setTimeout(tryRun, 150);
+                }
+                window.addEventListener('resize', function() {
+                  var gd = document.querySelector('.plotly-graph-div');
+                  if (gd && window.Plotly) {
+                    var container = document.getElementById('chart-container');
+                    Plotly.relayout(gd, { width: container.clientWidth, height: Math.max(300, window.innerHeight - 70) });
+                  }
+                });
+              })();
             </script>
           </body>
           </html>
