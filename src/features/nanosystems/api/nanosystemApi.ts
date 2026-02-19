@@ -278,3 +278,43 @@ export const fetchGenerationMetrics = async (
     throw appError;
   }
 };
+
+export interface DeleteNanosystemRequest {
+  nanosystemId: string;
+  password: string;
+}
+
+export const deleteNanosystem = async (
+  request: DeleteNanosystemRequest,
+): Promise<void> => {
+  try {
+    await nanosystemApiClient.delete('/nanosystem/delete-nanosystem', {
+      data: {
+        nanosystemId: request.nanosystemId,
+        password: request.password,
+      },
+    });
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
+  }
+};
+
+export interface DeleteSeriesRequest {
+  seriesId: string;
+}
+
+export const deleteSeries = async (
+  request: DeleteSeriesRequest,
+): Promise<void> => {
+  try {
+    await nanosystemApiClient.delete('/nanosystem/delete-series', {
+      data: {
+        seriesId: request.seriesId,
+      },
+    });
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
+  }
+};

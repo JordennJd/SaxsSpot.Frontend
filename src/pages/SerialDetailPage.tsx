@@ -5,12 +5,13 @@ import {useToastContext} from '../contexts/ToastContext';
 import {type ApiResponseListNanosystemDto, type NanosystemDto, type RadialAnalysisDto} from '../features/nanosystems/api/nanosystemTypes';
 import type {CalculationDto, PlotAnalyseRequest, RunCalculationRequest} from '../features/calculation/api/calculationTypes.ts';
 import {RunCalculation, RunSeriesCalculation} from '../features/calculation/api/calculationApi.ts';
-import {runRadialAnalysis, fetchNanosystemList, fetchRadialAnalysisList, type RunRadialAnalysisRequest} from '../features/nanosystems/api/nanosystemApi.ts';
+import {runRadialAnalysis, fetchNanosystemList, fetchRadialAnalysisList, deleteNanosystem, deleteSeries, type RunRadialAnalysisRequest} from '../features/nanosystems/api/nanosystemApi.ts';
 import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
 import {RadialAnalysisDetailsCard} from '../features/nanosystems/components/RadialAnalysisCard.tsx';
 import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader, RadialAnalysisModal} from '../components/series';
 import {useCalculationsData, useNanosystemsData, useSeriesData, useRadialAnalysisData} from '../hooks/useSeriesDetail';
 import {downloadNanosystem} from '../utils/seriesUtils';
+import {DeleteConfirmDialog} from '../components/ui/DeleteConfirmDialog';
 
 export const SeriesDetailPage = () => {
   const { guid: seriesId = '' } = useParams<{ guid: string }>();
@@ -31,6 +32,9 @@ export const SeriesDetailPage = () => {
   const [isSeriesCalculateModalOpen, setIsSeriesCalculateModalOpen] = useState(false);
   const [isRadialAnalysisModalOpen, setIsRadialAnalysisModalOpen] = useState(false);
   const [isSeriesAverageChartLoading, setIsSeriesAverageChartLoading] = useState(false);
+  const [isDeleteNanosystemDialogOpen, setIsDeleteNanosystemDialogOpen] = useState(false);
+  const [isDeleteSeriesDialogOpen, setIsDeleteSeriesDialogOpen] = useState(false);
+  const [nanosystemToDelete, setNanosystemToDelete] = useState<string | null>(null);
 
   // Calculation parameters
   const [calculationParams, setCalculationParams] = useState<RunCalculationRequest>({
@@ -221,6 +225,36 @@ export const SeriesDetailPage = () => {
     navigate(`/radial-analyses/${analysisIds[0]}/chart`, { state: { request } });
   }, [navigate]);
 
+  const handleDeleteNanosystem = async (password: string) => {
+    if (!nanosystemToDelete) return;
+    try {
+      await deleteNanosystem({ nanosystemId: nanosystemToDelete, password });
+      setIsDeleteNanosystemDialogOpen(false);
+      setNanosystemToDelete(null);
+      showSuccess('System Deleted', 'The nanosystem and all related data have been deleted.');
+      // Refresh nanosystems list
+      window.location.reload();
+    } catch (error) {
+      showError('Delete Failed', error instanceof Error ? error.message : 'Failed to delete nanosystem.');
+    }
+  };
+
+  const handleDeleteSeries = async () => {
+    try {
+      await deleteSeries({ seriesId });
+      setIsDeleteSeriesDialogOpen(false);
+      showSuccess('Series Deleted', 'The series and all related nanosystems have been deleted.');
+      navigate('/series');
+    } catch (error) {
+      showError('Delete Failed', error instanceof Error ? error.message : 'Failed to delete series.');
+    }
+  };
+
+  const openDeleteNanosystemDialog = (systemId: string) => {
+    setNanosystemToDelete(systemId);
+    setIsDeleteNanosystemDialogOpen(true);
+  };
+
   const handleViewSeriesAverageChart = useCallback(async () => {
     setIsSeriesAverageChartLoading(true);
     try {
@@ -270,7 +304,7 @@ export const SeriesDetailPage = () => {
 
   return (
     <div className="space-y-6">
-      <SeriesHeader series={series} />
+      <SeriesHeader series={series} onDelete={() => setIsDeleteSeriesDialogOpen(true)} />
       
       {/* Calculation Action Section */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-6">
@@ -355,6 +389,7 @@ export const SeriesDetailPage = () => {
         nanosystems={nanosystems as ApiResponseListNanosystemDto}
         isLoading={isNanosystemsLoading}
         onNanosystemClick={openNanosystemDetails}
+        onDelete={openDeleteNanosystemDialog}
         currentPage={page}
         pageSize={pageSize}
         onPageChange={setPage}
@@ -420,6 +455,29 @@ export const SeriesDetailPage = () => {
           onClose={() => setIsRadialAnalysisDetailsModalOpen(false)}
         />
       )}
+
+      <DeleteConfirmDialog
+        isOpen={isDeleteNanosystemDialogOpen}
+        onClose={() => {
+          setIsDeleteNanosystemDialogOpen(false);
+          setNanosystemToDelete(null);
+        }}
+        onConfirm={handleDeleteNanosystem}
+        title="Delete Nanosystem"
+        message="Are you sure you want to delete this nanosystem? This will permanently delete the nanosystem, all radial analyses, metrics, and the object from storage. This action cannot be undone."
+        confirmButtonText="Delete"
+        requirePassword={true}
+      />
+
+      <DeleteConfirmDialog
+        isOpen={isDeleteSeriesDialogOpen}
+        onClose={() => setIsDeleteSeriesDialogOpen(false)}
+        onConfirm={() => handleDeleteSeries()}
+        title="Delete Series"
+        message="Are you sure you want to delete this series? This will permanently delete the series and ALL nanosystems in it, including all radial analyses, metrics, and objects from storage. This action cannot be undone."
+        confirmButtonText="Delete Series"
+        requirePassword={false}
+      />
     </div>
   );
 };

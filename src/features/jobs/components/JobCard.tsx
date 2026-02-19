@@ -10,6 +10,19 @@ interface InputJobCard {
 
 const SUPPORTED_OPERATION_TYPES = ['manual-series-run', 'RunRadialAnalysis'];
 
+const JOB_TYPE_LABELS: Record<string, string> = {
+    'manual-series-run': 'Generation',
+    'RunRadialAnalysis': 'Radial analysis',
+};
+
+/** Progress 0–100 from job.progress or parsed from message (e.g. "Generation in progress: 45%") */
+function getDisplayProgress(job: Job): number | null {
+    if (job.progress > 0) return Math.min(100, job.progress);
+    if (!job.message) return null;
+    const match = job.message.match(/(?:in progress:\s*)?(\d+)\s*%/i);
+    return match ? Math.min(100, parseInt(match[1], 10)) : null;
+}
+
 export const JobCard = ({ job, onCancel }: InputJobCard) => {
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
     const [isCancelling, setIsCancelling] = useState<boolean>(false);
@@ -68,11 +81,29 @@ export const JobCard = ({ job, onCancel }: InputJobCard) => {
         >
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-2">
                 <div className="min-w-0 flex-1">
-                    <h4 className="text-sm sm:text-base font-medium text-gray-800 dark:text-white break-words">{job.jobType}</h4>
+                    <h4 className="text-sm sm:text-base font-medium text-gray-800 dark:text-white break-words">
+                        {JOB_TYPE_LABELS[job.jobType] ?? job.jobType}
+                    </h4>
                     {job.message && (
                         <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 break-words line-clamp-2">
                             {job.message}
                         </p>
+                    )}
+                    {job.status === JobStatus.Enum.StatusRunning && (
+                        <div className="mt-2 w-full">
+                            {getDisplayProgress(job) != null ? (
+                                <div className="h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-blue-500 dark:bg-blue-400 rounded-full transition-all duration-300"
+                                        style={{ width: `${getDisplayProgress(job)!}%` }}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                    <div className="h-full w-2/3 bg-blue-500 dark:bg-blue-400 rounded-full animate-pulse" />
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">

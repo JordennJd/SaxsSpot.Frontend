@@ -5,6 +5,7 @@ interface NanosystemsTableProps {
   nanosystems: ApiResponseListNanosystemDto;
   isLoading: boolean;
   onNanosystemClick: (system: NanosystemDto) => void;
+  onDelete?: (systemId: string) => void;
   currentPage: number;
   pageSize: number;
   onPageChange: (page: number) => void;
@@ -13,7 +14,8 @@ interface NanosystemsTableProps {
 export const NanosystemsTable = ({ 
   nanosystems, 
   isLoading, 
-  onNanosystemClick, 
+  onNanosystemClick,
+  onDelete,
   currentPage, 
   pageSize, 
   onPageChange, 
@@ -58,38 +60,85 @@ export const NanosystemsTable = ({
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Excess</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Generated</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              {onDelete && (
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {nanosystems?.result.data.map((system) => (
               <tr
                 key={system.id}
-                className="hover:bg-gray-50 cursor-pointer"
-                onClick={() => onNanosystemClick(system)}
+                className="hover:bg-gray-50"
               >
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600">
+                <td 
+                  className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600 cursor-pointer"
+                  onClick={() => onNanosystemClick(system)}
+                >
                   {system.id.slice(0, 8)}...
                 </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td 
+                  className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer"
+                  onClick={() => onNanosystemClick(system)}
+                >
                   {system.particleCount.toLocaleString()}
                 </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td 
+                  className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer"
+                  onClick={() => onNanosystemClick(system)}
+                >
                   {system.globalSize} nm
                 </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td 
+                  className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer"
+                  onClick={() => onNanosystemClick(system)}
+                >
                   {system.numericalConcentration}
                 </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td 
+                  className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer"
+                  onClick={() => onNanosystemClick(system)}
+                >
                   {system.excess}
                 </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td 
+                  className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer"
+                  onClick={() => onNanosystemClick(system)}
+                >
                   {system.generationStart}
                 </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                <td 
+                  className="px-4 lg:px-6 py-4 whitespace-nowrap cursor-pointer"
+                  onClick={() => onNanosystemClick(system)}
+                >
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                     Generated
                   </span>
                 </td>
+                {onDelete && (
+                  <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onNanosystemClick(system);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(system.id);
+                        }}
+                        className="text-red-600 hover:text-red-800 font-medium"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -101,8 +150,7 @@ export const NanosystemsTable = ({
         {nanosystems?.result.data.map((system) => (
           <div
             key={system.id}
-            className="p-3 hover:bg-gray-50 cursor-pointer active:bg-gray-100 touch-manipulation"
-            onClick={() => onNanosystemClick(system)}
+            className="p-3 hover:bg-gray-50 active:bg-gray-100 touch-manipulation"
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1 min-w-0">
@@ -135,6 +183,22 @@ export const NanosystemsTable = ({
             {system.generationStart && (
               <div className="mt-2 text-xs text-gray-500">
                 Generated: {system.generationStart}
+              </div>
+            )}
+            {onDelete && (
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={() => onNanosystemClick(system)}
+                  className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
+                >
+                  View
+                </button>
+                <button
+                  onClick={() => onDelete(system.id)}
+                  className="flex-1 px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
+                >
+                  Delete
+                </button>
               </div>
             )}
           </div>
