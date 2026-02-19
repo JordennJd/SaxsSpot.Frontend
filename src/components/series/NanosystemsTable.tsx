@@ -5,7 +5,6 @@ interface NanosystemsTableProps {
   nanosystems: ApiResponseListNanosystemDto;
   isLoading: boolean;
   onNanosystemClick: (system: NanosystemDto) => void;
-  onDelete?: (systemId: string) => void;
   currentPage: number;
   pageSize: number;
   onPageChange: (page: number) => void;
@@ -14,8 +13,7 @@ interface NanosystemsTableProps {
 export const NanosystemsTable = ({ 
   nanosystems, 
   isLoading, 
-  onNanosystemClick,
-  onDelete,
+  onNanosystemClick, 
   currentPage, 
   pageSize, 
   onPageChange, 
@@ -60,16 +58,14 @@ export const NanosystemsTable = ({
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Excess</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Generated</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              {onDelete && (
-                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {nanosystems?.result.data.map((system) => (
               <tr
                 key={system.id}
-                className="hover:bg-gray-50"
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => onNanosystemClick(system)}
               >
                 <td 
                   className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600 cursor-pointer"
@@ -107,31 +103,11 @@ export const NanosystemsTable = ({
                 >
                   {system.generationStart}
                 </td>
-                <td 
-                  className="px-4 lg:px-6 py-4 whitespace-nowrap cursor-pointer"
-                  onClick={() => onNanosystemClick(system)}
-                >
+                <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                     Generated
                   </span>
                 </td>
-                {onDelete && (
-                  <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(system.id);
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                      title="Delete nanosystem"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                      Delete
-                    </button>
-                  </td>
-                )}
               </tr>
             ))}
           </tbody>
@@ -176,25 +152,6 @@ export const NanosystemsTable = ({
             {system.generationStart && (
               <div className="mt-2 text-xs text-gray-500">
                 Generated: {system.generationStart}
-              </div>
-            )}
-            {onDelete && (
-              <div className="mt-3">
-                <button
-                  onClick={() => onNanosystemClick(system)}
-                  className="w-full mb-2 px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-colors"
-                >
-                  View Details
-                </button>
-                <button
-                  onClick={() => onDelete(system.id)}
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-md transition-colors"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  Delete System
-                </button>
               </div>
             )}
           </div>
