@@ -42,7 +42,7 @@ export const RadialAnalysisChartPage = () => {
     html { height: 100%; }
     body {
       margin: 0;
-      padding: 0 0 56px 0;
+      padding: 0;
       min-height: 100%;
       background: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -58,73 +58,10 @@ export const RadialAnalysisChartPage = () => {
       max-width: 100%;
       margin: 0 auto;
     }
-    #chart-actions {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      background: #fff;
-      border-top: 1px solid #e2e8f0;
-      padding: 0 16px;
-      z-index: 1000;
-    }
-    #btn-download-png {
-      padding: 12px 24px;
-      font-size: 15px;
-      font-weight: 600;
-      color: #fff;
-      background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 100%);
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
-    }
-    #btn-download-png:hover { opacity: 0.95; }
-    #btn-download-png:active { transform: scale(0.97); }
   </style>
 </head>
 <body>
   <div id="chart-container">${result}</div>
-  <div id="chart-actions">
-    <button type="button" id="btn-download-png">Скачать PNG</button>
-  </div>
-  <script>
-(function() {
-  function bindDownload() {
-    var gd = document.querySelector('.plotly-graph-div');
-    if (!gd || !window.Plotly) return false;
-    var btn = document.getElementById('btn-download-png');
-    if (btn && !btn._bound) {
-      btn._bound = true;
-      btn.addEventListener('click', function() {
-        try {
-          Plotly.downloadImage(gd, {
-            format: 'png',
-            width: gd.offsetWidth,
-            height: gd.offsetHeight,
-            filename: 'radial-analysis'
-          });
-        } catch (e) { console.error(e); }
-      });
-    }
-    return true;
-  }
-  function run() {
-    if (bindDownload()) return;
-    setTimeout(run, 80);
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { setTimeout(run, 200); });
-  } else {
-    setTimeout(run, 200);
-  }
-})();
-  </script>
 </body>
 </html>
         `;
