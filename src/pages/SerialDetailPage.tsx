@@ -221,30 +221,6 @@ export const SeriesDetailPage = () => {
     navigate(`/radial-analyses/${analysisIds[0]}/chart`, { state: { request } });
   }, [navigate]);
 
-  const handleDeleteNanosystem = async (password?: string) => {
-    if (!nanosystemToDelete) return;
-    if (!password) {
-      showError('Password Required', 'Password is required to delete a nanosystem.');
-      return;
-    }
-    try {
-      await deleteNanosystem({ nanosystemId: nanosystemToDelete, password });
-      setIsDeleteNanosystemDialogOpen(false);
-      setNanosystemToDelete(null);
-      showSuccess('System Deleted', 'The nanosystem and all related data have been deleted.');
-      // Refresh nanosystems list
-      window.location.reload();
-    } catch (error) {
-      showError('Delete Failed', error instanceof Error ? error.message : 'Failed to delete nanosystem.');
-    }
-  };
-
-
-  const openDeleteNanosystemDialog = (systemId: string) => {
-    setNanosystemToDelete(systemId);
-    setIsDeleteNanosystemDialogOpen(true);
-  };
-
   const handleViewSeriesAverageChart = useCallback(async () => {
     setIsSeriesAverageChartLoading(true);
     try {
