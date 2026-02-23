@@ -8,14 +8,14 @@ interface fetchJobQuery {
     dateTo: Date
 }
 export const fetchJobs =
-    async (query: fetchJobQuery): Promise<Job[]> => {
+    async (_query: fetchJobQuery): Promise<Job[]> => {
     const response = await jobApiClient.get<GetAllJobsResponse>(
-        '/jobs',
+        '/actual',
         {
-            params: {
-                dateFrom: query.dateFrom.toJSON(),
-                dateTo: query.dateTo.toJSON(),
-            },
+            // params: {
+            //     dateFrom: query.dateFrom.toJSON(),
+            //     dateTo: query.dateTo.toJSON(),
+            // },
             paramsSerializer: (params) => {
                 return new URLSearchParams(params).toString();
             },
