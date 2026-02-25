@@ -119,7 +119,16 @@ export const NanosystemsTable = ({
         {nanosystems?.result.data.map((system) => (
           <div
             key={system.id}
-            className="p-3 hover:bg-gray-50 active:bg-gray-100 touch-manipulation"
+            role="button"
+            tabIndex={0}
+            className="p-3 hover:bg-gray-50 active:bg-gray-100 touch-manipulation cursor-pointer"
+            onClick={() => onNanosystemClick(system)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onNanosystemClick(system);
+              }
+            }}
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1 min-w-0">
