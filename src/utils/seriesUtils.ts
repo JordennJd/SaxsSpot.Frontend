@@ -5,6 +5,8 @@ export const downloadNanosystem = async (id: string) => {
     const response = await nanosystemApiClient.get('/nanosystem/download-nanosystem', {
       responseType: 'blob',
       params: { id },
+      // Disable timeout for large file downloads
+      timeout: 0,
     });
 
     const url = window.URL.createObjectURL(new Blob([response.data]));

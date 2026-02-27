@@ -210,6 +210,8 @@ export const downloadRadialAnalysis = async (id: string): Promise<void> => {
     const response = await nanosystemApiClient.get('/radial-analysis/download-radial-analysis', {
       responseType: 'blob',
       params: { id },
+      // Disable timeout for large file downloads
+      timeout: 0,
     });
 
     const url = window.URL.createObjectURL(new Blob([response.data]));
