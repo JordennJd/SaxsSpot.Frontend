@@ -12,6 +12,8 @@ import {
   type ApiResponseGenerationMetrics,
   ApiResponseGenerationMetricsSchema,
   type GenerationMetrics,
+  type ParallelepipedParticle,
+  type SphereParticle,
 } from './nanosystemTypes';
 
 import { nanosystemApiClient, calculationApiClient } from '../../../lib/axios';
@@ -319,4 +321,29 @@ export const deleteSeries = async (
     const appError = handleError(error as Error);
     throw appError;
   }
+};
+
+/**
+ * Fetch particle coordinates for 3D visualization.
+ * Backend endpoint: GET /api/nanosystem/get-particles?nanosystemId=...&skip=0&take=10000&particleKind=0
+ * - particleKind: 0 = Sphere, 1 = Parallelepiped
+ * - skip: number of particles to skip (pagination)
+ * - take: max number of particles to return
+ * Returns array of ParallelepipedParticle[] or SphereParticle[] depending on particleKind.
+ */
+export const getNanosystemParticles = async (
+  nanosystemId: string,
+  skip: number = 0,
+  take: number = 10000,
+  particleKind: 0 | 1 = 0,
+): Promise<ParallelepipedParticle[] | SphereParticle[]> => {
+  const response = await nanosystemApiClient.get<ParallelepipedParticle[] | SphereParticle[]>(
+    '/nanosystem/get-particles',
+    {
+      params: { nanosystemId, skip, take, particleKind },
+      paramsSerializer: (params: Record<string, unknown>) =>
+        new URLSearchParams(params as Record<string, string>).toString(),
+    },
+  );
+  return response.data;
 };

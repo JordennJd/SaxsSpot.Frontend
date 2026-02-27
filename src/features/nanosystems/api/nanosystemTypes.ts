@@ -186,3 +186,24 @@ export const RadialAnalysisDtoSchema = z.object({
 export type RadialAnalysisDto = z.infer<typeof RadialAnalysisDtoSchema>;
 export const RadialAnalysisApiResponseSchema = ApiResponseListSchema(RadialAnalysisDtoSchema);
 export type RadialAnalysisApiResponse = z.infer<typeof RadialAnalysisApiResponseSchema>;
+
+// Particle data for 3D viewer (compatible with MathService format)
+export interface ParallelepipedParticle {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+  fi: number;
+  theta: number;
+  zenit: number;
+  a: number;
+  e: number;
+}
+
+export interface SphereParticle {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+  radius: number;
+}
