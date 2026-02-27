@@ -30,8 +30,8 @@ export const CalculationDetailsCard = ({
             ChartTitle: 'Scattering',
             XAxis: 'Q',
             YAxis: 'I',
-            ScaleMethodsX: 'Linear',
-            ScaleMethodsY: 'Linear',
+            ScaleMethodsX: 'Log',
+            ScaleMethodsY: 'Log',
         };
         navigate(`/calculations/${calculation.id}/chart`, { state: { request } });
     };

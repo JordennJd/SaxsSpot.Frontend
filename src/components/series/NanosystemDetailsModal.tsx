@@ -39,6 +39,8 @@ interface NanosystemDetailsModalProps {
   isRadialAnalysesError?: boolean;
   onRadialAnalysisClick: (analysis: RadialAnalysisDto) => void;
   onViewChartSelected?: (analysisIds: string[]) => void;
+  onViewCalculationChartSelected?: (calculationIds: string[]) => void;
+  onViewCalculationChartAverageSelected?: (calculationIds: string[]) => void;
 }
 
 const DetailItem = ({ label, value, icon: Icon }: DetailItemProps) => (
@@ -69,8 +71,11 @@ export const NanosystemDetailsModal = ({
                                          isRadialAnalysesError,
                                          onRadialAnalysisClick,
                                          onViewChartSelected,
+                                         onViewCalculationChartSelected,
+                                         onViewCalculationChartAverageSelected,
                                        }: NanosystemDetailsModalProps) => {
   const [selectedAnalysisIds, setSelectedAnalysisIds] = useState<Set<string>>(new Set());
+  const [selectedCalculationIds, setSelectedCalculationIds] = useState<Set<string>>(new Set());
 
   const toggleAnalysisSelection = useCallback((e: React.MouseEvent, analysisId: string) => {
     e.stopPropagation();
@@ -82,8 +87,19 @@ export const NanosystemDetailsModal = ({
     });
   }, []);
 
+  const toggleCalculationSelection = useCallback((e: React.MouseEvent, calculationId: string) => {
+    e.stopPropagation();
+    setSelectedCalculationIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(calculationId)) next.delete(calculationId);
+      else next.add(calculationId);
+      return next;
+    });
+  }, []);
+
   const handleClose = useCallback(() => {
     setSelectedAnalysisIds(new Set());
+    setSelectedCalculationIds(new Set());
     onClose();
   }, [onClose]);
 
@@ -91,6 +107,16 @@ export const NanosystemDetailsModal = ({
     const ids = Array.from(selectedAnalysisIds);
     if (ids.length > 0 && onViewChartSelected) onViewChartSelected(ids);
   }, [selectedAnalysisIds, onViewChartSelected]);
+
+  const handleViewCalculationChartSelected = useCallback(() => {
+    const ids = Array.from(selectedCalculationIds);
+    if (ids.length > 0 && onViewCalculationChartSelected) onViewCalculationChartSelected(ids);
+  }, [selectedCalculationIds, onViewCalculationChartSelected]);
+
+  const handleViewCalculationChartAverageSelected = useCallback(() => {
+    const ids = Array.from(selectedCalculationIds);
+    if (ids.length >= 2 && onViewCalculationChartAverageSelected) onViewCalculationChartAverageSelected(ids);
+  }, [selectedCalculationIds, onViewCalculationChartAverageSelected]);
 
   if (!nanosystem) return null;
 
@@ -248,23 +274,33 @@ export const NanosystemDetailsModal = ({
                         {calculations?.map((calc) => (
                             <li
                                 key={calc.id}
-                                className="p-3 bg-white rounded-lg border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer"
+                                className="p-3 bg-white rounded-lg border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer flex items-start gap-3"
                                 onClick={() => onCalculationClick(calc)}
                             >
-                              <div className="flex justify-between items-start">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <ClockIcon className="h-4 w-4 text-gray-400" />
-                                    <span className="text-sm font-medium text-gray-700">{calc.inputDate}</span>
+                              <input
+                                  type="checkbox"
+                                  checked={selectedCalculationIds.has(calc.id)}
+                                  onChange={() => {}}
+                                  onClick={(e) => toggleCalculationSelection(e, calc.id)}
+                                  className="mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                  aria-label={`Select calculation ${calc.id}`}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex justify-between items-start">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <ClockIcon className="h-4 w-4 text-gray-400" />
+                                      <span className="text-sm font-medium text-gray-700">{calc.inputDate}</span>
+                                    </div>
+                                    <p className="text-xs font-mono text-blue-600 mb-1 truncate">{calc.id}</p>
+                                    <p className="text-xs text-gray-500">
+                                      Q: {calc.qVectorFrom}-{calc.qVectorTo}
+                                    </p>
                                   </div>
-                                  <p className="text-xs font-mono text-blue-600 mb-1">{calc.id}</p>
-                                  <p className="text-xs text-gray-500">
-                                    Q: {calc.qVectorFrom}-{calc.qVectorTo}
-                                  </p>
+                                  <span className="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full bg-indigo-100 text-indigo-800 shrink-0">
+                                    Calculation
+                                  </span>
                                 </div>
-                                <span className="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                            Calculation
-                          </span>
                               </div>
                             </li>
                         ))}
@@ -366,7 +402,28 @@ export const NanosystemDetailsModal = ({
                         className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Squares2X2Icon className="h-5 w-5" />
-                      View chart ({selectedAnalysisIds.size} selected)
+                      View analyse chart ({selectedAnalysisIds.size})
+                    </button>
+                )}
+                {onViewCalculationChartSelected && (
+                    <button
+                        onClick={handleViewCalculationChartSelected}
+                        disabled={selectedCalculationIds.size === 0}
+                        className="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-blue-600 text-white rounded-lg hover:from-indigo-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChartBarIcon className="h-5 w-5" />
+                      View calculation chart ({selectedCalculationIds.size})
+                    </button>
+                )}
+                {onViewCalculationChartAverageSelected && (
+                    <button
+                        onClick={handleViewCalculationChartAverageSelected}
+                        disabled={selectedCalculationIds.size < 2}
+                        title="Average intensity when Q grid matches (same number of points)"
+                        className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChartBarIcon className="h-5 w-5" />
+                      View average chart ({selectedCalculationIds.size})
                     </button>
                 )}
               </div>

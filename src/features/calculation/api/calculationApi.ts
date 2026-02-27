@@ -52,18 +52,44 @@ export const RunSeriesCalculation = async (
 };
 
 export const PlotChart = async (request: PlotChartRequest): Promise<string> => {
+    const params = new URLSearchParams();
+    request.CalculatesId.forEach((calculationId) => params.append('CalculatesId', calculationId));
+    params.set('ChartTitle', request.ChartTitle);
+    params.set('XAxis', request.XAxis);
+    params.set('YAxis', request.YAxis);
+    params.set('ScaleMethodsX', String(request.ScaleMethodsX));
+    params.set('ScaleMethodsY', String(request.ScaleMethodsY));
+
     const response = await calculationApiClient
         .get<ApiResponse<string>>(
             '/calculation/plot',
             {
-                params: {...request},
-                paramsSerializer: (params) => {
-                    return new URLSearchParams(params).toString();
-                },
+                params,
+                paramsSerializer: (p) => (p instanceof URLSearchParams ? p.toString() : ''),
             },
         );
 
-    console.log(response);
+    return response.data.result;
+};
+
+export const PlotChartAverage = async (request: PlotChartRequest): Promise<string> => {
+    const params = new URLSearchParams();
+    request.CalculatesId.forEach((calculationId) => params.append('CalculatesId', calculationId));
+    params.set('ChartTitle', request.ChartTitle);
+    params.set('XAxis', request.XAxis);
+    params.set('YAxis', request.YAxis);
+    params.set('ScaleMethodsX', String(request.ScaleMethodsX));
+    params.set('ScaleMethodsY', String(request.ScaleMethodsY));
+
+    const response = await calculationApiClient
+        .get<ApiResponse<string>>(
+            '/calculation/plot-chart-average',
+            {
+                params,
+                paramsSerializer: (p) => (p instanceof URLSearchParams ? p.toString() : ''),
+            },
+        );
+
     return response.data.result;
 };
 

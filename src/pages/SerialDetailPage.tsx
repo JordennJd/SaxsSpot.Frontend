@@ -3,7 +3,7 @@ import {useParams, useNavigate} from 'react-router-dom';
 import {useToastContext} from '../contexts/ToastContext';
 
 import {type ApiResponseListNanosystemDto, type NanosystemDto, type RadialAnalysisDto} from '../features/nanosystems/api/nanosystemTypes';
-import type {CalculationDto, PlotAnalyseRequest, RunCalculationRequest} from '../features/calculation/api/calculationTypes.ts';
+import type {CalculationDto, PlotAnalyseRequest, PlotChartRequest, RunCalculationRequest} from '../features/calculation/api/calculationTypes.ts';
 import {RunCalculation, RunSeriesCalculation} from '../features/calculation/api/calculationApi.ts';
 import {runRadialAnalysis, fetchNanosystemList, fetchRadialAnalysisList, type RunRadialAnalysisRequest} from '../features/nanosystems/api/nanosystemApi.ts';
 import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
@@ -221,6 +221,30 @@ export const SeriesDetailPage = () => {
     navigate(`/radial-analyses/${analysisIds[0]}/chart`, { state: { request } });
   }, [navigate]);
 
+  const handleViewCalculationChartSelected = useCallback((calculationIds: string[]) => {
+    const request: PlotChartRequest = {
+      CalculatesId: calculationIds,
+      ChartTitle: 'Scattering',
+      XAxis: 'Q',
+      YAxis: 'I',
+      ScaleMethodsX: 'Log',
+      ScaleMethodsY: 'Log',
+    };
+    navigate(`/calculations/${calculationIds[0]}/chart`, { state: { request } });
+  }, [navigate]);
+
+  const handleViewCalculationChartAverageSelected = useCallback((calculationIds: string[]) => {
+    const request: PlotChartRequest = {
+      CalculatesId: calculationIds,
+      ChartTitle: 'Scattering (average)',
+      XAxis: 'Q',
+      YAxis: 'I',
+      ScaleMethodsX: 'Log',
+      ScaleMethodsY: 'Log',
+    };
+    navigate(`/calculations/${calculationIds[0]}/chart`, { state: { request, isAverage: true } });
+  }, [navigate]);
+
   const handleViewSeriesAverageChart = useCallback(async () => {
     setIsSeriesAverageChartLoading(true);
     try {
@@ -377,6 +401,8 @@ export const SeriesDetailPage = () => {
         isRadialAnalysesError={isRadialAnalysesError}
         onRadialAnalysisClick={openRadialAnalysisDetails}
         onViewChartSelected={handleViewChartSelected}
+        onViewCalculationChartSelected={handleViewCalculationChartSelected}
+        onViewCalculationChartAverageSelected={handleViewCalculationChartAverageSelected}
       />
 
       <CalculationModal
