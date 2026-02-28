@@ -9,6 +9,7 @@ import {runRadialAnalysis, fetchNanosystemList, fetchRadialAnalysisList, type Ru
 import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
 import {RadialAnalysisDetailsCard} from '../features/nanosystems/components/RadialAnalysisCard.tsx';
 import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader, RadialAnalysisModal} from '../components/series';
+import {NanosystemViewer3DModal} from '../features/nanosystem-viewer/NanosystemViewer3DModal';
 import {useCalculationsData, useNanosystemsData, useSeriesData, useRadialAnalysisData} from '../hooks/useSeriesDetail';
 import {downloadNanosystem} from '../utils/seriesUtils';
 
@@ -31,6 +32,7 @@ export const SeriesDetailPage = () => {
   const [isSeriesCalculateModalOpen, setIsSeriesCalculateModalOpen] = useState(false);
   const [isRadialAnalysisModalOpen, setIsRadialAnalysisModalOpen] = useState(false);
   const [isSeriesAverageChartLoading, setIsSeriesAverageChartLoading] = useState(false);
+  const [is3DModalOpen, setIs3DModalOpen] = useState(false);
 
   // Calculation parameters
   const [calculationParams, setCalculationParams] = useState<RunCalculationRequest>({
@@ -403,6 +405,7 @@ export const SeriesDetailPage = () => {
         onViewChartSelected={handleViewChartSelected}
         onViewCalculationChartSelected={handleViewCalculationChartSelected}
         onViewCalculationChartAverageSelected={handleViewCalculationChartAverageSelected}
+        onView3D={() => setIs3DModalOpen(true)}
       />
 
       <CalculationModal
@@ -429,6 +432,12 @@ export const SeriesDetailPage = () => {
         analysisParams={radialAnalysisParams}
         onParamChange={handleRadialAnalysisParamChange}
         onAnalyse={handleRadialAnalysis}
+      />
+
+      <NanosystemViewer3DModal
+        isOpen={is3DModalOpen}
+        onClose={() => setIs3DModalOpen(false)}
+        nanosystem={selectedNanosystem}
       />
 
       {selectedCalculation && (

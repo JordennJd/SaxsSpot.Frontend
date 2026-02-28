@@ -15,6 +15,7 @@ import {
   BeakerIcon,
   ChartBarIcon,
   Squares2X2Icon,
+  CubeTransparentIcon,
 } from '@heroicons/react/24/outline';
 
 interface DetailItemProps {
@@ -41,6 +42,7 @@ interface NanosystemDetailsModalProps {
   onViewChartSelected?: (analysisIds: string[]) => void;
   onViewCalculationChartSelected?: (calculationIds: string[]) => void;
   onViewCalculationChartAverageSelected?: (calculationIds: string[]) => void;
+  onView3D?: () => void;
 }
 
 const DetailItem = ({ label, value, icon: Icon }: DetailItemProps) => (
@@ -73,6 +75,7 @@ export const NanosystemDetailsModal = ({
                                          onViewChartSelected,
                                          onViewCalculationChartSelected,
                                          onViewCalculationChartAverageSelected,
+                                         onView3D,
                                        }: NanosystemDetailsModalProps) => {
   const [selectedAnalysisIds, setSelectedAnalysisIds] = useState<Set<string>>(new Set());
   const [selectedCalculationIds, setSelectedCalculationIds] = useState<Set<string>>(new Set());
@@ -395,6 +398,15 @@ export const NanosystemDetailsModal = ({
                   <CubeIcon className="h-5 w-5" />
                   Download
                 </button>
+                {onView3D && (
+                    <button
+                        onClick={onView3D}
+                        className="px-5 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-lg hover:from-teal-600 hover:to-cyan-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                    >
+                      <CubeTransparentIcon className="h-5 w-5" />
+                      3D View
+                    </button>
+                )}
                 {onViewChartSelected && (
                     <button
                         onClick={handleViewChartSelected}
