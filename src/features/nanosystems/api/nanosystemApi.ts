@@ -343,6 +343,7 @@ export const getNanosystemParticles = async (
       params: { nanosystemId, skip, take, particleKind },
       paramsSerializer: (params: Record<string, unknown>) =>
         new URLSearchParams(params as Record<string, string>).toString(),
+      timeout: 0,
     },
   );
   return response.data;

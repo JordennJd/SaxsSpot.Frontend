@@ -72,7 +72,7 @@ export function NanosystemViewer3DModal({ isOpen, onClose, nanosystem }: Nanosys
             </button>
           </div>
           <div className="flex-1 min-h-0 p-4">
-            {nanosystem ? (
+            {isOpen && nanosystem ? (
               <NanosystemViewer3D
                 key={`${nanosystem.id}-${appliedSkip}-${appliedTake}`}
                 nanosystemId={nanosystem.id}

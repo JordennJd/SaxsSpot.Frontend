@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Text } from '@react-three/drei';
 import type { ParallelepipedParticle, SphereParticle } from '../nanosystems/api/nanosystemTypes';
@@ -37,40 +37,45 @@ export function NanosystemViewer3D({
   const [spheres, setSpheres] = useState<SphereParticle[]>(initialSpheres);
   const [loading, setLoading] = useState(!!nanosystemId);
   const [error, setError] = useState<string | null>(null);
-
-  const loadParticles = useCallback(async () => {
-    if (!nanosystemId) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getNanosystemParticles(nanosystemId, skip, take, particleKind);
-      const arr = Array.isArray(data) ? data : [];
-      if (particleKind === 1) {
-        setParallelepipeds(arr as ParallelepipedParticle[]);
-        setSpheres([]);
-      } else {
-        setSpheres(arr as SphereParticle[]);
-        setParallelepipeds([]);
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load particles');
-      setParallelepipeds([]);
-      setSpheres([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [nanosystemId, skip, take, particleKind]);
-
   useEffect(() => {
-    if (nanosystemId) {
-      loadParticles();
-    } else {
+    if (!nanosystemId) {
       setParallelepipeds(initialParallelepipeds);
       setSpheres(initialSpheres);
       setLoading(false);
       setError(null);
+      return;
     }
-  }, [nanosystemId, loadParticles, initialParallelepipeds, initialSpheres]);
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    getNanosystemParticles(nanosystemId, skip, take, particleKind)
+      .then((data) => {
+        if (cancelled) return;
+        const arr = Array.isArray(data) ? data : [];
+        if (particleKind === 1) {
+          setParallelepipeds(arr as ParallelepipedParticle[]);
+          setSpheres([]);
+        } else {
+          setSpheres(arr as SphereParticle[]);
+          setParallelepipeds([]);
+        }
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : 'Failed to load particles');
+        setParallelepipeds([]);
+        setSpheres([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [nanosystemId, skip, take, particleKind]);
 
   const hasParticles = parallelepipeds.length > 0 || spheres.length > 0;
   const totalCount = parallelepipeds.length + spheres.length;
