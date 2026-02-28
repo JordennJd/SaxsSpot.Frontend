@@ -15,7 +15,6 @@ import {
   BeakerIcon,
   ChartBarIcon,
   Squares2X2Icon,
-  CubeTransparentIcon,
 } from '@heroicons/react/24/outline';
 
 interface DetailItemProps {
@@ -42,7 +41,6 @@ interface NanosystemDetailsModalProps {
   onViewChartSelected?: (analysisIds: string[]) => void;
   onViewCalculationChartSelected?: (calculationIds: string[]) => void;
   onViewCalculationChartAverageSelected?: (calculationIds: string[]) => void;
-  onView3D?: () => void;
 }
 
 const DetailItem = ({ label, value, icon: Icon }: DetailItemProps) => (
@@ -75,7 +73,6 @@ export const NanosystemDetailsModal = ({
                                          onViewChartSelected,
                                          onViewCalculationChartSelected,
                                          onViewCalculationChartAverageSelected,
-                                         onView3D,
                                        }: NanosystemDetailsModalProps) => {
   const [selectedAnalysisIds, setSelectedAnalysisIds] = useState<Set<string>>(new Set());
   const [selectedCalculationIds, setSelectedCalculationIds] = useState<Set<string>>(new Set());
