@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { PlotAnalyse, PlotAnalyseAverage, PlotAnalyseAveragePng, PlotAnalysePng } from '../features/calculation/api/calculationApi';
 import type { PlotAnalyseRequest } from '../features/calculation/api/calculationTypes';
 
@@ -7,23 +7,59 @@ export const RadialAnalysisChartPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const isAverage = (location.state as { isAverage?: boolean } | null)?.isAverage ?? false;
-    const [chart, setChart] = useState<string>('');
-    const [request] = useState<PlotAnalyseRequest>(
-        location.state?.request || {
-            RadialAnalysisIds: id ? [id] : [],
-            ChartTitle: 'Radial Analysis',
-            XAxis: 'r, nm',
-            YAxis: 'Numerical concentration',
-            ScaleMethodsX: 0, // Linear
-            ScaleMethodsY: 0, // Linear
-        },
-    );
-    const [isLoading, setIsLoading] = useState(false);
+    const [searchParams] = useSearchParams();
 
     const isMobileDevice =
         typeof navigator !== 'undefined' &&
         /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+    const stateIsAverage = (location.state as { isAverage?: boolean } | null)?.isAverage ?? false;
+
+    const analysisIdsQueryRaw = searchParams.get('analysisIds');
+    const analysisIdsQuery = analysisIdsQueryRaw
+        ? analysisIdsQueryRaw.split(',').map((s) => s.trim()).filter(Boolean)
+        : [];
+
+    const hasAnalysisIdsQuery = analysisIdsQueryRaw != null;
+
+    const isAverageFromQueryRaw = searchParams.get('isAverage');
+    const hasIsAverageQuery = isAverageFromQueryRaw != null;
+    const isAverageFromQuery = isAverageFromQueryRaw === '1' || isAverageFromQueryRaw?.toLowerCase() === 'true';
+    const isAverage = hasIsAverageQuery ? isAverageFromQuery : stateIsAverage;
+
+    const downloadRequested = searchParams.get('download') === '1';
+    const isDownloadMode = downloadRequested || isMobileDevice;
+
+    const seriesId = searchParams.get('seriesId');
+    const safePart = (v: string) => v.replace(/[^0-9a-zA-Z]+/g, '_');
+    const filename = `radial_${isAverage ? 'avg' : 'single'}${seriesId ? `_${safePart(seriesId)}` : ''}.png`;
+
+    const request = useMemo<PlotAnalyseRequest>(() => {
+        if (hasAnalysisIdsQuery && analysisIdsQuery.length > 0) {
+            return {
+                RadialAnalysisIds: analysisIdsQuery,
+                ChartTitle: isAverage ? 'Series average (first analyses)' : 'Radial Analysis',
+                XAxis: 'r, nm',
+                YAxis: 'Numerical concentration',
+                ScaleMethodsX: 0,
+                ScaleMethodsY: 0,
+            };
+        }
+
+        return (
+            location.state?.request || {
+                RadialAnalysisIds: id ? [id] : [],
+                ChartTitle: 'Radial Analysis',
+                XAxis: 'r, nm',
+                YAxis: 'Numerical concentration',
+                ScaleMethodsX: 0, // Linear
+                ScaleMethodsY: 0, // Linear
+            }
+        );
+    }, [analysisIdsQueryRaw, analysisIdsQuery.join(','), hasAnalysisIdsQuery, id, isAverage, location.state]);
+
+    const [chart, setChart] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (request.RadialAnalysisIds.length === 0) return;
@@ -31,7 +67,7 @@ export const RadialAnalysisChartPage = () => {
         const fetchChart = async () => {
             setIsLoading(true);
             try {
-                if (isMobileDevice) {
+                if (isDownloadMode) {
                     const base64 = isAverage
                         ? await PlotAnalyseAveragePng(request)
                         : await PlotAnalysePng(request);
@@ -39,7 +75,7 @@ export const RadialAnalysisChartPage = () => {
                     const href = `data:image/png;base64,${base64}`;
                     const a = document.createElement('a');
                     a.href = href;
-                    a.download = isAverage ? 'radial-average.png' : 'radial.png';
+                    a.download = filename;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
@@ -95,7 +131,7 @@ export const RadialAnalysisChartPage = () => {
         };
 
         fetchChart();
-    }, [request, isAverage, isMobileDevice]);
+    }, [request, isAverage, isDownloadMode, filename, navigate]);
 
     return (
         <div className="h-screen w-full flex flex-col bg-gray-50">

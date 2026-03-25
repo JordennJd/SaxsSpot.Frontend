@@ -253,8 +253,12 @@ export const SeriesDetailPage = () => {
       ScaleMethodsX: 0,
       ScaleMethodsY: 0,
     };
-    navigate(`/radial-analyses/${analysisIds[0]}/chart`, { state: { request } });
-  }, [navigate]);
+    const params = new URLSearchParams();
+    params.set('analysisIds', analysisIds.join(','));
+    params.set('isAverage', '0');
+    params.set('seriesId', seriesId);
+    navigate(`/radial-analyses/${analysisIds[0]}/chart?${params.toString()}`, { state: { request } });
+  }, [navigate, seriesId]);
 
   const handleViewCalculationChartSelected = useCallback((calculationIds: string[]) => {
     const request: PlotChartRequest = {
@@ -265,8 +269,12 @@ export const SeriesDetailPage = () => {
       ScaleMethodsX: 'Log',
       ScaleMethodsY: 'Log',
     };
-    navigate(`/calculations/${calculationIds[0]}/chart`, { state: { request } });
-  }, [navigate]);
+    const params = new URLSearchParams();
+    params.set('calcIds', calculationIds.join(','));
+    params.set('isAverage', '0');
+    params.set('seriesId', seriesId);
+    navigate(`/calculations/${calculationIds[0]}/chart?${params.toString()}`, { state: { request } });
+  }, [navigate, seriesId]);
 
   const handleViewCalculationChartAverageSelected = useCallback((calculationIds: string[]) => {
     const request: PlotChartRequest = {
@@ -277,8 +285,12 @@ export const SeriesDetailPage = () => {
       ScaleMethodsX: 'Log',
       ScaleMethodsY: 'Log',
     };
-    navigate(`/calculations/${calculationIds[0]}/chart`, { state: { request, isAverage: true } });
-  }, [navigate]);
+    const params = new URLSearchParams();
+    params.set('calcIds', calculationIds.join(','));
+    params.set('isAverage', '1');
+    params.set('seriesId', seriesId);
+    navigate(`/calculations/${calculationIds[0]}/chart?${params.toString()}`, { state: { request, isAverage: true } });
+  }, [navigate, seriesId]);
 
   const handleViewSeriesScatteringAverageChartSelected = useCallback(() => {
     if (!selectedSeriesScatteringGroup) return;
@@ -291,10 +303,16 @@ export const SeriesDetailPage = () => {
       ScaleMethodsX: 'Log',
       ScaleMethodsY: 'Log',
     };
-    navigate(`/calculations/${selectedSeriesScatteringGroup.calculationIds[0]}/chart`, {
+    const params = new URLSearchParams();
+    params.set('calcIds', selectedSeriesScatteringGroup.calculationIds.join(','));
+    params.set('isAverage', '1');
+    params.set('seriesId', seriesId);
+    params.set('qFrom', String(selectedSeriesScatteringGroup.parameters.qVectorFrom));
+    params.set('qTo', String(selectedSeriesScatteringGroup.parameters.qVectorTo));
+    navigate(`/calculations/${selectedSeriesScatteringGroup.calculationIds[0]}/chart?${params.toString()}`, {
       state: { request, isAverage: true },
     });
-  }, [navigate, selectedSeriesScatteringGroup]);
+  }, [navigate, selectedSeriesScatteringGroup, seriesId]);
 
   const handleViewSeriesAverageChart = useCallback(async () => {
     setIsSeriesAverageChartLoading(true);
@@ -325,7 +343,11 @@ export const SeriesDetailPage = () => {
         ScaleMethodsX: 0,
         ScaleMethodsY: 0,
       };
-      navigate(`/radial-analyses/${ids[0]}/chart`, { state: { request, isAverage: true } });
+      const params = new URLSearchParams();
+      params.set('analysisIds', ids.join(','));
+      params.set('isAverage', '1');
+      params.set('seriesId', seriesId);
+      navigate(`/radial-analyses/${ids[0]}/chart?${params.toString()}`, { state: { request, isAverage: true } });
     } catch (error) {
       console.error('Error loading series average chart:', error);
       showError('Chart error', 'Failed to load first analyses for the series.');

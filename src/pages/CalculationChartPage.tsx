@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { PlotChart, PlotChartAverage, PlotChartAveragePng, PlotChartPng } from '../features/calculation/api/calculationApi';
 import type { PlotChartRequest } from '../features/calculation/api/calculationTypes';
 
@@ -7,23 +7,63 @@ export const CalculationChartPage = () => {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const isAverage = (location.state as { isAverage?: boolean } | null)?.isAverage ?? false;
-    const [chart, setChart] = useState<string>('');
-    const [request] = useState<PlotChartRequest>(
-        location.state?.request || {
-            CalculatesId: id ? [id] : [],
-            ChartTitle: 'Scattering',
-            XAxis: 'Q',
-            YAxis: 'I',
-            ScaleMethodsX: 'Log',
-            ScaleMethodsY: 'Log',
-        },
-    );
-    const [isLoading, setIsLoading] = useState(false);
+    const [searchParams] = useSearchParams();
 
     const isMobileDevice =
         typeof navigator !== 'undefined' &&
         /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+    const stateIsAverage = (location.state as { isAverage?: boolean } | null)?.isAverage ?? false;
+
+    const calcIdsQueryRaw = searchParams.get('calcIds');
+    const calcIdsQuery = calcIdsQueryRaw
+        ? calcIdsQueryRaw.split(',').map((s) => s.trim()).filter(Boolean)
+        : [];
+
+    const hasCalcIdsQuery = calcIdsQueryRaw != null;
+    const isAverageFromQueryRaw = searchParams.get('isAverage');
+    const hasIsAverageQuery = isAverageFromQueryRaw != null;
+    const isAverageFromQuery = isAverageFromQueryRaw === '1' || isAverageFromQueryRaw?.toLowerCase() === 'true';
+    const isAverage = hasIsAverageQuery ? isAverageFromQuery : stateIsAverage;
+
+    const downloadRequested = searchParams.get('download') === '1';
+    const isDownloadMode = downloadRequested || isMobileDevice;
+
+    const seriesId = searchParams.get('seriesId');
+    const qFrom = searchParams.get('qFrom');
+    const qTo = searchParams.get('qTo');
+
+    const safePart = (v: string) => v.replace(/[^0-9a-zA-Z]+/g, '_');
+    const filename = `scattering_${isAverage ? 'avg' : 'single'}${seriesId ? `_${safePart(seriesId)}` : ''}${
+        qFrom && qTo ? `_q_${safePart(qFrom)}-${safePart(qTo)}` : ''
+    }.png`;
+
+    const request = useMemo<PlotChartRequest>(() => {
+        if (hasCalcIdsQuery && calcIdsQuery.length > 0) {
+            return {
+                CalculatesId: calcIdsQuery,
+                ChartTitle: isAverage ? 'Scattering (average)' : 'Scattering',
+                XAxis: 'Q',
+                YAxis: 'I',
+                ScaleMethodsX: 'Log',
+                ScaleMethodsY: 'Log',
+            };
+        }
+
+        return (
+            location.state?.request || {
+                CalculatesId: id ? [id] : [],
+                ChartTitle: 'Scattering',
+                XAxis: 'Q',
+                YAxis: 'I',
+                ScaleMethodsX: 'Log',
+                ScaleMethodsY: 'Log',
+            }
+        );
+    }, [calcIdsQueryRaw, calcIdsQuery.join(','), hasCalcIdsQuery, id, isAverage, location.state]);
+
+    const [chart, setChart] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (request.CalculatesId.length === 0) return;
@@ -31,7 +71,7 @@ export const CalculationChartPage = () => {
         const fetchChart = async () => {
             setIsLoading(true);
             try {
-                if (isMobileDevice) {
+                if (isDownloadMode) {
                     const base64 = isAverage
                         ? await PlotChartAveragePng(request)
                         : await PlotChartPng(request);
@@ -39,7 +79,7 @@ export const CalculationChartPage = () => {
                     const href = `data:image/png;base64,${base64}`;
                     const a = document.createElement('a');
                     a.href = href;
-                    a.download = isAverage ? 'chart-average.png' : 'chart.png';
+                    a.download = filename;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
@@ -96,7 +136,7 @@ export const CalculationChartPage = () => {
         };
 
         fetchChart();
-    }, [request, isAverage, isMobileDevice]);
+    }, [request, isAverage, isDownloadMode, filename, navigate]);
 
     return (
         <div className="h-screen w-full flex flex-col bg-gray-50">
