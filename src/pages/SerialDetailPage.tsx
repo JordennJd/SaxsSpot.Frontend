@@ -1,10 +1,16 @@
-import {useState, useCallback} from 'react';
+import {useEffect, useState, useCallback} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
 import {useToastContext} from '../contexts/ToastContext';
 
 import {type ApiResponseListNanosystemDto, type NanosystemDto, type RadialAnalysisDto} from '../features/nanosystems/api/nanosystemTypes';
-import type {CalculationDto, PlotAnalyseRequest, PlotChartRequest, RunCalculationRequest} from '../features/calculation/api/calculationTypes.ts';
-import {RunCalculation, RunSeriesCalculation} from '../features/calculation/api/calculationApi.ts';
+import type {
+  CalculationDto,
+  PlotAnalyseRequest,
+  PlotChartRequest,
+  RunCalculationRequest,
+  SeriesCalculationGroupDto,
+} from '../features/calculation/api/calculationTypes.ts';
+import {fetchSeriesCalculationGroups, RunCalculation, RunSeriesCalculation} from '../features/calculation/api/calculationApi.ts';
 import {runRadialAnalysis, fetchNanosystemList, fetchRadialAnalysisList, type RunRadialAnalysisRequest} from '../features/nanosystems/api/nanosystemApi.ts';
 import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
 import {RadialAnalysisDetailsCard} from '../features/nanosystems/components/RadialAnalysisCard.tsx';
@@ -32,6 +38,9 @@ export const SeriesDetailPage = () => {
   const [isSeriesCalculateModalOpen, setIsSeriesCalculateModalOpen] = useState(false);
   const [isRadialAnalysisModalOpen, setIsRadialAnalysisModalOpen] = useState(false);
   const [isSeriesAverageChartLoading, setIsSeriesAverageChartLoading] = useState(false);
+  const [isSeriesScatteringGroupsLoading, setIsSeriesScatteringGroupsLoading] = useState(false);
+  const [seriesScatteringGroups, setSeriesScatteringGroups] = useState<SeriesCalculationGroupDto[]>([]);
+  const [selectedSeriesScatteringGroupId, setSelectedSeriesScatteringGroupId] = useState<string | null>(null);
   const [is3DModalOpen, setIs3DModalOpen] = useState(false);
 
   // Calculation parameters
@@ -81,6 +90,30 @@ export const SeriesDetailPage = () => {
     selectedNanosystem?.id,
     calculationPage,
     pageSize,
+  );
+
+  useEffect(() => {
+    const loadSeriesGroups = async () => {
+      if (!seriesId) return;
+      setIsSeriesScatteringGroupsLoading(true);
+      try {
+        const res = await fetchSeriesCalculationGroups(seriesId);
+        const groups = res.result ?? [];
+        setSeriesScatteringGroups(groups);
+        setSelectedSeriesScatteringGroupId(groups[0]?.groupId ?? null);
+      } catch (error) {
+        console.error('Error loading series calculation groups:', error);
+        showError('Series groups', 'Failed to load scattering calculation groups for this series.');
+      } finally {
+        setIsSeriesScatteringGroupsLoading(false);
+      }
+    };
+
+    loadSeriesGroups();
+  }, [seriesId, showError]);
+
+  const selectedSeriesScatteringGroup = seriesScatteringGroups.find(
+    (g) => g.groupId === selectedSeriesScatteringGroupId,
   );
 
   // Event handlers
@@ -247,6 +280,22 @@ export const SeriesDetailPage = () => {
     navigate(`/calculations/${calculationIds[0]}/chart`, { state: { request, isAverage: true } });
   }, [navigate]);
 
+  const handleViewSeriesScatteringAverageChartSelected = useCallback(() => {
+    if (!selectedSeriesScatteringGroup) return;
+    if (selectedSeriesScatteringGroup.calculationIds.length === 0) return;
+    const request: PlotChartRequest = {
+      CalculatesId: selectedSeriesScatteringGroup.calculationIds,
+      ChartTitle: 'Scattering (average)',
+      XAxis: 'Q',
+      YAxis: 'I',
+      ScaleMethodsX: 'Log',
+      ScaleMethodsY: 'Log',
+    };
+    navigate(`/calculations/${selectedSeriesScatteringGroup.calculationIds[0]}/chart`, {
+      state: { request, isAverage: true },
+    });
+  }, [navigate, selectedSeriesScatteringGroup]);
+
   const handleViewSeriesAverageChart = useCallback(async () => {
     setIsSeriesAverageChartLoading(true);
     try {
@@ -375,6 +424,93 @@ export const SeriesDetailPage = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Series scattering average: average by equal input parameters */}
+      <div className="bg-gradient-to-r from-indigo-50 to-cyan-50 dark:from-indigo-900/20 dark:to-cyan-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800 p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Chart: average intensity by input parameters
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              Choose one parameter set; we average scattering intensity across systems that match it.
+            </p>
+          </div>
+          <div className="flex-shrink-0">
+            <button
+              type="button"
+              disabled={isSeriesScatteringGroupsLoading || !selectedSeriesScatteringGroup || selectedSeriesScatteringGroup.calculationIds.length === 0}
+              onClick={handleViewSeriesScatteringAverageChartSelected}
+              className="group relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-cyan-700 text-white rounded-xl shadow-lg hover:from-indigo-700 hover:to-cyan-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 font-semibold text-lg hover:shadow-2xl transform hover:scale-105 active:scale-95 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative z-10 flex items-center gap-3">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <div className="text-left">
+                  <div className="font-bold">
+                    {isSeriesScatteringGroupsLoading ? 'Loading…' : 'View averaged intensity'}
+                  </div>
+                  <div className="text-xs opacity-90 font-normal">
+                    {selectedSeriesScatteringGroup
+                      ? `Systems: ${selectedSeriesScatteringGroup.systemsCount}`
+                      : 'Select a group'}
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {isSeriesScatteringGroupsLoading ? (
+          <div className="mt-4 text-center text-gray-600 dark:text-gray-300">
+            Loading calculation groups...
+          </div>
+        ) : seriesScatteringGroups.length > 0 ? (
+          <div className="mt-5 space-y-2">
+            {seriesScatteringGroups.map((group) => (
+              <label
+                key={group.groupId}
+                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                  selectedSeriesScatteringGroupId === group.groupId
+                    ? 'border-indigo-400 bg-indigo-50 dark:border-indigo-300 dark:bg-indigo-900/20'
+                    : 'border-gray-200 hover:border-indigo-300 dark:border-gray-800 dark:hover:border-indigo-300/60'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="series-scattering-group"
+                  checked={selectedSeriesScatteringGroupId === group.groupId}
+                  onChange={() => setSelectedSeriesScatteringGroupId(group.groupId)}
+                  className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        Q: {group.parameters.qVectorFrom}-{group.parameters.qVectorTo}
+                      </div>
+                      <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                        Phi: {group.parameters.phiVectorFrom == null ? '—' : `${group.parameters.phiVectorFrom}-${group.parameters.phiVectorTo}`}
+                        {' | '}
+                        Theta: {group.parameters.thetaVectorFrom == null ? '—' : `${group.parameters.thetaVectorFrom}-${group.parameters.thetaVectorTo}`}
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-xs text-gray-500 dark:text-gray-400">
+                      {group.systemsCount} systems
+                    </div>
+                  </div>
+                </div>
+              </label>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-4 text-center text-gray-600 dark:text-gray-300">
+            No grouped calculations found yet for this series.
+          </div>
+        )}
       </div>
 
       <NanosystemsTable

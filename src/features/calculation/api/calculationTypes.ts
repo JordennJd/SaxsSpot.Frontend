@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ApiResponseListSchema } from '../../common/commonTypes.ts';
+import { ApiResponseListSchema, ApiResponseSchema } from '../../common/commonTypes.ts';
 
 // ==================== ENUMS AND SCHEMAS ====================
 
@@ -101,3 +101,38 @@ export const CalculationApiResponseSchema = ApiResponseListSchema(CalculationDto
 export type CalculationApiResponse = z.infer<typeof CalculationApiResponseSchema>;
 export type PlotChartRequest = z.infer<typeof PlotChartRequestSchema>;
 export type PlotAnalyseRequest = z.infer<typeof PlotAnalyseRequestSchema>;
+
+// ==================== SERIES GROUPS (AVERAGING INPUT SETS) ====================
+export const CalculationInputParametersDtoSchema = z.object({
+  qVectorFrom: z.number(),
+  qVectorTo: z.number(),
+  qSpaceMethod: z.number().int(),
+  qScaleMethod: z.number().int(),
+  qSpaceParameter: z.number(),
+
+  phiVectorFrom: z.number().nullable(),
+  phiVectorTo: z.number().nullable(),
+  phiSpaceMethod: z.number().int().nullable(),
+  phiScaleMethod: z.number().int().nullable(),
+  phiSpaceParameter: z.number().nullable(),
+
+  thetaVectorFrom: z.number().nullable(),
+  thetaVectorTo: z.number().nullable(),
+  thetaSpaceMethod: z.number().int().nullable(),
+  thetaScaleMethod: z.number().int().nullable(),
+  thetaSpaceParameter: z.number().nullable(),
+});
+
+export const SeriesCalculationGroupDtoSchema = z.object({
+  groupId: z.string(),
+  parameters: CalculationInputParametersDtoSchema,
+  systemsCount: z.number().int(),
+  calculationIds: z.array(z.string().uuid()),
+  nanosystemIds: z.array(z.string().uuid()),
+});
+
+export const SeriesCalculationGroupsApiResponseSchema = ApiResponseSchema(
+  z.array(SeriesCalculationGroupDtoSchema),
+);
+export type SeriesCalculationGroupsApiResponse = z.infer<typeof SeriesCalculationGroupsApiResponseSchema>;
+export type SeriesCalculationGroupDto = z.infer<typeof SeriesCalculationGroupDtoSchema>;

@@ -2,6 +2,8 @@ import {calculationApiClient} from '../../../lib/axios.ts';
 import {
     type CalculationApiResponse,
     CalculationApiResponseSchema, type PlotChartRequest, type RunCalculationRequest, type PlotAnalyseRequest,
+    type SeriesCalculationGroupsApiResponse,
+    SeriesCalculationGroupsApiResponseSchema,
 } from './calculationTypes.ts';
 import type {ApiResponse} from '../../common/commonTypes.ts';
 
@@ -49,6 +51,21 @@ export const RunSeriesCalculation = async (
     );
 
     return response.data;
+};
+
+export const fetchSeriesCalculationGroups = async (
+    seriesId: string,
+): Promise<SeriesCalculationGroupsApiResponse> => {
+    const response = await calculationApiClient
+        .get<unknown>(
+            '/calculation/series-groups',
+            {
+                params: { seriesId },
+                paramsSerializer: (params) => new URLSearchParams(params as Record<string, string>).toString(),
+            },
+        );
+
+    return SeriesCalculationGroupsApiResponseSchema.parse(response.data);
 };
 
 export const PlotChart = async (request: PlotChartRequest): Promise<string> => {
