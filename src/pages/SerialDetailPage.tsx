@@ -493,9 +493,15 @@ export const SeriesDetailPage = () => {
                         Q: {group.parameters.qVectorFrom}-{group.parameters.qVectorTo}
                       </div>
                       <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                        Phi: {group.parameters.phiVectorFrom == null ? '—' : `${group.parameters.phiVectorFrom}-${group.parameters.phiVectorTo}`}
+                        Phi:{' '}
+                        {group.parameters.phiVectorFrom == null || (group.parameters.phiVectorFrom === -1 && group.parameters.phiVectorTo === -1)
+                          ? '—'
+                          : `${group.parameters.phiVectorFrom}-${group.parameters.phiVectorTo}`}
                         {' | '}
-                        Theta: {group.parameters.thetaVectorFrom == null ? '—' : `${group.parameters.thetaVectorFrom}-${group.parameters.thetaVectorTo}`}
+                        Theta:{' '}
+                        {group.parameters.thetaVectorFrom == null || (group.parameters.thetaVectorFrom === -1 && group.parameters.thetaVectorTo === -1)
+                          ? '—'
+                          : `${group.parameters.thetaVectorFrom}-${group.parameters.thetaVectorTo}`}
                       </div>
                     </div>
                     <div className="shrink-0 text-xs text-gray-500 dark:text-gray-400">
