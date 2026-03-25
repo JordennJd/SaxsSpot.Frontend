@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { PlotAnalyse, PlotAnalyseAverage } from '../features/calculation/api/calculationApi';
+import { PlotAnalyse, PlotAnalyseAverage, PlotAnalyseAveragePng, PlotAnalysePng } from '../features/calculation/api/calculationApi';
 import type { PlotAnalyseRequest } from '../features/calculation/api/calculationTypes';
 
 export const RadialAnalysisChartPage = () => {
@@ -21,15 +21,36 @@ export const RadialAnalysisChartPage = () => {
     );
     const [isLoading, setIsLoading] = useState(false);
 
+    const isMobileDevice =
+        typeof navigator !== 'undefined' &&
+        /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
     useEffect(() => {
         if (request.RadialAnalysisIds.length === 0) return;
 
         const fetchChart = async () => {
             setIsLoading(true);
             try {
-                const result = isAverage
-                    ? await PlotAnalyseAverage(request)
-                    : await PlotAnalyse(request);
+                if (isMobileDevice) {
+                    const base64 = isAverage
+                        ? await PlotAnalyseAveragePng(request)
+                        : await PlotAnalysePng(request);
+
+                    const href = `data:image/png;base64,${base64}`;
+                    const a = document.createElement('a');
+                    a.href = href;
+                    a.download = isAverage ? 'radial-average.png' : 'radial.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+
+                    if (window.history.length > 1) {
+                        navigate(-1);
+                    }
+                    return;
+                }
+
+                const result = isAverage ? await PlotAnalyseAverage(request) : await PlotAnalyse(request);
                 const fullHtml = `
 <!DOCTYPE html>
 <html lang="ru">
@@ -74,7 +95,7 @@ export const RadialAnalysisChartPage = () => {
         };
 
         fetchChart();
-    }, [request, isAverage]);
+    }, [request, isAverage, isMobileDevice]);
 
     return (
         <div className="h-screen w-full flex flex-col bg-gray-50">

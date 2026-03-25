@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { PlotChart, PlotChartAverage } from '../features/calculation/api/calculationApi';
+import { PlotChart, PlotChartAverage, PlotChartAveragePng, PlotChartPng } from '../features/calculation/api/calculationApi';
 import type { PlotChartRequest } from '../features/calculation/api/calculationTypes';
 
 export const CalculationChartPage = () => {
@@ -21,15 +21,37 @@ export const CalculationChartPage = () => {
     );
     const [isLoading, setIsLoading] = useState(false);
 
+    const isMobileDevice =
+        typeof navigator !== 'undefined' &&
+        /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
     useEffect(() => {
         if (request.CalculatesId.length === 0) return;
 
         const fetchChart = async () => {
             setIsLoading(true);
             try {
-                const result = isAverage
-                    ? await PlotChartAverage(request)
-                    : await PlotChart(request);
+                if (isMobileDevice) {
+                    const base64 = isAverage
+                        ? await PlotChartAveragePng(request)
+                        : await PlotChartPng(request);
+
+                    const href = `data:image/png;base64,${base64}`;
+                    const a = document.createElement('a');
+                    a.href = href;
+                    a.download = isAverage ? 'chart-average.png' : 'chart.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+
+                    // Return back to the previous page after download trigger.
+                    if (window.history.length > 1) {
+                        navigate(-1);
+                    }
+                    return;
+                }
+
+                const result = isAverage ? await PlotChartAverage(request) : await PlotChart(request);
                 const fullHtml = `
 <!DOCTYPE html>
 <html lang="ru">
@@ -74,7 +96,7 @@ export const CalculationChartPage = () => {
         };
 
         fetchChart();
-    }, [request, isAverage]);
+    }, [request, isAverage, isMobileDevice]);
 
     return (
         <div className="h-screen w-full flex flex-col bg-gray-50">
