@@ -12,8 +12,6 @@ export type SeriesFilterForm = {
   globalSizeMax: string;
   concentrationMin: string;
   concentrationMax: string;
-  createdFrom: string;
-  createdTo: string;
 };
 
 const empty = (s: string) => s.trim() === '';
@@ -31,7 +29,7 @@ export function buildSeriesListGridifyFilter(f: SeriesFilterForm): string {
   const parts: string[] = [];
 
   if (!empty(f.commentContains)) {
-    parts.push(`Comment=*${escapeGridifyValue(f.commentContains.trim())}/i`);
+    parts.push(`comment=*${escapeGridifyValue(f.commentContains.trim())}/i`);
   }
 
   if (f.particleKind === '0' || f.particleKind === '1') {
@@ -66,15 +64,6 @@ export function buildSeriesListGridifyFilter(f: SeriesFilterForm): string {
     parts.push(`NumericalConcentrationTo>=${cMin}`);
   } else if (!empty(cMax)) {
     parts.push(`NumericalConcentrationFrom<=${cMax}`);
-  }
-
-  const crFrom = f.createdFrom.trim();
-  const crTo = f.createdTo.trim();
-  if (!empty(crFrom)) {
-    parts.push(`created_at>=${crFrom}T00:00:00`);
-  }
-  if (!empty(crTo)) {
-    parts.push(`created_at<=${crTo}T23:59:59.999`);
   }
 
   return joinAnd(parts);

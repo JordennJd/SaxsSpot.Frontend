@@ -18,8 +18,6 @@ const defaultForm: SeriesFilterForm = {
   globalSizeMax: '',
   concentrationMin: '',
   concentrationMax: '',
-  createdFrom: '',
-  createdTo: '',
 };
 
 export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) => {
@@ -138,29 +136,8 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
           {num('Concentration (max)', 'concentrationMax')}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-300">
-            <span>Series created from</span>
-            <input
-              type="date"
-              value={f.createdFrom}
-              onChange={(e) => setF((prev) => ({ ...prev, createdFrom: e.target.value }))}
-              className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2 py-1.5 text-sm text-gray-900 dark:text-gray-100"
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-300">
-            <span>Series created to</span>
-            <input
-              type="date"
-              value={f.createdTo}
-              onChange={(e) => setF((prev) => ({ ...prev, createdTo: e.target.value }))}
-              className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2 py-1.5 text-sm text-gray-900 dark:text-gray-100"
-            />
-          </label>
-        </div>
-
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Range filters use overlap logic for series intervals. Dates are based on series creation time (UTC).
+          Range filters use overlap logic for series intervals.
         </p>
       </div>
     </form>
