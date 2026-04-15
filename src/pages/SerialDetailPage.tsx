@@ -16,7 +16,6 @@ import {runRadialAnalysis, fetchNanosystemList, fetchRadialAnalysisList, updateS
 import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
 import {RadialAnalysisDetailsCard} from '../features/nanosystems/components/RadialAnalysisCard.tsx';
 import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader, RadialAnalysisModal} from '../components/series';
-import {NanosystemListFilters} from '../features/nanosystems/components/NanosystemListFilters';
 import {NanosystemViewer3DModal} from '../features/nanosystem-viewer/NanosystemViewer3DModal';
 import {
   useCalculationsData,
@@ -35,7 +34,6 @@ export const SeriesDetailPage = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useToastContext();
   const [page, setPage] = useState(1);
-  const [nanoListGridify, setNanoListGridify] = useState('');
   const [calculationPage] = useState(1);
   const pageSize = 100;
 
@@ -104,7 +102,6 @@ export const SeriesDetailPage = () => {
     seriesId,
     page,
     pageSize,
-    nanoListGridify,
   );
   const { data: calculations, isLoading: isCalculationsLoading, isError: isCalculationsError } = useCalculationsData(
     selectedNanosystem?.id,
@@ -669,13 +666,6 @@ export const SeriesDetailPage = () => {
           </div>
         )}
       </div>
-
-      <NanosystemListFilters
-        onApply={(fragment) => {
-          setNanoListGridify(fragment);
-          setPage(1);
-        }}
-      />
 
       <NanosystemsTable
         nanosystems={nanosystems as ApiResponseListNanosystemDto}

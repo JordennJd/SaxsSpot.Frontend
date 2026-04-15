@@ -8,10 +8,6 @@ export type SeriesFilterForm = {
   particleKind: '' | '0' | '1';
   particleCountMin: string;
   particleCountMax: string;
-  kMin: string;
-  kMax: string;
-  thetaMin: string;
-  thetaMax: string;
   globalSizeMin: string;
   globalSizeMax: string;
   concentrationMin: string;
@@ -52,26 +48,6 @@ export function buildSeriesListGridifyFilter(f: SeriesFilterForm): string {
     parts.push(`ParticleCountFrom<=${pcMax}`);
   }
 
-  const kMin = f.kMin.trim();
-  const kMax = f.kMax.trim();
-  if (!empty(kMin) && !empty(kMax)) {
-    parts.push(`KFrom<=${kMax}`, `KTo>=${kMin}`);
-  } else if (!empty(kMin)) {
-    parts.push(`KTo>=${kMin}`);
-  } else if (!empty(kMax)) {
-    parts.push(`KFrom<=${kMax}`);
-  }
-
-  const tMin = f.thetaMin.trim();
-  const tMax = f.thetaMax.trim();
-  if (!empty(tMin) && !empty(tMax)) {
-    parts.push(`ThetaFrom<=${tMax}`, `ThetaTo>=${tMin}`);
-  } else if (!empty(tMin)) {
-    parts.push(`ThetaTo>=${tMin}`);
-  } else if (!empty(tMax)) {
-    parts.push(`ThetaFrom<=${tMax}`);
-  }
-
   const gsMin = f.globalSizeMin.trim();
   const gsMax = f.globalSizeMax.trim();
   if (!empty(gsMin) && !empty(gsMax)) {
@@ -95,10 +71,10 @@ export function buildSeriesListGridifyFilter(f: SeriesFilterForm): string {
   const crFrom = f.createdFrom.trim();
   const crTo = f.createdTo.trim();
   if (!empty(crFrom)) {
-    parts.push(`CreatedAt>=${crFrom}T00:00:00`);
+    parts.push(`created_at>=${crFrom}T00:00:00`);
   }
   if (!empty(crTo)) {
-    parts.push(`CreatedAt<=${crTo}T23:59:59.999`);
+    parts.push(`created_at<=${crTo}T23:59:59.999`);
   }
 
   return joinAnd(parts);

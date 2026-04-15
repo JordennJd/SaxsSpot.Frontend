@@ -29,5 +29,5 @@ export const fetchJobs =
 };
 
 export const markJobIrrelevant = async (jobRecordId: string): Promise<void> => {
-    await jobApiClient.post(`/jobs/${jobRecordId}/mark-irrelevant`);
+    await jobApiClient.post(`/jobs/${jobRecordId}/mark-irrelevant`, {});
 };

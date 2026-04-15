@@ -14,10 +14,6 @@ const defaultForm: SeriesFilterForm = {
   particleKind: '',
   particleCountMin: '',
   particleCountMax: '',
-  kMin: '',
-  kMax: '',
-  thetaMin: '',
-  thetaMax: '',
   globalSizeMin: '',
   globalSizeMax: '',
   concentrationMin: '',
@@ -48,10 +44,6 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
       SeriesFilterForm,
       | 'particleCountMin'
       | 'particleCountMax'
-      | 'kMin'
-      | 'kMax'
-      | 'thetaMin'
-      | 'thetaMax'
       | 'globalSizeMin'
       | 'globalSizeMax'
       | 'concentrationMin'
@@ -140,10 +132,6 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {num('Particles (min range)', 'particleCountMin')}
           {num('Particles (max range)', 'particleCountMax')}
-          {num('k (min)', 'kMin')}
-          {num('k (max)', 'kMax')}
-          {num('theta (min)', 'thetaMin')}
-          {num('theta (max)', 'thetaMax')}
           {num('Size, nm (min)', 'globalSizeMin')}
           {num('Size, nm (max)', 'globalSizeMax')}
           {num('Concentration (min)', 'concentrationMin')}
