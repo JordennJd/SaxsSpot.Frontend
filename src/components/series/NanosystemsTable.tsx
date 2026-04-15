@@ -1,5 +1,6 @@
 import {type ApiResponseListNanosystemDto, type NanosystemDto} from '../../features/nanosystems/api/nanosystemTypes';
 import { Pagination } from '../ui/Pagination';
+import { formatDateTime } from '@/lib/utils';
 
 interface NanosystemsTableProps {
   nanosystems: ApiResponseListNanosystemDto;
@@ -101,7 +102,7 @@ export const NanosystemsTable = ({
                   className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer"
                   onClick={() => onNanosystemClick(system)}
                 >
-                  {system.generationStart}
+                  {formatDateTime(system.generationStart)}
                 </td>
                 <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -160,7 +161,7 @@ export const NanosystemsTable = ({
             </div>
             {system.generationStart && (
               <div className="mt-2 text-xs text-gray-500">
-                Generated: {system.generationStart}
+                Generated: {formatDateTime(system.generationStart)}
               </div>
             )}
           </div>

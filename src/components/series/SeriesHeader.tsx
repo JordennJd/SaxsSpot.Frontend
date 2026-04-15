@@ -8,6 +8,7 @@ interface ParameterBlockProps {
 
 interface SeriesHeaderProps {
   series: NanosystemSeriesDto;
+  generationDuration?: string;
 }
 
 const ParameterBlock = ({ title, value, icon }: ParameterBlockProps) => (
@@ -22,7 +23,7 @@ const ParameterBlock = ({ title, value, icon }: ParameterBlockProps) => (
   </div>
 );
 
-export const SeriesHeader = ({ series }: SeriesHeaderProps) => (
+export const SeriesHeader = ({ series, generationDuration = '—' }: SeriesHeaderProps) => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
     <div className="bg-gradient-to-r from-blue-800 to-indigo-800 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
       <h2 className="text-base sm:text-lg md:text-xl font-bold text-white break-words">Series: {series.id}</h2>
@@ -64,6 +65,11 @@ export const SeriesHeader = ({ series }: SeriesHeaderProps) => (
         title="Theta"
         value={`${series.thetaFrom} - ${series.thetaTo}`}
         icon="∠"
+      />
+      <ParameterBlock
+        title="Generation Duration"
+        value={generationDuration}
+        icon="⏱️"
       />
     </div>
   </div>

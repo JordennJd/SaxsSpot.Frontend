@@ -1,7 +1,9 @@
 import {type Job, JobStatus} from '../api/jobTypes.ts';
 import {useState} from 'react';
 import {cancelOperation} from '@/features/nanosystems/api/nanosystemApi';
+import {markJobIrrelevant} from '../api/jobApi';
 import {useToast} from '@/hooks/useToast';
+import { formatDateTime, formatDateTimeCompact } from '@/lib/utils';
 
 interface InputJobCard {
     job: Job;
@@ -26,6 +28,7 @@ function getDisplayProgress(job: Job): number | null {
 export const JobCard = ({ job, onCancel }: InputJobCard) => {
     const [isExpanded, setIsExpanded] = useState<boolean>(false);
     const [isCancelling, setIsCancelling] = useState<boolean>(false);
+    const [isHiding, setIsHiding] = useState<boolean>(false);
     const {showToast} = useToast();
 
     const statusColors: Record<JobStatus, string> = {
@@ -49,6 +52,24 @@ export const JobCard = ({ job, onCancel }: InputJobCard) => {
     const canCancel = (job.status === JobStatus.Enum.StatusRunning || 
                       job.status === JobStatus.Enum.StatusPending) &&
                       SUPPORTED_OPERATION_TYPES.includes(job.jobType);
+
+    const handleMarkIrrelevant = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (job.isIrrelevant) return;
+        setIsHiding(true);
+        try {
+            await markJobIrrelevant(job.id);
+            showToast('success', { title: 'Задача скрыта из списка' });
+            onCancel?.();
+        } catch (error) {
+            showToast('error', {
+                title: 'Не удалось пометить задачу',
+                message: error instanceof Error ? error.message : 'Unknown error',
+            });
+        } finally {
+            setIsHiding(false);
+        }
+    };
 
     const handleCancel = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -107,6 +128,17 @@ export const JobCard = ({ job, onCancel }: InputJobCard) => {
                     )}
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
+                    {!job.isIrrelevant && (
+                        <button
+                            type="button"
+                            onClick={handleMarkIrrelevant}
+                            disabled={isHiding}
+                            className="px-3 py-1.5 sm:px-3 sm:py-1 text-xs font-medium text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50 rounded-md transition-colors touch-manipulation min-h-[32px] sm:min-h-0"
+                            title="Скрыть задачу из списка (неактуальна)"
+                        >
+                            {isHiding ? '…' : 'Неактуально'}
+                        </button>
+                    )}
                     {canCancel && (
                         <button
                             onClick={handleCancel}
@@ -128,14 +160,9 @@ export const JobCard = ({ job, onCancel }: InputJobCard) => {
                 <p className="break-words">
                     <span className="font-medium">Created:</span>{' '}
                     <span className="text-gray-500 dark:text-gray-400">
-                        <span className="hidden sm:inline">{new Date(job.createdAt).toLocaleString()}</span>
+                        <span className="hidden sm:inline">{formatDateTime(job.createdAt)}</span>
                         <span className="sm:hidden">
-                            {new Date(job.createdAt).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                            })}
+                            {formatDateTimeCompact(job.createdAt)}
                         </span>
                     </span>
                 </p>
@@ -143,14 +170,9 @@ export const JobCard = ({ job, onCancel }: InputJobCard) => {
                     <p className="break-words">
                         <span className="font-medium">Started:</span>{' '}
                         <span className="text-gray-500 dark:text-gray-400">
-                            <span className="hidden sm:inline">{new Date(job.startedAt).toLocaleString()}</span>
+                            <span className="hidden sm:inline">{formatDateTime(job.startedAt)}</span>
                             <span className="sm:hidden">
-                                {new Date(job.startedAt).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                })}
+                                {formatDateTimeCompact(job.startedAt)}
                             </span>
                         </span>
                     </p>
@@ -159,14 +181,9 @@ export const JobCard = ({ job, onCancel }: InputJobCard) => {
                     <p className="break-words">
                         <span className="font-medium">Finished:</span>{' '}
                         <span className="text-gray-500 dark:text-gray-400">
-                            <span className="hidden sm:inline">{new Date(job.finishedAt).toLocaleString()}</span>
+                            <span className="hidden sm:inline">{formatDateTime(job.finishedAt)}</span>
                             <span className="sm:hidden">
-                                {new Date(job.finishedAt).toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                })}
+                                {formatDateTimeCompact(job.finishedAt)}
                             </span>
                         </span>
                     </p>

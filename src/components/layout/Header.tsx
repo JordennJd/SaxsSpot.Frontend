@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { formatDateOnly } from '@/lib/utils';
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -108,7 +109,7 @@ export const Header = () => {
       <div className="bg-white bg-opacity-20 text-xs text-blue-100 py-1 px-3 sm:px-4 font-mono">
         <div className="container mx-auto flex flex-col sm:flex-row justify-between gap-1 sm:gap-0">
           <span className="truncate">Status: <span className="text-green-400">Online</span></span>
-          <span className="hidden sm:inline">Last: {new Date().toLocaleDateString()}</span>
+          <span className="hidden sm:inline">Last: {formatDateOnly(new Date())}</span>
           <span className="hidden md:inline">v1.0.0</span>
         </div>
       </div>

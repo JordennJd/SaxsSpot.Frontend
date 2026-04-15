@@ -1,5 +1,8 @@
 import { useState } from 'react';
 
+/** Must match SaxsSpot.NanoSystemService DeleteNanosystemHandler.RequiredPassword */
+export const DELETE_GUARD_PASSWORD = 'Pass123$';
+
 interface DeleteConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,7 +28,7 @@ export const DeleteConfirmDialog = ({
   if (!isOpen) return null;
 
   const handleConfirm = async () => {
-    if (requirePassword && password !== '123') {
+    if (requirePassword && password !== DELETE_GUARD_PASSWORD) {
       setError('Invalid password');
       return;
     }

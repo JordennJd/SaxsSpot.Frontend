@@ -17,6 +17,7 @@ import {
   Squares2X2Icon,
   CubeTransparentIcon,
 } from '@heroicons/react/24/outline';
+import { formatDateTime } from '@/lib/utils';
 
 interface DetailItemProps {
   label: string;
@@ -151,9 +152,9 @@ export const NanosystemDetailsModal = ({
   ];
 
   const timeInfo = [
-    { label: 'Generation Start', value: nanosystem.generationStart, icon: ClockIcon },
-    { label: 'Generation End', value: nanosystem.generationEnd, icon: ClockIcon },
-    { label: 'Input Date', value: nanosystem.inputDate, icon: ClockIcon },
+    { label: 'Generation Start', value: formatDateTime(nanosystem.generationStart), icon: ClockIcon },
+    { label: 'Generation End', value: formatDateTime(nanosystem.generationEnd), icon: ClockIcon },
+    { label: 'Input Date', value: formatDateTime(nanosystem.inputDate), icon: ClockIcon },
   ];
 
   return (
@@ -293,7 +294,7 @@ export const NanosystemDetailsModal = ({
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
                                       <ClockIcon className="h-4 w-4 text-gray-400" />
-                                      <span className="text-sm font-medium text-gray-700">{calc.inputDate}</span>
+                                      <span className="text-sm font-medium text-gray-700">{formatDateTime(calc.inputDate)}</span>
                                     </div>
                                     <p className="text-xs font-mono text-blue-600 mb-1 truncate">{calc.id}</p>
                                     <p className="text-xs text-gray-500">
@@ -368,7 +369,7 @@ export const NanosystemDetailsModal = ({
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
                                       <ClockIcon className="h-4 w-4 text-gray-400" />
-                                      <span className="text-sm font-medium text-gray-700">{analysis.startDate}</span>
+                                      <span className="text-sm font-medium text-gray-700">{formatDateTime(analysis.startDate)}</span>
                                     </div>
                                     <p className="text-xs font-mono text-purple-600 mb-1 truncate">{analysis.id}</p>
                                     <p className="text-xs text-gray-500">

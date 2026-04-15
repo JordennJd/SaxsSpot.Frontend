@@ -42,10 +42,10 @@ export const NanosystemSeriesForm = () => {
       numericalConcentrationTo: 0.2,
       excessFrom: 1,
       excessTo: 1.1,
-      kFrom: 2,
-      kTo: 2,
-      thetaFrom: 3,
-      thetaTo: 3,
+      kFrom: 3,
+      kTo: 3,
+      thetaFrom: 0.4,
+      thetaTo: 0.4,
       pointCountFrom: 5000000,
       pointCountTo: 5000000
     }

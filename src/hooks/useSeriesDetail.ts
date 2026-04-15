@@ -23,16 +23,7 @@ const fetchNanosystems = async (
   page: number = 1,
   pageSize: number = 10,
 ): Promise<ApiResponseListNanosystemDto> => {
-  try {
-    const response = await fetchNanosystemList(gridifyQuery, page, pageSize);
-    if (response.result.data.length === 0) {
-      throw new Error('Nanosystem List query error');
-    }
-    return response;
-  } catch (e) {
-    console.log(e);
-    throw new Error('Nanosystem List query error');
-  }
+  return fetchNanosystemList(gridifyQuery, page, pageSize);
 };
 
 // Custom Hooks
@@ -43,11 +34,72 @@ export const useSeriesData = (seriesId: string) => {
   });
 };
 
-export const useNanosystemsData = (seriesId: string, page: number, pageSize: number) => {
+export const useNanosystemsData = (
+  seriesId: string,
+  page: number,
+  pageSize: number,
+  extraGridifyFilter?: string,
+) => {
+  const filter =
+    extraGridifyFilter && extraGridifyFilter.length > 0
+      ? `seriesId=${seriesId},${extraGridifyFilter}`
+      : `seriesId=${seriesId}`;
+
   return useQuery<ApiResponseListNanosystemDto>({
-    queryKey: ['nanosystems', seriesId, page, pageSize],
-    queryFn: () => fetchNanosystems(`seriesId=${seriesId}`, page, pageSize),
+    queryKey: ['nanosystems', seriesId, page, pageSize, extraGridifyFilter ?? ''],
+    queryFn: () => fetchNanosystems(filter, page, pageSize),
     placeholderData: (previousData) => previousData,
+    retry: 1,
+  });
+};
+
+interface SeriesGenerationWindow {
+  firstGenerationStart: string | null;
+  lastGenerationEnd: string | null;
+  nanosystemCount: number;
+}
+
+const fetchSeriesGenerationWindow = async (seriesId: string): Promise<SeriesGenerationWindow> => {
+  const filter = `seriesId=${seriesId}`;
+  const fetchPageSize = 200;
+  const firstPage = await fetchNanosystems(filter, 1, fetchPageSize);
+  const all = [...firstPage.result.data];
+  const totalCount = firstPage.result.count ?? all.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / fetchPageSize));
+
+  for (let page = 2; page <= totalPages; page += 1) {
+    const pageResponse = await fetchNanosystems(filter, page, fetchPageSize);
+    all.push(...pageResponse.result.data);
+  }
+
+  let minStart: Date | null = null;
+  let maxEnd: Date | null = null;
+
+  for (const item of all) {
+    const start = new Date(item.generationStart);
+    const end = new Date(item.generationEnd);
+
+    if (!Number.isNaN(start.getTime()) && (minStart === null || start < minStart)) {
+      minStart = start;
+    }
+
+    if (!Number.isNaN(end.getTime()) && (maxEnd === null || end > maxEnd)) {
+      maxEnd = end;
+    }
+  }
+
+  return {
+    firstGenerationStart: minStart?.toISOString() ?? null,
+    lastGenerationEnd: maxEnd?.toISOString() ?? null,
+    nanosystemCount: all.length,
+  };
+};
+
+export const useSeriesGenerationWindow = (seriesId: string) => {
+  return useQuery<SeriesGenerationWindow>({
+    queryKey: ['series-generation-window', seriesId],
+    queryFn: () => fetchSeriesGenerationWindow(seriesId),
+    enabled: !!seriesId,
     retry: 1,
   });
 };

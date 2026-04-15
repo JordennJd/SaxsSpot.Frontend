@@ -12,6 +12,7 @@ import {
     ScaleIcon,
     HashtagIcon,
 } from '@heroicons/react/24/outline';
+import { formatDateTime } from '@/lib/utils';
 
 export const CalculationDetailsCard = ({
                                            calculation,
@@ -87,9 +88,9 @@ export const CalculationDetailsCard = ({
     });
 
     const timeInfo = [
-        { label: 'Input Date', value: calculation.inputDate, icon: CalendarIcon },
-        { label: 'Calculation Start', value: calculation.calculateStart, icon: CalendarIcon },
-        { label: 'Calculation End', value: calculation.calculateEnd, icon: CalendarIcon },
+        { label: 'Input Date', value: formatDateTime(calculation.inputDate), icon: CalendarIcon },
+        { label: 'Calculation Start', value: formatDateTime(calculation.calculateStart), icon: CalendarIcon },
+        { label: 'Calculation End', value: formatDateTime(calculation.calculateEnd), icon: CalendarIcon },
     ];
 
     return (

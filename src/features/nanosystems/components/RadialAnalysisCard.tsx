@@ -12,6 +12,7 @@ import {
     ChartBarIcon,
     ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
+import { formatDateTime } from '@/lib/utils';
 
 export const RadialAnalysisDetailsCard = ({
     analysis,
@@ -55,8 +56,8 @@ export const RadialAnalysisDetailsCard = ({
     ];
 
     const timeInfo = [
-        { label: 'Start Date', value: analysis.startDate, icon: CalendarIcon },
-        { label: 'End Date', value: analysis.endDate || 'N/A', icon: CalendarIcon },
+        { label: 'Start Date', value: formatDateTime(analysis.startDate), icon: CalendarIcon },
+        { label: 'End Date', value: formatDateTime(analysis.endDate), icon: CalendarIcon },
     ];
 
     return (

@@ -1,5 +1,6 @@
-import {useEffect, useState, useCallback} from 'react';
+import {useEffect, useState, useCallback, useMemo} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
+import {useQueryClient} from '@tanstack/react-query';
 import {useToastContext} from '../contexts/ToastContext';
 
 import {type ApiResponseListNanosystemDto, type NanosystemDto, type RadialAnalysisDto} from '../features/nanosystems/api/nanosystemTypes';
@@ -11,19 +12,30 @@ import type {
   SeriesCalculationGroupDto,
 } from '../features/calculation/api/calculationTypes.ts';
 import {fetchSeriesCalculationGroups, RunCalculation, RunSeriesCalculation} from '../features/calculation/api/calculationApi.ts';
-import {runRadialAnalysis, fetchNanosystemList, fetchRadialAnalysisList, type RunRadialAnalysisRequest} from '../features/nanosystems/api/nanosystemApi.ts';
+import {runRadialAnalysis, fetchNanosystemList, fetchRadialAnalysisList, updateSeriesComment, type RunRadialAnalysisRequest} from '../features/nanosystems/api/nanosystemApi.ts';
 import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
 import {RadialAnalysisDetailsCard} from '../features/nanosystems/components/RadialAnalysisCard.tsx';
 import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader, RadialAnalysisModal} from '../components/series';
+import {NanosystemListFilters} from '../features/nanosystems/components/NanosystemListFilters';
 import {NanosystemViewer3DModal} from '../features/nanosystem-viewer/NanosystemViewer3DModal';
-import {useCalculationsData, useNanosystemsData, useSeriesData, useRadialAnalysisData} from '../hooks/useSeriesDetail';
+import {
+  useCalculationsData,
+  useNanosystemsData,
+  useSeriesData,
+  useRadialAnalysisData,
+  useSeriesGenerationWindow,
+} from '../hooks/useSeriesDetail';
 import {downloadNanosystem} from '../utils/seriesUtils';
+
+const MAX_SERIES_COMMENT_LENGTH = 8000;
 
 export const SeriesDetailPage = () => {
   const { guid: seriesId = '' } = useParams<{ guid: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { showSuccess, showError } = useToastContext();
   const [page, setPage] = useState(1);
+  const [nanoListGridify, setNanoListGridify] = useState('');
   const [calculationPage] = useState(1);
   const pageSize = 100;
 
@@ -42,6 +54,9 @@ export const SeriesDetailPage = () => {
   const [seriesScatteringGroups, setSeriesScatteringGroups] = useState<SeriesCalculationGroupDto[]>([]);
   const [selectedSeriesScatteringGroupId, setSelectedSeriesScatteringGroupId] = useState<string | null>(null);
   const [is3DModalOpen, setIs3DModalOpen] = useState(false);
+  const [seriesTab, setSeriesTab] = useState<'main' | 'comment'>('main');
+  const [commentDraft, setCommentDraft] = useState('');
+  const [isSavingComment, setIsSavingComment] = useState(false);
 
   // Calculation parameters
   const [calculationParams, setCalculationParams] = useState<RunCalculationRequest>({
@@ -80,7 +95,17 @@ export const SeriesDetailPage = () => {
 
   // Data fetching
   const { data: series, isLoading: isSeriesLoading } = useSeriesData(seriesId);
-  const { data: nanosystems, isLoading: isNanosystemsLoading } = useNanosystemsData(seriesId, page, pageSize);
+  const { data: generationWindow } = useSeriesGenerationWindow(seriesId);
+
+  useEffect(() => {
+    if (series) setCommentDraft(series.comment ?? '');
+  }, [series?.id, series?.comment]);
+  const { data: nanosystems, isLoading: isNanosystemsLoading } = useNanosystemsData(
+    seriesId,
+    page,
+    pageSize,
+    nanoListGridify,
+  );
   const { data: calculations, isLoading: isCalculationsLoading, isError: isCalculationsError } = useCalculationsData(
     selectedNanosystem?.id,
     calculationPage,
@@ -91,6 +116,31 @@ export const SeriesDetailPage = () => {
     calculationPage,
     pageSize,
   );
+
+  const seriesGenerationDuration = useMemo(() => {
+    const first = generationWindow?.firstGenerationStart ? new Date(generationWindow.firstGenerationStart) : null;
+    const last = generationWindow?.lastGenerationEnd ? new Date(generationWindow.lastGenerationEnd) : null;
+
+    if (!first || !last) return '—';
+    if (Number.isNaN(first.getTime()) || Number.isNaN(last.getTime())) return '—';
+
+    const diffMs = last.getTime() - first.getTime();
+    if (diffMs < 0) return '—';
+
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const parts: string[] = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    parts.push(`${seconds}s`);
+
+    return parts.join(' ');
+  }, [generationWindow?.firstGenerationStart, generationWindow?.lastGenerationEnd]);
 
   useEffect(() => {
     const loadSeriesGroups = async () => {
@@ -115,6 +165,26 @@ export const SeriesDetailPage = () => {
   const selectedSeriesScatteringGroup = seriesScatteringGroups.find(
     (g) => g.groupId === selectedSeriesScatteringGroupId,
   );
+
+  const handleSaveComment = useCallback(async () => {
+    if (!seriesId) return;
+    setIsSavingComment(true);
+    try {
+      const trimmed = commentDraft.trim();
+      await updateSeriesComment({
+        seriesId,
+        comment: trimmed.length > 0 ? trimmed : null,
+      });
+      await queryClient.invalidateQueries({ queryKey: ['series', seriesId] });
+      await queryClient.invalidateQueries({ queryKey: ['nanosystem-series-list'] });
+      showSuccess('Комментарий', 'Сохранено.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Не удалось сохранить комментарий.';
+      showError('Комментарий', message);
+    } finally {
+      setIsSavingComment(false);
+    }
+  }, [seriesId, commentDraft, queryClient, showSuccess, showError]);
 
   // Event handlers
   const openNanosystemDetails = (system: NanosystemDto) => {
@@ -367,8 +437,67 @@ export const SeriesDetailPage = () => {
 
   return (
     <div className="space-y-6">
-      <SeriesHeader series={series} />
-      
+      <SeriesHeader series={series} generationDuration={seriesGenerationDuration} />
+
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="flex gap-1" aria-label="Разделы серии">
+          <button
+            type="button"
+            onClick={() => setSeriesTab('main')}
+            className={`px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 -mb-px transition-colors ${
+              seriesTab === 'main'
+                ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-300'
+                : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+            }`}
+          >
+            Серия
+          </button>
+          <button
+            type="button"
+            onClick={() => setSeriesTab('comment')}
+            className={`px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 -mb-px transition-colors ${
+              seriesTab === 'comment'
+                ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-300'
+                : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
+            }`}
+          >
+            Комментарий
+          </button>
+        </nav>
+      </div>
+
+      {seriesTab === 'comment' ? (
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+          <label htmlFor="series-comment" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            Текст комментария
+          </label>
+          <textarea
+            id="series-comment"
+            value={commentDraft}
+            onChange={(e) => setCommentDraft(e.target.value.slice(0, MAX_SERIES_COMMENT_LENGTH))}
+            rows={14}
+            maxLength={MAX_SERIES_COMMENT_LENGTH}
+            placeholder="Добавьте заметку к этой серии…"
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y min-h-[200px]"
+          />
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {commentDraft.length} / {MAX_SERIES_COMMENT_LENGTH}
+            </span>
+            <button
+              type="button"
+              onClick={handleSaveComment}
+              disabled={isSavingComment}
+              className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+            >
+              {isSavingComment ? 'Сохранение…' : 'Сохранить'}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {seriesTab === 'main' ? (
+        <>
       {/* Calculation Action Section */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -541,6 +670,13 @@ export const SeriesDetailPage = () => {
         )}
       </div>
 
+      <NanosystemListFilters
+        onApply={(fragment) => {
+          setNanoListGridify(fragment);
+          setPage(1);
+        }}
+      />
+
       <NanosystemsTable
         nanosystems={nanosystems as ApiResponseListNanosystemDto}
         isLoading={isNanosystemsLoading}
@@ -549,7 +685,8 @@ export const SeriesDetailPage = () => {
         pageSize={pageSize}
         onPageChange={setPage}
       />
-
+        </>
+      ) : null}
 
       <NanosystemDetailsModal
         nanosystem={selectedNanosystem}

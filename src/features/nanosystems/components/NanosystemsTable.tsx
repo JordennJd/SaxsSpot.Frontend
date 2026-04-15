@@ -7,7 +7,8 @@ import type {NanosystemSeriesDto} from '../api/nanosystemTypes.ts';
 import {EyeIcon} from '@heroicons/react/16/solid';
 import { deleteSeries } from '../api/nanosystemApi';
 import { useToastContext } from '@/contexts/ToastContext';
-import { DeleteConfirmDialog } from '@/components/ui/DeleteConfirmDialog';
+import { DeleteConfirmDialog, DELETE_GUARD_PASSWORD } from '@/components/ui/DeleteConfirmDialog';
+import { formatDateTime } from '@/lib/utils';
 
 interface NanosystemsTableProps {
   initialPage?: number
@@ -31,8 +32,8 @@ export const NanosystemsTable: React.FC<NanosystemsTableProps> = ({
 
   const handleDeleteSeries = async (password?: string) => {
     if (!seriesToDelete) return;
-    if (!password || password !== '123') {
-      showError('Password Required', 'Password "123" is required to delete a series.');
+    if (!password || password !== DELETE_GUARD_PASSWORD) {
+      showError('Password Required', 'Enter the configured delete password to confirm.');
       return;
     }
     try {
@@ -64,7 +65,12 @@ export const NanosystemsTable: React.FC<NanosystemsTableProps> = ({
             </div>
           </div>
           <div>
-            <NanosystemFilters onFilterChange={setSearchQuery}></NanosystemFilters>
+            <NanosystemFilters
+              onFilterChange={(q) => {
+                setSearchQuery(q);
+                setPage(1);
+              }}
+            />
           </div>
         </div>
 
@@ -154,6 +160,8 @@ const TableHeader = () => (
       <TableHeaderCell>Size (nm)</TableHeaderCell>
       <TableHeaderCell>Concentration</TableHeaderCell>
       <TableHeaderCell>Excess</TableHeaderCell>
+      <TableHeaderCell>Comment</TableHeaderCell>
+      <TableHeaderCell>Created</TableHeaderCell>
       <TableHeaderCell>Actions</TableHeaderCell>
     </tr>
   </thead>
@@ -175,6 +183,16 @@ const TableRow = ({ data, onDelete }: { data: NanosystemSeriesDto; onDelete?: (s
     </TableCell>
     <TableCell>
       {data.excessFrom} - {data.excessTo}
+    </TableCell>
+    <TableCell className="max-w-[12rem] whitespace-normal">
+      <span className="line-clamp-2 break-words" title={data.comment ?? undefined}>
+        {data.comment?.trim() ? data.comment.trim() : '—'}
+      </span>
+    </TableCell>
+    <TableCell className="whitespace-normal">
+      <span className="text-xs text-gray-600 dark:text-gray-400">
+        {data.createdAt ? formatDateTime(data.createdAt) : '—'}
+      </span>
     </TableCell>
     <TableCell>
       <div className="flex items-center gap-2">
@@ -269,6 +287,18 @@ const MobileCardRow = ({ data, onDelete }: { data: NanosystemSeriesDto; onDelete
             {data.excessFrom} - {data.excessTo}
           </span>
         </div>
+        <div className="col-span-2">
+          <span className="text-gray-500 dark:text-gray-400">Комментарий:</span>
+          <span className="ml-1 font-medium text-gray-800 dark:text-gray-200 line-clamp-2 break-words">
+            {data.comment?.trim() || '—'}
+          </span>
+        </div>
+        <div className="col-span-2">
+          <span className="text-gray-500 dark:text-gray-400">Создана:</span>
+          <span className="ml-1 font-medium text-gray-800 dark:text-gray-200">
+            {data.createdAt ? formatDateTime(data.createdAt) : '—'}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -281,8 +311,10 @@ const TableHeaderCell = ({ children }: { children: React.ReactNode }) => (
   </th>
 );
 
-const TableCell = ({ children }: { children: React.ReactNode }) => (
-  <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200 transition-colors duration-150">
+const TableCell = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <td
+    className={`px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200 transition-colors duration-150 ${className}`}
+  >
     {children}
   </td>
 );

@@ -27,3 +27,7 @@ export const fetchJobs =
 
     return z.array(JobSchema).parse(response.data.data);
 };
+
+export const markJobIrrelevant = async (jobRecordId: string): Promise<void> => {
+    await jobApiClient.post(`/jobs/${jobRecordId}/mark-irrelevant`);
+};

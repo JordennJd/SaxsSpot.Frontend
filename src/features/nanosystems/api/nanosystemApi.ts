@@ -323,6 +323,23 @@ export const deleteSeries = async (
   }
 };
 
+export interface UpdateSeriesCommentRequest {
+  seriesId: string;
+  comment: string | null;
+}
+
+export const updateSeriesComment = async (request: UpdateSeriesCommentRequest): Promise<void> => {
+  try {
+    await nanosystemApiClient.patch('/nanosystem/update-series-comment', {
+      seriesId: request.seriesId,
+      comment: request.comment,
+    });
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
+  }
+};
+
 /**
  * Fetch particle coordinates for 3D visualization.
  * Backend endpoint: GET /api/nanosystem/get-particles?nanosystemId=...&skip=0&take=10000&particleKind=0

@@ -41,6 +41,8 @@ export const NanosystemSeriesDtoSchema = z.object({
   kTo: z.number(),
   thetaFrom: z.number(),
   thetaTo: z.number(),
+  comment: z.string().nullable().optional(),
+  createdAt: z.string().nullish(),
 });
 
 export type NanosystemSeriesDto = z.infer<typeof NanosystemSeriesDtoSchema>;

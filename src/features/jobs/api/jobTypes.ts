@@ -38,6 +38,7 @@ export const JobSchema = z.object({
     started_at: z.string().pipe(z.coerce.date()).nullable(),
     finished_at: z.string().pipe(z.coerce.date()).nullable(),
     user_id: uuidSchema,
+    is_irrelevant: z.boolean().optional(),
 })
     .transform((data) => ({
         // Преобразуем в camelCase для TypeScript
@@ -52,6 +53,7 @@ export const JobSchema = z.object({
         startedAt: data.started_at,
         finishedAt: data.finished_at,
         userId: data.user_id,
+        isIrrelevant: data.is_irrelevant ?? false,
     }));
 
 

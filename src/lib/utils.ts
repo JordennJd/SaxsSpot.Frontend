@@ -3,16 +3,53 @@ export function cn(...inputs: (string | undefined | null | false)[]): string {
   return inputs.filter(Boolean).join(' ');
 }
 
-// Format date to readable string
-export function formatDate(date: string | Date): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toLocaleDateString('en-US', {
-    year: 'numeric',
+const displayLocale =
+  typeof navigator !== 'undefined' && navigator.language ? navigator.language : 'ru-RU';
+
+function parseToDate(value: string | Date | null | undefined): Date | null {
+  if (value == null || value === '') return null;
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/** Дата и время в «человеческом» виде (локаль браузера, например 14 апреля 2026 г., 15:30). */
+export function formatDateTime(value: string | Date | null | undefined): string {
+  const d = parseToDate(value);
+  if (!d) return '—';
+  return new Intl.DateTimeFormat(displayLocale, {
+    dateStyle: 'long',
+    timeStyle: 'short',
+  }).format(d);
+}
+
+/** Только дата (без времени). */
+export function formatDateOnly(value: string | Date | null | undefined): string {
+  const d = parseToDate(value);
+  if (!d) return '—';
+  return new Intl.DateTimeFormat(displayLocale, {
+    dateStyle: 'long',
+  }).format(d);
+}
+
+/** Узкий вариант: короткий месяц + дата + время. */
+export function formatDateTimeCompact(value: string | Date | null | undefined): string {
+  const d = parseToDate(value);
+  if (!d) return '—';
+  return new Intl.DateTimeFormat(displayLocale, {
     month: 'short',
     day: 'numeric',
+    year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  });
+  }).format(d);
+}
+
+/** @deprecated Используйте formatDateTime. */
+export function formatDate(date: string | Date): string {
+  return formatDateTime(date);
 }
 
 // Format file size
