@@ -177,10 +177,10 @@ export const SeriesDetailPage = () => {
       });
       await queryClient.invalidateQueries({ queryKey: ['series', seriesId] });
       await queryClient.invalidateQueries({ queryKey: ['nanosystem-series-list'] });
-      showSuccess('Комментарий', 'Сохранено.');
+      showSuccess('Comment', 'Saved.');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Не удалось сохранить комментарий.';
-      showError('Комментарий', message);
+      const message = error instanceof Error ? error.message : 'Failed to save comment.';
+      showError('Comment', message);
     } finally {
       setIsSavingComment(false);
     }
@@ -440,7 +440,7 @@ export const SeriesDetailPage = () => {
       <SeriesHeader series={series} generationDuration={seriesGenerationDuration} />
 
       <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="flex gap-1" aria-label="Разделы серии">
+        <nav className="flex gap-1" aria-label="Series sections">
           <button
             type="button"
             onClick={() => setSeriesTab('main')}
@@ -450,7 +450,7 @@ export const SeriesDetailPage = () => {
                 : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
-            Серия
+            Series
           </button>
           <button
             type="button"
@@ -461,7 +461,7 @@ export const SeriesDetailPage = () => {
                 : 'border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
-            Комментарий
+            Comment
           </button>
         </nav>
       </div>
@@ -469,7 +469,7 @@ export const SeriesDetailPage = () => {
       {seriesTab === 'comment' ? (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
           <label htmlFor="series-comment" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Текст комментария
+            Comment text
           </label>
           <textarea
             id="series-comment"
@@ -477,7 +477,7 @@ export const SeriesDetailPage = () => {
             onChange={(e) => setCommentDraft(e.target.value.slice(0, MAX_SERIES_COMMENT_LENGTH))}
             rows={14}
             maxLength={MAX_SERIES_COMMENT_LENGTH}
-            placeholder="Добавьте заметку к этой серии…"
+            placeholder="Add a note for this series..."
             className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y min-h-[200px]"
           />
           <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
@@ -490,7 +490,7 @@ export const SeriesDetailPage = () => {
               disabled={isSavingComment}
               className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             >
-              {isSavingComment ? 'Сохранение…' : 'Сохранить'}
+              {isSavingComment ? 'Saving...' : 'Save'}
             </button>
           </div>
         </div>

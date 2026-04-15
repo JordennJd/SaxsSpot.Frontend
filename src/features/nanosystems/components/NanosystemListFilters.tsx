@@ -53,28 +53,28 @@ export const NanosystemListFilters = ({ onApply }: NanosystemListFiltersProps) =
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40 p-4 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Фильтр наносистем</h3>
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Nanosystem filters</h3>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={reset}
             className="px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
           >
-            Сбросить
+            Reset
           </button>
           <button
             type="button"
             onClick={apply}
             className="px-3 py-1.5 text-xs font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700"
           >
-            Применить
+            Apply
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {num('Частиц ≥', 'particleCountMin')}
-        {num('Частиц ≤', 'particleCountMax')}
+        {num('Particles ≥', 'particleCountMin')}
+        {num('Particles ≤', 'particleCountMax')}
         {num('k ≥', 'kMin')}
         {num('k ≤', 'kMax')}
         {num('θ ≥', 'thetaMin')}
@@ -83,7 +83,7 @@ export const NanosystemListFilters = ({ onApply }: NanosystemListFiltersProps) =
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <label className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-300">
-          <span>Дата ввода (с)</span>
+          <span>Input date from</span>
           <input
             type="date"
             value={f.inputDateFrom}
@@ -92,7 +92,7 @@ export const NanosystemListFilters = ({ onApply }: NanosystemListFiltersProps) =
           />
         </label>
         <label className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-300">
-          <span>Дата ввода (по)</span>
+          <span>Input date to</span>
           <input
             type="date"
             value={f.inputDateTo}

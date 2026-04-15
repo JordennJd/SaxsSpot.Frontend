@@ -59,11 +59,11 @@ export const JobCard = ({ job, onCancel }: InputJobCard) => {
         setIsHiding(true);
         try {
             await markJobIrrelevant(job.id);
-            showToast('success', { title: 'Задача скрыта из списка' });
+            showToast('success', { title: 'Task hidden from list' });
             onCancel?.();
         } catch (error) {
             showToast('error', {
-                title: 'Не удалось пометить задачу',
+                title: 'Failed to mark task',
                 message: error instanceof Error ? error.message : 'Unknown error',
             });
         } finally {
@@ -134,9 +134,9 @@ export const JobCard = ({ job, onCancel }: InputJobCard) => {
                             onClick={handleMarkIrrelevant}
                             disabled={isHiding}
                             className="px-3 py-1.5 sm:px-3 sm:py-1 text-xs font-medium text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50 rounded-md transition-colors touch-manipulation min-h-[32px] sm:min-h-0"
-                            title="Скрыть задачу из списка (неактуальна)"
+                            title="Hide task from list (irrelevant)"
                         >
-                            {isHiding ? '…' : 'Неактуально'}
+                            {isHiding ? '…' : 'Irrelevant'}
                         </button>
                     )}
                     {canCancel && (

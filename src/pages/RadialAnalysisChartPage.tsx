@@ -89,11 +89,11 @@ export const RadialAnalysisChartPage = () => {
                 const result = isAverage ? await PlotAnalyseAverage(request) : await PlotAnalyse(request);
                 const fullHtml = `
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
-  <title>График радиального анализа</title>
+  <title>Radial Analysis Chart</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     html { height: 100%; }

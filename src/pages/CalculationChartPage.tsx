@@ -94,11 +94,11 @@ export const CalculationChartPage = () => {
                 const result = isAverage ? await PlotChartAverage(request) : await PlotChart(request);
                 const fullHtml = `
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
-  <title>График рассеяния</title>
+  <title>Scattering Chart</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     html { height: 100%; }

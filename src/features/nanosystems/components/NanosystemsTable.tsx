@@ -288,13 +288,13 @@ const MobileCardRow = ({ data, onDelete }: { data: NanosystemSeriesDto; onDelete
           </span>
         </div>
         <div className="col-span-2">
-          <span className="text-gray-500 dark:text-gray-400">Комментарий:</span>
+          <span className="text-gray-500 dark:text-gray-400">Comment:</span>
           <span className="ml-1 font-medium text-gray-800 dark:text-gray-200 line-clamp-2 break-words">
             {data.comment?.trim() || '—'}
           </span>
         </div>
         <div className="col-span-2">
-          <span className="text-gray-500 dark:text-gray-400">Создана:</span>
+          <span className="text-gray-500 dark:text-gray-400">Created:</span>
           <span className="ml-1 font-medium text-gray-800 dark:text-gray-200">
             {data.createdAt ? formatDateTime(data.createdAt) : '—'}
           </span>

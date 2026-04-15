@@ -74,38 +74,38 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
     <form onSubmit={apply} className="mb-6 space-y-4">
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40 p-4 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Фильтр серий</h3>
+          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Series filters</h3>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={reset}
               className="px-3 py-2 text-sm font-medium rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              Сбросить
+              Reset
             </button>
             <button
               type="submit"
               className="px-4 py-2 text-sm font-medium rounded-md bg-blue-600 text-white hover:bg-blue-700"
             >
-              Применить
+              Apply
             </button>
             <AddNanosystemButton />
           </div>
         </div>
 
         <label className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-300">
-          <span>Поиск по комментарию (часть текста)</span>
+          <span>Comment contains</span>
           <input
             type="text"
             value={f.commentContains}
             onChange={(e) => setF((prev) => ({ ...prev, commentContains: e.target.value }))}
-            placeholder="Например: образец, повтор…"
+            placeholder="e.g. sample, repeat..."
             className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
           />
         </label>
 
         <div>
-          <span className="text-xs text-gray-600 dark:text-gray-300 block mb-1">Тип частиц</span>
+          <span className="text-xs text-gray-600 dark:text-gray-300 block mb-1">Particle type</span>
           <div className="flex flex-wrap gap-3 text-sm text-gray-800 dark:text-gray-200">
             <label className="inline-flex items-center gap-2 cursor-pointer">
               <input
@@ -114,7 +114,7 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
                 checked={f.particleKind === ''}
                 onChange={() => setF((prev) => ({ ...prev, particleKind: '' }))}
               />
-              Все
+              All
             </label>
             <label className="inline-flex items-center gap-2 cursor-pointer">
               <input
@@ -123,7 +123,7 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
                 checked={f.particleKind === '0'}
                 onChange={() => setF((prev) => ({ ...prev, particleKind: '0' }))}
               />
-              Сфера
+              Sphere
             </label>
             <label className="inline-flex items-center gap-2 cursor-pointer">
               <input
@@ -132,27 +132,27 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
                 checked={f.particleKind === '1'}
                 onChange={() => setF((prev) => ({ ...prev, particleKind: '1' }))}
               />
-              Параллелепипед
+              Parallelepiped
             </label>
           </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          {num('Частиц (мин. диап.)', 'particleCountMin')}
-          {num('Частиц (макс. диап.)', 'particleCountMax')}
-          {num('k (мин.)', 'kMin')}
-          {num('k (макс.)', 'kMax')}
-          {num('θ (мин.)', 'thetaMin')}
-          {num('θ (макс.)', 'thetaMax')}
-          {num('Размер, нм (мин.)', 'globalSizeMin')}
-          {num('Размер, нм (макс.)', 'globalSizeMax')}
-          {num('Конц. (доля, мин.)', 'concentrationMin')}
-          {num('Конц. (доля, макс.)', 'concentrationMax')}
+          {num('Particles (min range)', 'particleCountMin')}
+          {num('Particles (max range)', 'particleCountMax')}
+          {num('k (min)', 'kMin')}
+          {num('k (max)', 'kMax')}
+          {num('theta (min)', 'thetaMin')}
+          {num('theta (max)', 'thetaMax')}
+          {num('Size, nm (min)', 'globalSizeMin')}
+          {num('Size, nm (max)', 'globalSizeMax')}
+          {num('Concentration (min)', 'concentrationMin')}
+          {num('Concentration (max)', 'concentrationMax')}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-300">
-            <span>Серия создана (с)</span>
+            <span>Series created from</span>
             <input
               type="date"
               value={f.createdFrom}
@@ -161,7 +161,7 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
             />
           </label>
           <label className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-300">
-            <span>Серия создана (по)</span>
+            <span>Series created to</span>
             <input
               type="date"
               value={f.createdTo}
@@ -172,8 +172,7 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
         </div>
 
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Диапазоны для серии: показываются серии, чей интервал параметров пересекается с введённым отрезком.
-          Даты — по времени создания записи серии (UTC).
+          Range filters use overlap logic for series intervals. Dates are based on series creation time (UTC).
         </p>
       </div>
     </form>
