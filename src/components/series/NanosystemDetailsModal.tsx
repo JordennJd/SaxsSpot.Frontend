@@ -17,7 +17,7 @@ import {
   Squares2X2Icon,
   CubeTransparentIcon,
 } from '@heroicons/react/24/outline';
-import { formatDateTime } from '@/lib/utils';
+import { formatDateTime, formatGenerationDuration } from '@/lib/utils';
 
 interface DetailItemProps {
   label: string;
@@ -154,6 +154,11 @@ export const NanosystemDetailsModal = ({
   const timeInfo = [
     { label: 'Generation Start', value: formatDateTime(nanosystem.generationStart), icon: ClockIcon },
     { label: 'Generation End', value: formatDateTime(nanosystem.generationEnd), icon: ClockIcon },
+    {
+      label: 'Generation duration',
+      value: formatGenerationDuration(nanosystem.generationStart, nanosystem.generationEnd),
+      icon: ClockIcon,
+    },
     { label: 'Input Date', value: formatDateTime(nanosystem.inputDate), icon: ClockIcon },
   ];
 

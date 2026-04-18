@@ -1,6 +1,6 @@
 import {type ApiResponseListNanosystemDto, type NanosystemDto} from '../../features/nanosystems/api/nanosystemTypes';
 import { Pagination } from '../ui/Pagination';
-import { formatDateTime } from '@/lib/utils';
+import { formatDateTime, formatGenerationDuration } from '@/lib/utils';
 
 interface NanosystemsTableProps {
   nanosystems: ApiResponseListNanosystemDto;
@@ -58,6 +58,7 @@ export const NanosystemsTable = ({
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concentration</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Excess</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Generated</th>
+              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gen. time</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
@@ -103,6 +104,12 @@ export const NanosystemsTable = ({
                   onClick={() => onNanosystemClick(system)}
                 >
                   {formatDateTime(system.generationStart)}
+                </td>
+                <td
+                  className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono cursor-pointer"
+                  onClick={() => onNanosystemClick(system)}
+                >
+                  {formatGenerationDuration(system.generationStart, system.generationEnd)}
                 </td>
                 <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -159,9 +166,12 @@ export const NanosystemsTable = ({
                 <span className="ml-1 font-medium text-gray-900">{system.excess}</span>
               </div>
             </div>
-            {system.generationStart && (
-              <div className="mt-2 text-xs text-gray-500">
-                Generated: {formatDateTime(system.generationStart)}
+            {(system.generationStart || system.generationEnd) && (
+              <div className="mt-2 text-xs text-gray-500 space-y-0.5">
+                <div>Generated: {formatDateTime(system.generationStart)}</div>
+                <div className="font-mono text-gray-700 dark:text-gray-300">
+                  Duration: {formatGenerationDuration(system.generationStart, system.generationEnd)}
+                </div>
               </div>
             )}
           </div>

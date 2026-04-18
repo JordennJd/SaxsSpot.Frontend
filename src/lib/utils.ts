@@ -47,6 +47,33 @@ export function formatDateTimeCompact(value: string | Date | null | undefined): 
   }).format(d);
 }
 
+/** Elapsed time between two instants, e.g. "2d 3h 1m 5s" (same style as series generation window). */
+export function formatGenerationDuration(
+  start: string | Date | null | undefined,
+  end: string | Date | null | undefined,
+): string {
+  const first = parseToDate(start);
+  const last = parseToDate(end);
+  if (!first || !last) return '—';
+
+  const diffMs = last.getTime() - first.getTime();
+  if (diffMs < 0) return '—';
+
+  const totalSeconds = Math.floor(diffMs / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0) parts.push(`${minutes}m`);
+  parts.push(`${seconds}s`);
+
+  return parts.join(' ');
+}
+
 /** @deprecated Используйте formatDateTime. */
 export function formatDate(date: string | Date): string {
   return formatDateTime(date);

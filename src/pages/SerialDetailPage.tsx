@@ -25,6 +25,7 @@ import {
   useSeriesGenerationWindow,
 } from '../hooks/useSeriesDetail';
 import {downloadNanosystem} from '../utils/seriesUtils';
+import { formatGenerationDuration } from '../lib/utils';
 
 const MAX_SERIES_COMMENT_LENGTH = 8000;
 
@@ -114,30 +115,14 @@ export const SeriesDetailPage = () => {
     pageSize,
   );
 
-  const seriesGenerationDuration = useMemo(() => {
-    const first = generationWindow?.firstGenerationStart ? new Date(generationWindow.firstGenerationStart) : null;
-    const last = generationWindow?.lastGenerationEnd ? new Date(generationWindow.lastGenerationEnd) : null;
-
-    if (!first || !last) return '—';
-    if (Number.isNaN(first.getTime()) || Number.isNaN(last.getTime())) return '—';
-
-    const diffMs = last.getTime() - first.getTime();
-    if (diffMs < 0) return '—';
-
-    const totalSeconds = Math.floor(diffMs / 1000);
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    const parts: string[] = [];
-    if (days > 0) parts.push(`${days}d`);
-    if (hours > 0) parts.push(`${hours}h`);
-    if (minutes > 0) parts.push(`${minutes}m`);
-    parts.push(`${seconds}s`);
-
-    return parts.join(' ');
-  }, [generationWindow?.firstGenerationStart, generationWindow?.lastGenerationEnd]);
+  const seriesGenerationDuration = useMemo(
+    () =>
+      formatGenerationDuration(
+        generationWindow?.firstGenerationStart,
+        generationWindow?.lastGenerationEnd,
+      ),
+    [generationWindow?.firstGenerationStart, generationWindow?.lastGenerationEnd],
+  );
 
   useEffect(() => {
     const loadSeriesGroups = async () => {
