@@ -125,8 +125,16 @@ export const NanosystemDetailsModal = ({
   if (!nanosystem) return null;
 
   // Группируем данные для лучшей организации
+  const intersectionPlacementText =
+    nanosystem.particleKind === 'Parallelepiped'
+      ? nanosystem.disableIntersectionOptimizations
+        ? 'SAT-only (no fast shortcuts)'
+        : 'Optimized (shortcuts on)'
+      : 'Not applicable (spheres)';
+
   const basicInfo = [
     { label: 'Particle Kind', value: nanosystem.particleKind, icon: CubeIcon },
+    { label: 'Intersection placement', value: intersectionPlacementText, icon: CubeTransparentIcon },
     { label: 'Series ID', value: nanosystem.seriesId, icon: HashtagIcon },
     { label: 'Object ID', value: nanosystem.objectId, icon: HashtagIcon },
     { label: 'User ID', value: nanosystem.userId.toString(), icon: UserIcon },

@@ -139,6 +139,13 @@ export const NanosystemDtoSchema = z.object({
   generationStart: z.string(), // или z.date() если парсится в Date
   generationEnd: z.string(),   // или z.date() если парсится в Date
   inputDate: z.string(),       // или z.date() если парсится в Date
+  disableIntersectionOptimizations: z.preprocess((v) => {
+    if (v === null || v === undefined) return false;
+    if (typeof v === 'boolean') return v;
+    if (typeof v === 'number') return v !== 0;
+    if (typeof v === 'string') return ['true', '1', 'yes'].includes(v.toLowerCase());
+    return false;
+  }, z.boolean()),
 });
 
 // Тип TypeScript на основе схемы

@@ -1,4 +1,9 @@
 import {type ApiResponseListNanosystemDto, type NanosystemDto} from '../../features/nanosystems/api/nanosystemTypes';
+
+function intersectionPlacementLabel(system: NanosystemDto): string {
+  if (system.particleKind !== 'Parallelepiped') return '—';
+  return system.disableIntersectionOptimizations ? 'SAT-only' : 'Optimized';
+}
 import { Pagination } from '../ui/Pagination';
 import { formatDateTime, formatGenerationDuration } from '@/lib/utils';
 
@@ -59,6 +64,7 @@ export const NanosystemsTable = ({
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Excess</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Generated</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gen. time</th>
+              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Intersection</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
@@ -110,6 +116,12 @@ export const NanosystemsTable = ({
                   onClick={() => onNanosystemClick(system)}
                 >
                   {formatGenerationDuration(system.generationStart, system.generationEnd)}
+                </td>
+                <td
+                  className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer"
+                  onClick={() => onNanosystemClick(system)}
+                >
+                  {intersectionPlacementLabel(system)}
                 </td>
                 <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -164,6 +176,10 @@ export const NanosystemsTable = ({
               <div>
                 <span className="text-gray-500">Excess:</span>
                 <span className="ml-1 font-medium text-gray-900">{system.excess}</span>
+              </div>
+              <div className="col-span-2">
+                <span className="text-gray-500">Intersection:</span>
+                <span className="ml-1 font-medium text-gray-900">{intersectionPlacementLabel(system)}</span>
               </div>
             </div>
             {(system.generationStart || system.generationEnd) && (
