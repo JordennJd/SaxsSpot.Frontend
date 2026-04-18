@@ -43,10 +43,13 @@ export const NanosystemSeriesDtoSchema = z.object({
   thetaTo: z.number(),
   comment: z.string().nullable().optional(),
   createdAt: z.string().nullish(),
-  disableIntersectionOptimizations: z.preprocess(
-    (v) => (v === null || v === undefined ? false : v),
-    z.boolean(),
-  ),
+  disableIntersectionOptimizations: z.preprocess((v) => {
+    if (v === null || v === undefined) return false;
+    if (typeof v === 'boolean') return v;
+    if (typeof v === 'number') return v !== 0;
+    if (typeof v === 'string') return ['true', '1', 'yes'].includes(v.toLowerCase());
+    return false;
+  }, z.boolean()),
 });
 
 export type NanosystemSeriesDto = z.infer<typeof NanosystemSeriesDtoSchema>;
