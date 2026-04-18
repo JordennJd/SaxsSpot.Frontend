@@ -6,6 +6,10 @@ export function escapeGridifyValue(value: string): string {
 export type SeriesFilterForm = {
   commentContains: string;
   particleKind: '' | '0' | '1';
+  /** '' = any, 'yes' = SAT-only series, 'no' = optimized intersection path */
+  satOnly: '' | 'yes' | 'no';
+  createdAtFrom: string;
+  createdAtTo: string;
   particleCountMin: string;
   particleCountMax: string;
   globalSizeMin: string;
@@ -34,6 +38,21 @@ export function buildSeriesListGridifyFilter(f: SeriesFilterForm): string {
 
   if (f.particleKind === '0' || f.particleKind === '1') {
     parts.push(`ParticleKind=${f.particleKind}`);
+  }
+
+  if (f.satOnly === 'yes') {
+    parts.push('DisableIntersectionOptimizations=true');
+  } else if (f.satOnly === 'no') {
+    parts.push('DisableIntersectionOptimizations=false');
+  }
+
+  const caFrom = f.createdAtFrom.trim();
+  const caTo = f.createdAtTo.trim();
+  if (!empty(caFrom)) {
+    parts.push(`CreatedAt>=${caFrom}T00:00:00`);
+  }
+  if (!empty(caTo)) {
+    parts.push(`CreatedAt<=${caTo}T23:59:59.999`);
   }
 
   const pcMin = f.particleCountMin.trim();

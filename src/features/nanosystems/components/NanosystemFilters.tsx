@@ -12,6 +12,9 @@ interface NanosystemFiltersProps {
 const defaultForm: SeriesFilterForm = {
   commentContains: '',
   particleKind: '',
+  satOnly: '',
+  createdAtFrom: '',
+  createdAtTo: '',
   particleCountMin: '',
   particleCountMax: '',
   globalSizeMin: '',
@@ -127,6 +130,60 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
           </div>
         </div>
 
+        <div>
+          <span className="text-xs text-gray-600 dark:text-gray-300 block mb-1">SAT-only intersection</span>
+          <div className="flex flex-wrap gap-3 text-sm text-gray-800 dark:text-gray-200">
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="satOnly"
+                checked={f.satOnly === ''}
+                onChange={() => setF((prev) => ({ ...prev, satOnly: '' }))}
+              />
+              Any
+            </label>
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="satOnly"
+                checked={f.satOnly === 'yes'}
+                onChange={() => setF((prev) => ({ ...prev, satOnly: 'yes' }))}
+              />
+              Yes
+            </label>
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="satOnly"
+                checked={f.satOnly === 'no'}
+                onChange={() => setF((prev) => ({ ...prev, satOnly: 'no' }))}
+              />
+              No
+            </label>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-300 min-w-0">
+            <span>Series created from</span>
+            <input
+              type="date"
+              value={f.createdAtFrom}
+              onChange={(e) => setF((prev) => ({ ...prev, createdAtFrom: e.target.value }))}
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2 py-1.5 text-sm text-gray-900 dark:text-gray-100"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-gray-600 dark:text-gray-300 min-w-0">
+            <span>Series created to</span>
+            <input
+              type="date"
+              value={f.createdAtTo}
+              onChange={(e) => setF((prev) => ({ ...prev, createdAtTo: e.target.value }))}
+              className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-2 py-1.5 text-sm text-gray-900 dark:text-gray-100"
+            />
+          </label>
+        </div>
+
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {num('Particles (min range)', 'particleCountMin')}
           {num('Particles (max range)', 'particleCountMax')}
@@ -137,7 +194,7 @@ export const NanosystemFilters = ({ onFilterChange }: NanosystemFiltersProps) =>
         </div>
 
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Range filters use overlap logic for series intervals.
+          Range filters use overlap logic for series intervals. Created date uses inclusive calendar days (local date).
         </p>
       </div>
     </form>
