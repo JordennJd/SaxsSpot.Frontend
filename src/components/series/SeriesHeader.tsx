@@ -66,6 +66,13 @@ export const SeriesHeader = ({ series, generationDuration = '—' }: SeriesHeade
         value={`${series.thetaFrom} - ${series.thetaTo}`}
         icon="∠"
       />
+      {series.particleKind === 'Parallelepiped' && (
+        <ParameterBlock
+          title="SAT-only intersection"
+          value={series.disableIntersectionOptimizations ? 'Yes' : 'No'}
+          icon="▦"
+        />
+      )}
       <ParameterBlock
         title="Generation Duration"
         value={generationDuration}

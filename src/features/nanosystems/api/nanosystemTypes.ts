@@ -43,6 +43,7 @@ export const NanosystemSeriesDtoSchema = z.object({
   thetaTo: z.number(),
   comment: z.string().nullable().optional(),
   createdAt: z.string().nullish(),
+  disableIntersectionOptimizations: z.boolean().optional().default(false),
 });
 
 export type NanosystemSeriesDto = z.infer<typeof NanosystemSeriesDtoSchema>;
@@ -66,6 +67,7 @@ export const MassGenerateNanoSystemOptionsSchema = z.object({
   needAnalysis: z.boolean().optional(),
   needMetrics: z.boolean().optional(),
   pointCounts: z.array(z.number()).optional(),
+  disableIntersectionOptimizations: z.boolean().optional(),
 });
 export type CommonParticleGenerationParameters = z.infer<typeof CommonParticleGenerationParametersSchema>;
 export const ApiResponseMassGenerateNanoSystemOptionsSchema = ApiResponseSchema(MassGenerateNanoSystemOptionsSchema);

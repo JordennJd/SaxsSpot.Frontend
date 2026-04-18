@@ -54,6 +54,7 @@ export const NanosystemSeriesForm = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [apiErrors, setApiErrors] = useState<Record<string, string[]>>({});
   const particleKind = watch("particleKind");
+  const disableIntersectionOptimizations = watch('disableIntersectionOptimizations');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationOptions, setGenerationOptions] = useState<MassGenerateNanoSystemOptions | null>(null);
   const [zoneCount, setZoneCount] = useState<number>(20);
@@ -77,11 +78,20 @@ export const NanosystemSeriesForm = () => {
 
     try {
       setIsGenerating(true);
+      const seriesSatOnly =
+        particleKind !== 0 && !!disableIntersectionOptimizations;
       const runResult = await runMassGeneration({
         ...generationOptions,
         zoneCount,
         needAnalysis,
-        needMetrics
+        needMetrics,
+        disableIntersectionOptimizations: seriesSatOnly || undefined,
+        options: generationOptions.options.map((o) => ({
+          ...o,
+          disableIntersectionOptimizations:
+            particleKind !== 0 &&
+            (seriesSatOnly || !!o.disableIntersectionOptimizations),
+        })),
       })
       showSuccess(
           'Generation Started',
@@ -294,16 +304,6 @@ export const NanosystemSeriesForm = () => {
                             error={getError("epsilonTo")}
                         />
                       </div>
-                      <div className="md:col-span-2 flex items-center pt-2">
-                        <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            {...register('disableIntersectionOptimizations')}
-                          />
-                          <span>Без оптимизаций пересечений (только SAT, каждый с каждым)</span>
-                        </label>
-                      </div>
                     </div>
                   </div>
               )}
@@ -389,10 +389,11 @@ export const NanosystemSeriesForm = () => {
                 </div>
               </div>
 
-              {/* Analysis Parameters */}
+              {/* Analysis & series run options */}
               <div className="md:col-span-2">
-                <SectionTitle icon={VariableIcon}>Analysis Parameters</SectionTitle>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                <SectionTitle icon={VariableIcon}>Analysis &amp; run options</SectionTitle>
+                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                   <div>
                     <Label htmlFor="zoneCount">Zone Count</Label>
                     <Input
@@ -442,6 +443,26 @@ export const NanosystemSeriesForm = () => {
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Need Metrics</span>
                     </label>
                   </div>
+                  </div>
+                  {particleKind !== 0 && (
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white/60 dark:bg-gray-800/40 px-4 py-3">
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          {...register('disableIntersectionOptimizations')}
+                        />
+                        <span>
+                          <span className="block text-sm font-medium text-gray-800 dark:text-gray-100">
+                            Disable intersection shortcuts (SAT only, check against all placed particles)
+                          </span>
+                          <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Parallelepipeds only. Applies to this series run and to every generated option unless overridden per option in the preview step.
+                          </span>
+                        </span>
+                      </label>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -523,7 +544,7 @@ export const NanosystemSeriesForm = () => {
                                               updateOptionField(index, 'disableIntersectionOptimizations', e.target.checked)
                                           }
                                       />
-                                      <span>Без оптимизаций (только SAT)</span>
+                                      <span>SAT-only intersection (no shortcuts)</span>
                                     </label>
                                   </div>
                               )}
