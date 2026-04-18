@@ -56,6 +56,7 @@ export const CommonParticleGenerationParametersSchema = z.object({
   excess: z.number(),
   epsilon: z.number().nullable(),
   pointCount: z.number().optional(),
+  disableIntersectionOptimizations: z.boolean().optional().default(false),
 });
 
 export const MassGenerateNanoSystemOptionsSchema = z.object({
@@ -74,6 +75,7 @@ export type MassGenerateNanoSystemOptions = z.infer<typeof MassGenerateNanoSyste
 export const GetNanosystemGenerationOptionsQuerySchema = z.object({
   count: z.number().int().positive(),
   particleKind: z.enum(['0', '1']).transform(Number),
+  disableIntersectionOptimizations: z.coerce.boolean().optional().default(false),
   epsilonFrom: z.number().nullable(),
   epsilonTo: z.number().nullable(),
   particleCountFrom: z.number().int(),

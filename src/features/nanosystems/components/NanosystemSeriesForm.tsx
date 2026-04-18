@@ -32,6 +32,7 @@ export const NanosystemSeriesForm = () => {
     defaultValues: {
       count: 3,
       particleKind: 0,
+      disableIntersectionOptimizations: false,
       epsilonFrom: 1,
       epsilonTo: 1,
       particleCountFrom: 10000,
@@ -293,6 +294,16 @@ export const NanosystemSeriesForm = () => {
                             error={getError("epsilonTo")}
                         />
                       </div>
+                      <div className="md:col-span-2 flex items-center pt-2">
+                        <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            {...register('disableIntersectionOptimizations')}
+                          />
+                          <span>Без оптимизаций пересечений (только SAT, каждый с каждым)</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
               )}
@@ -499,6 +510,21 @@ export const NanosystemSeriesForm = () => {
                                         value={option.epsilon || ''}
                                         onChange={(e) => updateOptionField(index, 'epsilon', Number(e.target.value))}
                                     />
+                                  </div>
+                              )}
+                              {particleKind !== 0 && (
+                                  <div className="flex items-center pt-1">
+                                    <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 dark:text-gray-300">
+                                      <input
+                                          type="checkbox"
+                                          className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                          checked={!!option.disableIntersectionOptimizations}
+                                          onChange={(e) =>
+                                              updateOptionField(index, 'disableIntersectionOptimizations', e.target.checked)
+                                          }
+                                      />
+                                      <span>Без оптимизаций (только SAT)</span>
+                                    </label>
                                   </div>
                               )}
                               <div>
