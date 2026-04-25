@@ -47,19 +47,7 @@ export function formatDateTimeCompact(value: string | Date | null | undefined): 
   }).format(d);
 }
 
-/** Elapsed time between two instants, e.g. "2d 3h 1m 5s" (same style as series generation window). */
-export function formatGenerationDuration(
-  start: string | Date | null | undefined,
-  end: string | Date | null | undefined,
-): string {
-  const first = parseToDate(start);
-  const last = parseToDate(end);
-  if (!first || !last) return '—';
-
-  const diffMs = last.getTime() - first.getTime();
-  if (diffMs < 0) return '—';
-
-  const totalSeconds = Math.floor(diffMs / 1000);
+function formatDurationFromTotalSeconds(totalSeconds: number): string {
   const days = Math.floor(totalSeconds / 86400);
   const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -72,6 +60,27 @@ export function formatGenerationDuration(
   parts.push(`${seconds}s`);
 
   return parts.join(' ');
+}
+
+/** Non-negative duration from milliseconds, e.g. sum of per-system generation spans. */
+export function formatElapsedDurationMs(totalMs: number): string {
+  if (!Number.isFinite(totalMs) || totalMs < 0) return '—';
+  return formatDurationFromTotalSeconds(Math.floor(totalMs / 1000));
+}
+
+/** Elapsed wall-clock time between two instants, e.g. "2d 3h 1m 5s". */
+export function formatGenerationDuration(
+  start: string | Date | null | undefined,
+  end: string | Date | null | undefined,
+): string {
+  const first = parseToDate(start);
+  const last = parseToDate(end);
+  if (!first || !last) return '—';
+
+  const diffMs = last.getTime() - first.getTime();
+  if (diffMs < 0) return '—';
+
+  return formatElapsedDurationMs(diffMs);
 }
 
 /** @deprecated Используйте formatDateTime. */

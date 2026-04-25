@@ -54,7 +54,7 @@ export const NanosystemSeriesForm = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [apiErrors, setApiErrors] = useState<Record<string, string[]>>({});
   const particleKind = watch("particleKind");
-  const disableIntersectionOptimizations = watch('disableIntersectionOptimizations');
+  const isParallelepiped = Number(particleKind) !== 0;
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationOptions, setGenerationOptions] = useState<MassGenerateNanoSystemOptions | null>(null);
   const [zoneCount, setZoneCount] = useState<number>(20);
@@ -78,19 +78,15 @@ export const NanosystemSeriesForm = () => {
 
     try {
       setIsGenerating(true);
-      const seriesSatOnly =
-        particleKind !== 0 && !!disableIntersectionOptimizations;
       const runResult = await runMassGeneration({
         ...generationOptions,
         zoneCount,
         needAnalysis,
         needMetrics,
-        disableIntersectionOptimizations: seriesSatOnly || undefined,
         options: generationOptions.options.map((o) => ({
           ...o,
           disableIntersectionOptimizations:
-            particleKind !== 0 &&
-            (seriesSatOnly || !!o.disableIntersectionOptimizations),
+            isParallelepiped && !!o.disableIntersectionOptimizations,
         })),
       })
       showSuccess(
@@ -280,7 +276,7 @@ export const NanosystemSeriesForm = () => {
                 </div>
               </div>
 
-              {particleKind !== 0 && (
+              {isParallelepiped && (
                   <div className="md:col-span-2">
                     <SectionTitle icon={VariableIcon}>Epsilon Parameters</SectionTitle>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
@@ -444,7 +440,7 @@ export const NanosystemSeriesForm = () => {
                     </label>
                   </div>
                   </div>
-                  {particleKind !== 0 && (
+                  {isParallelepiped && (
                     <div className="rounded-lg border border-gray-200 dark:border-gray-600 bg-white/60 dark:bg-gray-800/40 px-4 py-3">
                       <label className="flex items-start gap-3 cursor-pointer">
                         <input
@@ -457,7 +453,7 @@ export const NanosystemSeriesForm = () => {
                             Disable intersection shortcuts (SAT only, check against all placed particles)
                           </span>
                           <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Parallelepipeds only. Applies to this series run and to every generated option unless overridden per option in the preview step.
+                            Parallelepipeds only. Used when you click Generate Options (initial value for each row). Adjust SAT-only per system in the preview step before Generate Nanosystems.
                           </span>
                         </span>
                       </label>
@@ -522,7 +518,7 @@ export const NanosystemSeriesForm = () => {
                                     onChange={(e: any) => updateOptionField(index, 'count', Number(e.target.value))}
                                 />
                               </div>
-                              {particleKind !== 0 && (
+                              {isParallelepiped && (
                                   <div>
                                     <Label>Epsilon</Label>
                                     <Input
@@ -533,7 +529,7 @@ export const NanosystemSeriesForm = () => {
                                     />
                                   </div>
                               )}
-                              {particleKind !== 0 && (
+                              {isParallelepiped && (
                                   <div className="flex items-center pt-1">
                                     <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-700 dark:text-gray-300">
                                       <input

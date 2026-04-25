@@ -57,6 +57,8 @@ interface SeriesGenerationWindow {
   firstGenerationStart: string | null;
   lastGenerationEnd: string | null;
   nanosystemCount: number;
+  /** Sum of (generationEnd - generationStart) for each nanosystem in the series. */
+  totalGenerationDurationMs: number | null;
 }
 
 const fetchSeriesGenerationWindow = async (seriesId: string): Promise<SeriesGenerationWindow> => {
@@ -74,6 +76,7 @@ const fetchSeriesGenerationWindow = async (seriesId: string): Promise<SeriesGene
 
   let minStart: Date | null = null;
   let maxEnd: Date | null = null;
+  let totalGenerationDurationMs = 0;
 
   for (const item of all) {
     const start = new Date(item.generationStart);
@@ -86,12 +89,17 @@ const fetchSeriesGenerationWindow = async (seriesId: string): Promise<SeriesGene
     if (!Number.isNaN(end.getTime()) && (maxEnd === null || end > maxEnd)) {
       maxEnd = end;
     }
+
+    if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && end >= start) {
+      totalGenerationDurationMs += end.getTime() - start.getTime();
+    }
   }
 
   return {
     firstGenerationStart: minStart?.toISOString() ?? null,
     lastGenerationEnd: maxEnd?.toISOString() ?? null,
     nanosystemCount: all.length,
+    totalGenerationDurationMs: all.length === 0 ? null : totalGenerationDurationMs,
   };
 };
 

@@ -25,7 +25,7 @@ import {
   useSeriesGenerationWindow,
 } from '../hooks/useSeriesDetail';
 import {downloadNanosystem} from '../utils/seriesUtils';
-import { formatGenerationDuration } from '../lib/utils';
+import { formatElapsedDurationMs } from '../lib/utils';
 
 const MAX_SERIES_COMMENT_LENGTH = 8000;
 
@@ -117,11 +117,10 @@ export const SeriesDetailPage = () => {
 
   const seriesGenerationDuration = useMemo(
     () =>
-      formatGenerationDuration(
-        generationWindow?.firstGenerationStart,
-        generationWindow?.lastGenerationEnd,
-      ),
-    [generationWindow?.firstGenerationStart, generationWindow?.lastGenerationEnd],
+      generationWindow?.totalGenerationDurationMs != null
+        ? formatElapsedDurationMs(generationWindow.totalGenerationDurationMs)
+        : '—',
+    [generationWindow?.totalGenerationDurationMs],
   );
 
   useEffect(() => {

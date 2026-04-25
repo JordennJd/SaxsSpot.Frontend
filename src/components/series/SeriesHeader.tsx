@@ -74,7 +74,7 @@ export const SeriesHeader = ({ series, generationDuration = '—' }: SeriesHeade
         />
       )}
       <ParameterBlock
-        title="Generation Duration"
+        title="Total generation time"
         value={generationDuration}
         icon="⏱️"
       />
