@@ -5,9 +5,10 @@ import {
   type NanosystemSeriesDto,
   type RadialAnalysisDto,
 } from '../features/nanosystems/api/nanosystemTypes';
-import { fetchNanosystemList, fetchSeriesNanosystems, fetchRadialAnalysisList } from '../features/nanosystems/api/nanosystemApi';
+import { fetchNanosystemList, fetchSeriesNanosystems, fetchRadialAnalysisList, fetchScatteringCalculationList } from '../features/nanosystems/api/nanosystemApi';
 import { fetchCalculationsByNanosystem } from '../features/calculation/api/calculationApi';
 import type { CalculationDto } from '../features/calculation/api/calculationTypes';
+import type { ScatteringCalculationDto } from '../features/nanosystems/api/nanosystemTypes';
 
 // API Functions
 const fetchSeries = async (seriesId: string): Promise<NanosystemSeriesDto> => {
@@ -166,6 +167,40 @@ export const useRadialAnalysisData = (
   const query = useQuery<RadialAnalysisDto[]>({
     queryKey: ['radialAnalyses', nanosystemId, page, pageSize, filter, sortBy],
     queryFn: () => nanosystemId ? fetchRadialAnalyses(nanosystemId) : [],
+    enabled: !!nanosystemId,
+    retry: false,
+  });
+
+  return {
+    ...query,
+    isError: hasError,
+  };
+};
+
+export const useScatteringCalculationData = (
+  nanosystemId: string | undefined,
+  page: number,
+  pageSize: number,
+  filter?: string,
+  sortBy?: string,
+) => {
+  const [hasError, setHasError] = React.useState(false);
+
+  const fetchScatteringCalculations = async (id: string): Promise<ScatteringCalculationDto[]> => {
+    try {
+      setHasError(false);
+      const response = await fetchScatteringCalculationList(id, page, pageSize, filter, sortBy);
+      return response.result.data;
+    } catch (error) {
+      console.error('Error fetching scattering calculations:', error);
+      setHasError(true);
+      return [];
+    }
+  };
+
+  const query = useQuery<ScatteringCalculationDto[]>({
+    queryKey: ['scatteringCalculations', nanosystemId, page, pageSize, filter, sortBy],
+    queryFn: () => nanosystemId ? fetchScatteringCalculations(nanosystemId) : [],
     enabled: !!nanosystemId,
     retry: false,
   });

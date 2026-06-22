@@ -10,11 +10,13 @@ interface InputJobCard {
     onCancel?: () => void;
 }
 
-const SUPPORTED_OPERATION_TYPES = ['manual-series-run', 'RunRadialAnalysis'];
+const SUPPORTED_OPERATION_TYPES = ['manual-series-run', 'RunRadialAnalysis', 'RunStrictScatteringCalculation', 'RunSphereScatteringCalculation'];
 
 const JOB_TYPE_LABELS: Record<string, string> = {
     'manual-series-run': 'Generation',
     'RunRadialAnalysis': 'Radial analysis',
+    'RunStrictScatteringCalculation': 'Strict SAXS',
+    'RunSphereScatteringCalculation': 'Sphere SAXS',
 };
 
 /** Progress 0–100 from job.progress or parsed from message (e.g. "Generation in progress: 45%") */

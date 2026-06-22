@@ -212,6 +212,26 @@ export type RadialAnalysisDto = z.infer<typeof RadialAnalysisDtoSchema>;
 export const RadialAnalysisApiResponseSchema = ApiResponseListSchema(RadialAnalysisDtoSchema);
 export type RadialAnalysisApiResponse = z.infer<typeof RadialAnalysisApiResponseSchema>;
 
+export const ScatteringCalculationDtoSchema = z.object({
+  id: z.string().uuid(),
+  nanosystemId: z.string().uuid(),
+  objectId: z.string().uuid(),
+  calculationKind: z.number(),
+  qVectorFrom: z.number(),
+  qVectorTo: z.number(),
+  qSpaceMethod: z.number(),
+  qScaleMethod: z.number(),
+  qSpaceParameter: z.number(),
+  excess: z.number().nullable().optional(),
+  inputDate: DateTimeSchema,
+  startDate: DateTimeSchema,
+  endDate: DateTimeSchema,
+});
+
+export type ScatteringCalculationDto = z.infer<typeof ScatteringCalculationDtoSchema>;
+export const ScatteringCalculationApiResponseSchema = ApiResponseListSchema(ScatteringCalculationDtoSchema);
+export type ScatteringCalculationApiResponse = z.infer<typeof ScatteringCalculationApiResponseSchema>;
+
 // Particle data for 3D viewer (compatible with MathService format)
 export interface ParallelepipedParticle {
   id: string;

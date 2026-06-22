@@ -3,7 +3,7 @@ import {useParams, useNavigate} from 'react-router-dom';
 import {useQueryClient} from '@tanstack/react-query';
 import {useToastContext} from '../contexts/ToastContext';
 
-import {type ApiResponseListNanosystemDto, type NanosystemDto, type RadialAnalysisDto} from '../features/nanosystems/api/nanosystemTypes';
+import {type ApiResponseListNanosystemDto, type NanosystemDto, type RadialAnalysisDto, type ScatteringCalculationDto} from '../features/nanosystems/api/nanosystemTypes';
 import type {
   CalculationDto,
   PlotAnalyseRequest,
@@ -12,16 +12,18 @@ import type {
   SeriesCalculationGroupDto,
 } from '../features/calculation/api/calculationTypes.ts';
 import {fetchSeriesCalculationGroups, RunCalculation, RunSeriesCalculation} from '../features/calculation/api/calculationApi.ts';
-import {runRadialAnalysis, fetchNanosystemList, fetchRadialAnalysisList, updateSeriesComment, type RunRadialAnalysisRequest} from '../features/nanosystems/api/nanosystemApi.ts';
+import {runRadialAnalysis, runScatteringCalculation, fetchNanosystemList, fetchRadialAnalysisList, updateSeriesComment, type RunRadialAnalysisRequest, type RunScatteringCalculationRequest} from '../features/nanosystems/api/nanosystemApi.ts';
 import {CalculationDetailsCard} from '../features/calculation/components/CalculationCard.tsx';
 import {RadialAnalysisDetailsCard} from '../features/nanosystems/components/RadialAnalysisCard.tsx';
-import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader, RadialAnalysisModal} from '../components/series';
+import {ScatteringCalculationDetailsCard} from '../features/nanosystems/components/ScatteringCalculationCard.tsx';
+import {CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader, RadialAnalysisModal, ScatteringCalculationModal} from '../components/series';
 import {NanosystemViewer3DModal} from '../features/nanosystem-viewer/NanosystemViewer3DModal';
 import {
   useCalculationsData,
   useNanosystemsData,
   useSeriesData,
   useRadialAnalysisData,
+  useScatteringCalculationData,
   useSeriesGenerationWindow,
 } from '../hooks/useSeriesDetail';
 import {downloadNanosystem} from '../utils/seriesUtils';
@@ -42,12 +44,16 @@ export const SeriesDetailPage = () => {
   const [selectedNanosystem, setSelectedNanosystem] = useState<NanosystemDto | null>(null);
   const [selectedCalculation, setSelectedCalculation] = useState<CalculationDto | null>(null);
   const [selectedRadialAnalysis, setSelectedRadialAnalysis] = useState<RadialAnalysisDto | null>(null);
+  const [selectedScatteringCalculation, setSelectedScatteringCalculation] = useState<ScatteringCalculationDto | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCalculationModalOpen, setIsCalculationModalOpen] = useState(false);
   const [isRadialAnalysisDetailsModalOpen, setIsRadialAnalysisDetailsModalOpen] = useState(false);
   const [isCalculateModalOpen, setIsCalculateModalOpen] = useState(false);
   const [isSeriesCalculateModalOpen, setIsSeriesCalculateModalOpen] = useState(false);
   const [isRadialAnalysisModalOpen, setIsRadialAnalysisModalOpen] = useState(false);
+  const [isScatteringCalculationModalOpen, setIsScatteringCalculationModalOpen] = useState(false);
+  const [isScatteringCalculationDetailsModalOpen, setIsScatteringCalculationDetailsModalOpen] = useState(false);
+  const [isRunningScatteringCalculation, setIsRunningScatteringCalculation] = useState(false);
   const [isSeriesAverageChartLoading, setIsSeriesAverageChartLoading] = useState(false);
   const [isSeriesScatteringGroupsLoading, setIsSeriesScatteringGroupsLoading] = useState(false);
   const [seriesScatteringGroups, setSeriesScatteringGroups] = useState<SeriesCalculationGroupDto[]>([]);
@@ -92,6 +98,18 @@ export const SeriesDetailPage = () => {
     layerCount: 10,
   });
 
+  const [scatteringCalculationParams, setScatteringCalculationParams] = useState<RunScatteringCalculationRequest>({
+    nanosystemId: '',
+    qSpaceParameters: {
+      spaceMethod: 0,
+      scaleMethod: 1,
+      spaceParameter: 20,
+      start: 0.02,
+      end: 0.4,
+    },
+    excess: 0,
+  });
+
   // Data fetching
   const { data: series, isLoading: isSeriesLoading } = useSeriesData(seriesId);
   const { data: generationWindow } = useSeriesGenerationWindow(seriesId);
@@ -110,6 +128,11 @@ export const SeriesDetailPage = () => {
     pageSize,
   );
   const { data: radialAnalyses, isLoading: isRadialAnalysesLoading, isError: isRadialAnalysesError } = useRadialAnalysisData(
+    selectedNanosystem?.id,
+    calculationPage,
+    pageSize,
+  );
+  const { data: scatteringCalculations, isLoading: isScatteringCalculationsLoading, isError: isScatteringCalculationsError } = useScatteringCalculationData(
     selectedNanosystem?.id,
     calculationPage,
     pageSize,
@@ -220,6 +243,59 @@ export const SeriesDetailPage = () => {
 
   const closeRadialAnalysisModal = () => {
     setIsRadialAnalysisModalOpen(false);
+  };
+
+  const openScatteringCalculationModal = () => {
+    if (selectedNanosystem) {
+      setScatteringCalculationParams((prev) => ({
+        ...prev,
+        nanosystemId: selectedNanosystem.id,
+      }));
+      setIsScatteringCalculationModalOpen(true);
+    }
+  };
+
+  const closeScatteringCalculationModal = () => {
+    setIsScatteringCalculationModalOpen(false);
+  };
+
+  const openScatteringCalculationDetails = (calculation: ScatteringCalculationDto) => {
+    setSelectedScatteringCalculation(calculation);
+    setIsScatteringCalculationDetailsModalOpen(true);
+  };
+
+  const handleScatteringCalculationParamChange = (path: string, value: unknown) => {
+    setScatteringCalculationParams((prev) => {
+      const next = { ...prev, qSpaceParameters: { ...prev.qSpaceParameters } };
+      const parts = path.split('.');
+      if (parts.length === 1) {
+        return { ...next, [parts[0]]: value };
+      }
+      if (parts.length === 2 && parts[0] === 'qSpaceParameters') {
+        return {
+          ...next,
+          qSpaceParameters: {
+            ...next.qSpaceParameters,
+            [parts[1]]: value,
+          },
+        };
+      }
+      return next;
+    });
+  };
+
+  const handleScatteringCalculation = async () => {
+    try {
+      setIsRunningScatteringCalculation(true);
+      const operationId = await runScatteringCalculation(scatteringCalculationParams);
+      closeScatteringCalculationModal();
+      showSuccess(`SAXS calculation started. Operation ID: ${operationId}`);
+      await queryClient.invalidateQueries({ queryKey: ['scatteringCalculations', selectedNanosystem?.id] });
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'Failed to start SAXS calculation');
+    } finally {
+      setIsRunningScatteringCalculation(false);
+    }
   };
 
   const handleCalculate = async (isSeries: boolean = false) => {
@@ -669,6 +745,7 @@ export const SeriesDetailPage = () => {
         onDownload={handleDownload}
         onCalculate={() => openCalculateModal()}
         onAnalyse={openRadialAnalysisModal}
+        onScatteringCalculate={openScatteringCalculationModal}
         calculations={calculations || []}
         isCalculationsLoading={isCalculationsLoading}
         isCalculationsError={isCalculationsError}
@@ -677,6 +754,10 @@ export const SeriesDetailPage = () => {
         isRadialAnalysesLoading={isRadialAnalysesLoading}
         isRadialAnalysesError={isRadialAnalysesError}
         onRadialAnalysisClick={openRadialAnalysisDetails}
+        scatteringCalculations={scatteringCalculations || []}
+        isScatteringCalculationsLoading={isScatteringCalculationsLoading}
+        isScatteringCalculationsError={isScatteringCalculationsError}
+        onScatteringCalculationClick={openScatteringCalculationDetails}
         onViewChartSelected={handleViewChartSelected}
         onViewCalculationChartSelected={handleViewCalculationChartSelected}
         onViewCalculationChartAverageSelected={handleViewCalculationChartAverageSelected}
@@ -709,6 +790,16 @@ export const SeriesDetailPage = () => {
         onAnalyse={handleRadialAnalysis}
       />
 
+      <ScatteringCalculationModal
+        isOpen={isScatteringCalculationModalOpen}
+        onClose={closeScatteringCalculationModal}
+        params={scatteringCalculationParams}
+        onParamChange={handleScatteringCalculationParamChange}
+        onRun={handleScatteringCalculation}
+        isRunning={isRunningScatteringCalculation}
+        showExcess={selectedNanosystem?.particleKind === 'Sphere'}
+      />
+
       <NanosystemViewer3DModal
         isOpen={is3DModalOpen}
         onClose={() => setIs3DModalOpen(false)}
@@ -728,6 +819,14 @@ export const SeriesDetailPage = () => {
           analysis={selectedRadialAnalysis}
           isOpen={isRadialAnalysisDetailsModalOpen}
           onClose={() => setIsRadialAnalysisDetailsModalOpen(false)}
+        />
+      )}
+
+      {selectedScatteringCalculation && (
+        <ScatteringCalculationDetailsCard
+          calculation={selectedScatteringCalculation}
+          isOpen={isScatteringCalculationDetailsModalOpen}
+          onClose={() => setIsScatteringCalculationDetailsModalOpen(false)}
         />
       )}
     </div>

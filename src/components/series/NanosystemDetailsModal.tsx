@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Dialog } from '@headlessui/react';
-import { type NanosystemDto, type RadialAnalysisDto } from '../../features/nanosystems/api/nanosystemTypes';
+import { type NanosystemDto, type RadialAnalysisDto, type ScatteringCalculationDto } from '../../features/nanosystems/api/nanosystemTypes';
 import type { CalculationDto } from '../../features/calculation/api/calculationTypes';
 import { GenerationMetricsChart } from '../../features/nanosystems/components/GenerationMetricsChart';
 import {
@@ -32,6 +32,7 @@ interface NanosystemDetailsModalProps {
   onDownload: () => void;
   onCalculate: () => void;
   onAnalyse: () => void;
+  onScatteringCalculate: () => void;
   calculations: CalculationDto[];
   isCalculationsLoading: boolean;
   isCalculationsError?: boolean;
@@ -40,6 +41,10 @@ interface NanosystemDetailsModalProps {
   isRadialAnalysesLoading: boolean;
   isRadialAnalysesError?: boolean;
   onRadialAnalysisClick: (analysis: RadialAnalysisDto) => void;
+  scatteringCalculations: ScatteringCalculationDto[];
+  isScatteringCalculationsLoading: boolean;
+  isScatteringCalculationsError?: boolean;
+  onScatteringCalculationClick: (calculation: ScatteringCalculationDto) => void;
   onViewChartSelected?: (analysisIds: string[]) => void;
   onViewCalculationChartSelected?: (calculationIds: string[]) => void;
   onViewCalculationChartAverageSelected?: (calculationIds: string[]) => void;
@@ -65,6 +70,7 @@ export const NanosystemDetailsModal = ({
                                          onDownload,
                                          onCalculate,
                                          onAnalyse,
+                                         onScatteringCalculate,
                                          calculations,
                                          isCalculationsLoading,
                                          isCalculationsError,
@@ -73,6 +79,10 @@ export const NanosystemDetailsModal = ({
                                          isRadialAnalysesLoading,
                                          isRadialAnalysesError,
                                          onRadialAnalysisClick,
+                                         scatteringCalculations,
+                                         isScatteringCalculationsLoading,
+                                         isScatteringCalculationsError,
+                                         onScatteringCalculationClick,
                                          onViewChartSelected,
                                          onViewCalculationChartSelected,
                                          onViewCalculationChartAverageSelected,
@@ -400,6 +410,60 @@ export const NanosystemDetailsModal = ({
                     </div>
                 )}
               </div>
+
+              {/* SAXS Scattering Calculations Section */}
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300 flex items-center gap-2">
+                  <div className="h-2 w-2 bg-orange-500 rounded-full"></div>
+                  SAXS Scattering
+                </h3>
+                {isScatteringCalculationsLoading ? (
+                    <div className="text-center py-4">
+                      <div className="inline-flex items-center px-4 py-2 text-sm text-gray-600">
+                        <div className="animate-spin mr-2 h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+                        Loading SAXS calculations...
+                      </div>
+                    </div>
+                ) : isScatteringCalculationsError ? (
+                    <div className="text-center py-4 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
+                      <BeakerIcon className="h-8 w-8 mx-auto text-gray-400" />
+                      <p className="mt-2">Service unavailable</p>
+                    </div>
+                ) : scatteringCalculations?.length === 0 ? (
+                    <div className="text-center py-4 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
+                      <BeakerIcon className="h-8 w-8 mx-auto text-gray-400" />
+                      <p className="mt-2">No SAXS calculations found</p>
+                    </div>
+                ) : (
+                    <div className="h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                      <ul className="space-y-2">
+                        {scatteringCalculations?.map((calculation) => (
+                            <li
+                                key={calculation.id}
+                                className="p-3 bg-white rounded-lg border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all cursor-pointer"
+                                onClick={() => onScatteringCalculationClick(calculation)}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <ClockIcon className="h-4 w-4 text-gray-400" />
+                                    <span className="text-sm font-medium text-gray-700">{formatDateTime(calculation.startDate)}</span>
+                                  </div>
+                                  <p className="text-xs font-mono text-orange-600 mb-1 truncate">{calculation.id}</p>
+                                  <p className="text-xs text-gray-500">
+                                    Q: {calculation.qVectorFrom}-{calculation.qVectorTo}
+                                  </p>
+                                </div>
+                                <span className="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full bg-orange-100 text-orange-800 shrink-0">
+                                  {calculation.calculationKind === 1 ? 'Sphere' : 'Strict'}
+                                </span>
+                              </div>
+                            </li>
+                        ))}
+                      </ul>
+                    </div>
+                )}
+              </div>
             </div>
 
             {/* Footer */}
@@ -467,6 +531,13 @@ export const NanosystemDetailsModal = ({
                 >
                   <ChartBarIcon className="h-5 w-5" />
                   Analyse
+                </button>
+                <button
+                    onClick={onScatteringCalculate}
+                    className="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg hover:from-orange-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                >
+                  <BeakerIcon className="h-5 w-5" />
+                  SAXS
                 </button>
                 <button
                     onClick={handleClose}

@@ -9,6 +9,8 @@ import {
   NanosystemSeriesListApiResponseSchema, ApiResponseListNanosystemDtoSchema, type ApiResponseListNanosystemDto,
   type RadialAnalysisApiResponse,
   RadialAnalysisApiResponseSchema,
+  type ScatteringCalculationApiResponse,
+  ScatteringCalculationApiResponseSchema,
   type ApiResponseGenerationMetrics,
   ApiResponseGenerationMetricsSchema,
   type GenerationMetrics,
@@ -146,6 +148,20 @@ export interface RunRadialAnalysisRequest {
   layerCount: number;
 }
 
+export interface SpaceParametersRequest {
+  spaceMethod: number;
+  scaleMethod: number;
+  spaceParameter: number;
+  start: number;
+  end: number;
+}
+
+export interface RunScatteringCalculationRequest {
+  nanosystemId: string;
+  qSpaceParameters: SpaceParametersRequest;
+  excess?: number;
+}
+
 export const runRadialAnalysis = async (
   request: RunRadialAnalysisRequest,
 ): Promise<string> => {
@@ -201,6 +217,83 @@ export const fetchRadialAnalysisList = async (
     const validatedData = RadialAnalysisApiResponseSchema.parse(response.data);
 
     return validatedData;
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
+  }
+};
+
+export const runScatteringCalculation = async (
+  request: RunScatteringCalculationRequest,
+): Promise<string> => {
+  try {
+    const response = await nanosystemApiClient.post<{ result: string }>(
+      '/scattering-calculation/run-scattering-calculation',
+      request,
+    );
+
+    if (response.data && typeof response.data === 'object' && 'result' in response.data) {
+      return String(response.data.result);
+    }
+
+    return String(response.data);
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
+  }
+};
+
+export const fetchScatteringCalculationList = async (
+  nanosystemId: string,
+  page: number = 1,
+  pageSize: number = 10,
+  filter?: string,
+  sortBy?: string,
+): Promise<ScatteringCalculationApiResponse> => {
+  try {
+    const params: Record<string, string | number> = { page, pageSize };
+
+    if (filter) {
+      params.filter = filter;
+    } else {
+      params.filter = `nanosystemId=${nanosystemId}`;
+    }
+
+    if (sortBy) {
+      params.sortBy = sortBy;
+    }
+
+    const response = await nanosystemApiClient.get<unknown>(
+      '/scattering-calculation/get-scattering-calculation-list',
+      {
+        params,
+        paramsSerializer: (p) => new URLSearchParams(p as Record<string, string>).toString(),
+      },
+    );
+
+    return ScatteringCalculationApiResponseSchema.parse(response.data);
+  } catch (error) {
+    const appError = handleError(error as Error);
+    throw appError;
+  }
+};
+
+export const downloadScatteringCalculation = async (id: string): Promise<void> => {
+  try {
+    const response = await nanosystemApiClient.get('/scattering-calculation/download-scattering-calculation', {
+      responseType: 'blob',
+      params: { id },
+      timeout: 0,
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `scattering-calculation-${id}`);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(url);
   } catch (error) {
     const appError = handleError(error as Error);
     throw appError;
