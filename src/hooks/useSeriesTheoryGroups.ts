@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { fetchNanosystemList, fetchScatteringCalculationList } from '@/features/nanosystems/api/nanosystemApi';
 import type { ScatteringCalculationDto } from '@/features/nanosystems/api/nanosystemTypes';
-import { buildTheoryScatteringGroups, type TheoryScatteringGroup } from '@/lib/theoryScatteringGroups';
+import { buildTheoryScatteringGroups, type QRangeGroup } from '@/lib/theoryScatteringGroups';
 
 export function useSeriesTheoryGroups(seriesId: string) {
-  const [groups, setGroups] = useState<TheoryScatteringGroup[]>([]);
+  const [groups, setGroups] = useState<QRangeGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

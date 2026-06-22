@@ -6,9 +6,7 @@ import { NanosystemWorkspaceModals } from '../components/series/NanosystemWorksp
 import { NanosystemWorkspaceSidebar, type WorkspaceSection } from '../components/nanosystem/NanosystemWorkspaceSidebar';
 import { useNanosystemData, useSeriesData } from '../hooks/useSeriesDetail';
 import { useNanosystemWorkspace } from '../hooks/useNanosystemWorkspace';
-import { formatDateTime, formatGenerationDuration } from '@/lib/utils';
 import { openNanosystemInNewWindow } from '@/lib/navigation';
-import { SCATTERING } from '@/lib/scatteringLabels';
 
 const parseSection = (tab: string | null): WorkspaceSection => {
   if (tab === 'calculations' || tab === 'legacy' || tab === 'radial' || tab === 'saxs' || tab === 'overview') {
@@ -42,7 +40,7 @@ export const NanosystemDetailPage = () => {
   const viewTab = activeSection === 'calculations' ? 'legacy' : activeSection;
 
   if (isSeriesLoading || isNanosystemLoading) {
-    return <div className="text-center py-16 text-gray-600">Loading nanosystem workspace…</div>;
+    return <div className="text-center py-16 text-gray-600">Loading…</div>;
   }
 
   if (isError || !nanosystem) {
@@ -55,7 +53,7 @@ export const NanosystemDetailPage = () => {
   }
 
   return (
-    <div className={`space-y-4 ${standalone ? 'pb-4' : 'pb-8'}`}>
+    <div className={`space-y-3 ${standalone ? 'pb-4' : 'pb-8'}`}>
       {!standalone && (
         <nav className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
           <Link to="/" className="hover:text-gray-800">Series</Link>
@@ -64,31 +62,23 @@ export const NanosystemDetailPage = () => {
             {series?.comment?.trim() || seriesId.slice(0, 8)}
           </Link>
           <ChevronRightIcon className="h-4 w-4 shrink-0" />
-          <span className="text-gray-900 font-medium font-mono">{nanosystem.id.slice(0, 10)}…</span>
+          <span className="text-gray-900 font-mono text-xs">{nanosystem.id.slice(0, 10)}…</span>
         </nav>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-slate-800 to-indigo-900">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h1 className="text-lg font-bold text-white">Nanosystem workspace</h1>
-              <p className="font-mono text-xs text-indigo-200 mt-0.5 break-all">{nanosystem.id}</p>
-              <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">
-                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white">{nanosystem.particleKind}</span>
-                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white">{nanosystem.particleCount.toLocaleString()} pts</span>
-                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white">{nanosystem.globalSize} nm</span>
-                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white">
-                  {formatGenerationDuration(nanosystem.generationStart, nanosystem.generationEnd)}
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white">{formatDateTime(nanosystem.inputDate)}</span>
-              </div>
-            </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-sm font-semibold text-gray-900 dark:text-white">{nanosystem.particleKind}</h1>
+            <p className="font-mono text-xs text-gray-500 truncate">{nanosystem.id}</p>
           </div>
+          <span className="text-xs text-gray-500 shrink-0">
+            {nanosystem.particleCount.toLocaleString()} pts · {nanosystem.globalSize} nm
+          </span>
         </div>
 
-        <div className="flex flex-col lg:flex-row min-h-[640px]">
-          <div className="lg:border-r border-gray-200 dark:border-gray-700 p-4 lg:p-5 bg-gray-50/80 dark:bg-gray-900/40">
+        <div className="flex flex-col lg:flex-row min-h-[560px]">
+          <div className="lg:border-r border-gray-200 dark:border-gray-700 p-3 lg:p-4">
             <NanosystemWorkspaceSidebar
               seriesId={seriesId}
               activeSection={activeSection}
@@ -106,12 +96,7 @@ export const NanosystemDetailPage = () => {
             />
           </div>
 
-          <div className="flex-1 min-w-0 flex flex-col">
-            {activeSection === 'calculations' && (
-              <div className="px-5 py-3 bg-violet-50 dark:bg-violet-950/30 border-b border-violet-100 dark:border-violet-900/50 text-sm text-violet-800 dark:text-violet-200">
-                <strong>Pick & compare:</strong> use checkboxes in {SCATTERING.model} and {SCATTERING.theory} tabs, then build charts or compare pipelines. Switch tabs below without losing this panel.
-              </div>
-            )}
+          <div className="flex-1 min-w-0">
             <NanosystemDetailsView
               nanosystem={nanosystem}
               layout="page"

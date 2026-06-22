@@ -1,23 +1,21 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { SeriesCalculationGroupDto } from '@/features/calculation/api/calculationTypes';
 import type { PlotChartRequest } from '@/features/calculation/api/calculationTypes';
 import { SCATTERING, formatQRange } from '@/lib/scatteringLabels';
-import { matchScatteringGroups, type TheoryScatteringGroup } from '@/lib/theoryScatteringGroups';
+import { matchScatteringGroups, type QRangeGroup } from '@/lib/theoryScatteringGroups';
 
 interface SeriesGroupComparePanelProps {
   seriesId: string;
-  modelGroups: SeriesCalculationGroupDto[];
-  theoryGroups: TheoryScatteringGroup[];
+  modelGroups: QRangeGroup[];
+  theoryGroups: QRangeGroup[];
   modelLoading?: boolean;
   theoryLoading?: boolean;
-  compact?: boolean;
 }
 
 function navigateModelAverage(
   navigate: ReturnType<typeof useNavigate>,
   seriesId: string,
-  group: SeriesCalculationGroupDto,
+  group: QRangeGroup,
 ) {
   const request: PlotChartRequest = {
     CalculatesId: group.calculationIds,
@@ -31,8 +29,8 @@ function navigateModelAverage(
   params.set('calcIds', group.calculationIds.join(','));
   params.set('isAverage', '1');
   params.set('seriesId', seriesId);
-  params.set('qFrom', String(group.parameters.qVectorFrom));
-  params.set('qTo', String(group.parameters.qVectorTo));
+  params.set('qFrom', String(group.qVectorFrom));
+  params.set('qTo', String(group.qVectorTo));
   navigate(`/calculations/${group.calculationIds[0]}/chart?${params.toString()}`, {
     state: { request, isAverage: true },
   });
@@ -41,14 +39,15 @@ function navigateModelAverage(
 function navigateTheoryAverage(
   navigate: ReturnType<typeof useNavigate>,
   seriesId: string,
-  group: TheoryScatteringGroup,
+  group: QRangeGroup,
 ) {
+  const ids = group.calculationIds;
   const params = new URLSearchParams();
-  params.set('scatteringIds', group.scatteringIds.join(','));
+  params.set('scatteringIds', ids.join(','));
   params.set('isAverage', '1');
   params.set('seriesId', seriesId);
-  navigate(`/scattering-calculations/${group.scatteringIds[0]}/chart?${params.toString()}`, {
-    state: { scatteringIds: group.scatteringIds, isAverage: true },
+  navigate(`/scattering-calculations/${ids[0]}/chart?${params.toString()}`, {
+    state: { scatteringIds: ids, isAverage: true },
   });
 }
 
@@ -87,7 +86,6 @@ export const SeriesGroupComparePanel = ({
   theoryGroups,
   modelLoading = false,
   theoryLoading = false,
-  compact = false,
 }: SeriesGroupComparePanelProps) => {
   const navigate = useNavigate();
   const matched = useMemo(() => matchScatteringGroups(modelGroups, theoryGroups), [modelGroups, theoryGroups]);
@@ -96,102 +94,77 @@ export const SeriesGroupComparePanel = ({
   const comparable = matched.filter((m) => m.model && m.theory);
 
   if (isLoading) {
-    return <p className="text-sm text-gray-500 py-4">Loading groups…</p>;
+    return <p className="text-sm text-gray-500 py-4">Loading…</p>;
   }
 
   if (matched.length === 0) {
     return (
-      <p className="text-sm text-gray-500 py-6 text-center border border-dashed rounded-xl">
-        No scattering groups yet. Run {SCATTERING.model.toLowerCase()} or {SCATTERING.theory.toLowerCase()} on systems in this series.
+      <p className="text-sm text-gray-500 py-6 text-center border border-dashed rounded-lg">
+        No Q groups yet.
       </p>
     );
   }
 
   return (
-    <div className="space-y-3">
-      {!compact && (
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          Groups matched by Q parameters. Compare averaged {SCATTERING.modelShort.toLowerCase()} with averaged {SCATTERING.theoryShort.toLowerCase()} for the same Q range.
-        </p>
-      )}
+    <ul className="divide-y divide-gray-100 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+      {matched.map((row) => {
+        const qFrom = row.model?.qVectorFrom ?? row.theory!.qVectorFrom;
+        const qTo = row.model?.qVectorTo ?? row.theory!.qVectorTo;
+        const canCompare = !!row.model && !!row.theory;
 
-      {comparable.length > 0 && (
-        <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
-          {comparable.length} group{comparable.length === 1 ? '' : 's'} ready to compare
-        </p>
-      )}
-
-      <ul className="space-y-2">
-        {matched.map((row) => {
-          const qFrom = row.model?.parameters.qVectorFrom ?? row.theory!.qVectorFrom;
-          const qTo = row.model?.parameters.qVectorTo ?? row.theory!.qVectorTo;
-          const canCompare = !!row.model && !!row.theory;
-
-          return (
-            <li
-              key={row.key}
-              className={`rounded-xl border p-4 ${
-                canCompare
-                  ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20'
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50'
-              }`}
-            >
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium text-gray-900 dark:text-white">{formatQRange(qFrom, qTo)}</div>
-                  {row.model && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      φ: {row.model.parameters.phiVectorFrom ?? '—'} – {row.model.parameters.phiVectorTo ?? '—'}
-                      {' · '}
-                      θ: {row.model.parameters.thetaVectorFrom ?? '—'} – {row.model.parameters.thetaVectorTo ?? '—'}
-                    </p>
-                  )}
-                  <div className="flex flex-wrap gap-3 mt-2 text-xs">
-                    <span className={row.model ? 'text-indigo-700 dark:text-indigo-300' : 'text-gray-400'}>
-                      {SCATTERING.modelShort}: {row.model ? `${row.model.systemsCount} systems` : '—'}
-                    </span>
-                    <span className={row.theory ? 'text-orange-700 dark:text-orange-300' : 'text-gray-400'}>
-                      {SCATTERING.theoryShort}: {row.theory ? `${row.theory.systemsCount} systems` : '—'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 shrink-0">
-                  {row.model && (
-                    <button
-                      type="button"
-                      onClick={() => navigateModelAverage(navigate, seriesId, row.model!)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white hover:bg-indigo-700"
-                    >
-                      {SCATTERING.modelAverage}
-                    </button>
-                  )}
-                  {row.theory && (
-                    <button
-                      type="button"
-                      onClick={() => navigateTheoryAverage(navigate, seriesId, row.theory!)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-orange-500 text-white hover:bg-orange-600"
-                    >
-                      {SCATTERING.theoryAverage}
-                    </button>
-                  )}
-                  {canCompare && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        navigateCompare(navigate, seriesId, row.model!.calculationIds, row.theory!.scatteringIds)
-                      }
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 text-white hover:bg-emerald-700"
-                    >
-                      {SCATTERING.compareAverages}
-                    </button>
-                  )}
-                </div>
+        return (
+          <li
+            key={row.key}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-3 bg-white dark:bg-gray-800/50"
+          >
+            <div className="min-w-0">
+              <div className="font-medium text-sm text-gray-900 dark:text-white">{formatQRange(qFrom, qTo)}</div>
+              <div className="text-xs text-gray-500 mt-0.5">
+                {SCATTERING.modelShort}: {row.model?.systemsCount ?? '—'}
+                {' · '}
+                {SCATTERING.theoryShort}: {row.theory?.systemsCount ?? '—'}
               </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 shrink-0">
+              {row.model && (
+                <button
+                  type="button"
+                  onClick={() => navigateModelAverage(navigate, seriesId, row.model!)}
+                  className="px-2.5 py-1 rounded-md text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-300 dark:bg-indigo-950/50"
+                >
+                  Model avg
+                </button>
+              )}
+              {row.theory && (
+                <button
+                  type="button"
+                  onClick={() => navigateTheoryAverage(navigate, seriesId, row.theory!)}
+                  className="px-2.5 py-1 rounded-md text-xs font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 dark:text-orange-300 dark:bg-orange-950/50"
+                >
+                  Theory avg
+                </button>
+              )}
+              {canCompare && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigateCompare(navigate, seriesId, row.model!.calculationIds, row.theory!.calculationIds)
+                  }
+                  className="px-2.5 py-1 rounded-md text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Compare
+                </button>
+              )}
+            </div>
+          </li>
+        );
+      })}
+      {comparable.length === 0 && matched.length > 0 && (
+        <li className="px-4 py-2 text-xs text-gray-500 bg-gray-50 dark:bg-gray-900/40">
+          Run both pipelines with the same Q range to enable comparison.
+        </li>
+      )}
+    </ul>
   );
 };

@@ -2,41 +2,70 @@ import type { ScatteringCalculationDto } from '@/features/nanosystems/api/nanosy
 import type { SeriesCalculationGroupDto } from '@/features/calculation/api/calculationTypes';
 import { formatQRange } from '@/lib/scatteringLabels';
 
-export interface TheoryScatteringGroup {
+/** Group keyed only by Q range (from–to). */
+export interface QRangeGroup {
   groupId: string;
   qVectorFrom: number;
   qVectorTo: number;
-  qSpaceMethod: number;
-  qScaleMethod: number;
-  qSpaceParameter: number;
   systemsCount: number;
-  scatteringIds: string[];
+  calculationIds: string[];
   nanosystemIds: string[];
 }
 
 export interface MatchedScatteringGroup {
   key: string;
   qLabel: string;
-  model?: SeriesCalculationGroupDto;
-  theory?: TheoryScatteringGroup;
+  model?: QRangeGroup;
+  theory?: QRangeGroup;
 }
 
-const qKey = (from: number, to: number, method: number, scale: number, param: number) =>
-  `${from}|${to}|${method}|${scale}|${param}`;
+export const qRangeKey = (from: number, to: number) => `${from}|${to}`;
 
-export function buildTheoryScatteringGroups(calculations: ScatteringCalculationDto[]): TheoryScatteringGroup[] {
-  const byKey = new Map<string, ScatteringCalculationDto[]>();
+/** Merge API model groups that share the same Q range (ignores φ, θ and Q grid settings). */
+export function mergeModelGroupsByQRange(groups: SeriesCalculationGroupDto[]): QRangeGroup[] {
+  const byQ = new Map<string, Map<string, string>>();
 
-  for (const calc of calculations) {
-    const key = qKey(calc.qVectorFrom, calc.qVectorTo, calc.qSpaceMethod, calc.qScaleMethod, calc.qSpaceParameter);
-    const list = byKey.get(key) ?? [];
-    list.push(calc);
-    byKey.set(key, list);
+  for (const group of groups) {
+    const key = qRangeKey(group.parameters.qVectorFrom, group.parameters.qVectorTo);
+    const perSystem = byQ.get(key) ?? new Map<string, string>();
+    for (let i = 0; i < group.calculationIds.length; i++) {
+      const nsId = group.nanosystemIds[i];
+      const calcId = group.calculationIds[i];
+      if (nsId && calcId && !perSystem.has(nsId)) {
+        perSystem.set(nsId, calcId);
+      }
+    }
+    byQ.set(key, perSystem);
   }
 
-  const groups: TheoryScatteringGroup[] = [];
+  return Array.from(byQ.entries())
+    .map(([key, perSystem]) => {
+      const [from, to] = key.split('|').map(Number);
+      return {
+        groupId: key,
+        qVectorFrom: from,
+        qVectorTo: to,
+        systemsCount: perSystem.size,
+        calculationIds: Array.from(perSystem.values()),
+        nanosystemIds: Array.from(perSystem.keys()),
+      };
+    })
+    .sort((a, b) => b.systemsCount - a.systemsCount);
+}
 
-  for (const [, items] of byKey) {
+export function buildTheoryScatteringGroups(calculations: ScatteringCalculationDto[]): QRangeGroup[] {
+  const byQ = new Map<string, ScatteringCalculationDto[]>();
+
+  for (const calc of calculations) {
+    const key = qRangeKey(calc.qVectorFrom, calc.qVectorTo);
+    const list = byQ.get(key) ?? [];
+    list.push(calc);
+    byQ.set(key, list);
+  }
+
+  const groups: QRangeGroup[] = [];
+
+  for (const [key, items] of byQ) {
     const perSystem = new Map<string, ScatteringCalculationDto>();
     for (const calc of items) {
       const existing = perSystem.get(calc.nanosystemId);
@@ -46,17 +75,13 @@ export function buildTheoryScatteringGroups(calculations: ScatteringCalculationD
     }
     const picked = Array.from(perSystem.values());
     if (picked.length === 0) continue;
-    const sample = picked[0];
-    const key = qKey(sample.qVectorFrom, sample.qVectorTo, sample.qSpaceMethod, sample.qScaleMethod, sample.qSpaceParameter);
+    const [from, to] = key.split('|').map(Number);
     groups.push({
-      groupId: key.slice(0, 16),
-      qVectorFrom: sample.qVectorFrom,
-      qVectorTo: sample.qVectorTo,
-      qSpaceMethod: sample.qSpaceMethod,
-      qScaleMethod: sample.qScaleMethod,
-      qSpaceParameter: sample.qSpaceParameter,
+      groupId: key,
+      qVectorFrom: from,
+      qVectorTo: to,
       systemsCount: picked.length,
-      scatteringIds: picked.map((c) => c.id),
+      calculationIds: picked.map((c) => c.id),
       nanosystemIds: picked.map((c) => c.nanosystemId),
     });
   }
@@ -65,32 +90,21 @@ export function buildTheoryScatteringGroups(calculations: ScatteringCalculationD
 }
 
 export function matchScatteringGroups(
-  modelGroups: SeriesCalculationGroupDto[],
-  theoryGroups: TheoryScatteringGroup[],
+  modelGroups: QRangeGroup[],
+  theoryGroups: QRangeGroup[],
 ): MatchedScatteringGroup[] {
-  const theoryByQ = new Map(
-    theoryGroups.map((g) => [
-      qKey(g.qVectorFrom, g.qVectorTo, g.qSpaceMethod, g.qScaleMethod, g.qSpaceParameter),
-      g,
-    ]),
-  );
+  const theoryByQ = new Map(theoryGroups.map((g) => [qRangeKey(g.qVectorFrom, g.qVectorTo), g]));
 
   const keys = new Set<string>();
-  for (const m of modelGroups) {
-    keys.add(qKey(m.parameters.qVectorFrom, m.parameters.qVectorTo, m.parameters.qSpaceMethod, m.parameters.qScaleMethod, m.parameters.qSpaceParameter));
-  }
-  for (const t of theoryGroups) {
-    keys.add(qKey(t.qVectorFrom, t.qVectorTo, t.qSpaceMethod, t.qScaleMethod, t.qSpaceParameter));
-  }
+  for (const m of modelGroups) keys.add(qRangeKey(m.qVectorFrom, m.qVectorTo));
+  for (const t of theoryGroups) keys.add(qRangeKey(t.qVectorFrom, t.qVectorTo));
 
   return Array.from(keys)
     .map((key) => {
-      const model = modelGroups.find(
-        (g) => qKey(g.parameters.qVectorFrom, g.parameters.qVectorTo, g.parameters.qSpaceMethod, g.parameters.qScaleMethod, g.parameters.qSpaceParameter) === key,
-      );
+      const model = modelGroups.find((g) => qRangeKey(g.qVectorFrom, g.qVectorTo) === key);
       const theory = theoryByQ.get(key);
-      const qFrom = model?.parameters.qVectorFrom ?? theory!.qVectorFrom;
-      const qTo = model?.parameters.qVectorTo ?? theory!.qVectorTo;
+      const qFrom = model?.qVectorFrom ?? theory!.qVectorFrom;
+      const qTo = model?.qVectorTo ?? theory!.qVectorTo;
       return {
         key,
         qLabel: formatQRange(qFrom, qTo),
@@ -103,13 +117,4 @@ export function matchScatteringGroups(
       const bCount = Math.max(b.model?.systemsCount ?? 0, b.theory?.systemsCount ?? 0);
       return bCount - aCount;
     });
-}
-
-export function modelGroupQKey(group: SeriesCalculationGroupDto): string {
-  const p = group.parameters;
-  return qKey(p.qVectorFrom, p.qVectorTo, p.qSpaceMethod, p.qScaleMethod, p.qSpaceParameter);
-}
-
-export function theoryGroupQKey(group: TheoryScatteringGroup): string {
-  return qKey(group.qVectorFrom, group.qVectorTo, group.qSpaceMethod, group.qScaleMethod, group.qSpaceParameter);
 }

@@ -13,7 +13,7 @@ const defaultSaxsParams: Omit<RunScatteringCalculationRequest, 'nanosystemId'> =
 interface SeriesBulkSaxsPanelProps {
   seriesId: string;
   systemCount?: number;
-  variant?: 'hero' | 'compact';
+  variant?: 'hero' | 'compact' | 'inline';
 }
 
 export const SeriesBulkSaxsPanel = ({ seriesId, systemCount, variant = 'hero' }: SeriesBulkSaxsPanelProps) => {
@@ -92,7 +92,38 @@ export const SeriesBulkSaxsPanel = ({ seriesId, systemCount, variant = 'hero' }:
     }
   }, [seriesId, params, showSuccess, showError]);
 
-  const countLabel = systemCount != null ? ` (${systemCount} systems)` : '';
+  const countLabel = systemCount != null ? ` (${systemCount})` : '';
+
+  const modal = (
+    <ScatteringCalculationModal
+      isOpen={isModalOpen}
+      onClose={() => !isRunning && setIsModalOpen(false)}
+      params={params}
+      onParamChange={handleParamChange}
+      onRun={handleRunBulk}
+      isRunning={isRunning}
+      showExcess
+      title={`${SCATTERING.theory} for entire series`}
+      description={`The same Q parameters will be applied to every nanosystem in this series${countLabel}.`}
+      runLabel={SCATTERING.runTheorySeries}
+    />
+  );
+
+  if (variant === 'inline') {
+    return (
+      <>
+        <button
+          type="button"
+          disabled={isRunning || systemCount === 0}
+          onClick={() => setIsModalOpen(true)}
+          className="px-3 py-1.5 rounded-lg text-sm font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 disabled:opacity-50 dark:text-orange-300 dark:bg-orange-950/40"
+        >
+          {isRunning ? 'Starting…' : SCATTERING.runTheorySeries}
+        </button>
+        {modal}
+      </>
+    );
+  }
 
   if (variant === 'compact') {
     return (
@@ -120,18 +151,7 @@ export const SeriesBulkSaxsPanel = ({ seriesId, systemCount, variant = 'hero' }:
             </button>
           </div>
         </div>
-        <ScatteringCalculationModal
-          isOpen={isModalOpen}
-          onClose={() => !isRunning && setIsModalOpen(false)}
-          params={params}
-          onParamChange={handleParamChange}
-          onRun={handleRunBulk}
-          isRunning={isRunning}
-          showExcess
-          title={`${SCATTERING.theory} for entire series`}
-          description={`The same Q parameters will be applied to every nanosystem in this series${countLabel}.`}
-          runLabel={SCATTERING.runTheorySeries}
-        />
+        {modal}
       </>
     );
   }
@@ -176,18 +196,7 @@ export const SeriesBulkSaxsPanel = ({ seriesId, systemCount, variant = 'hero' }:
         </div>
       </div>
 
-      <ScatteringCalculationModal
-        isOpen={isModalOpen}
-        onClose={() => !isRunning && setIsModalOpen(false)}
-        params={params}
-        onParamChange={handleParamChange}
-        onRun={handleRunBulk}
-        isRunning={isRunning}
-        showExcess
-        title={`${SCATTERING.theory} for entire series`}
-        description={`Configure Q-space parameters. They will be applied to every nanosystem in this series${countLabel}.`}
-        runLabel={SCATTERING.runTheorySeries}
-      />
+      {modal}
     </>
   );
 };
