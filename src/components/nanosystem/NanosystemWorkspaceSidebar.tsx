@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import { getSeriesCalculationsUrl } from '@/lib/navigation';
 import { SCATTERING } from '@/lib/scatteringLabels';
 
-export type WorkspaceSection = 'overview' | 'calculations' | 'legacy' | 'radial' | 'saxs';
+export type WorkspaceSection = 'overview' | 'calculations' | 'legacy' | 'radial' | 'saxs' | 'jobs';
 
 interface NanosystemWorkspaceSidebarProps {
   seriesId: string;
@@ -107,6 +107,11 @@ export const NanosystemWorkspaceSidebar = ({
         label="Radial"
         count={radialCount}
         onClick={() => onSectionChange('radial')}
+      />
+      <NavItem
+        active={activeSection === 'jobs'}
+        label="Jobs"
+        onClick={() => onSectionChange('jobs')}
       />
     </nav>
 

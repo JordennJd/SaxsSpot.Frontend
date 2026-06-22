@@ -6,6 +6,7 @@ import {
     SeriesCalculationGroupsApiResponseSchema,
 } from './calculationTypes.ts';
 import type {ApiResponse} from '../../common/commonTypes.ts';
+import { handleError } from '../../../lib/errorHandler';
 
 export const fetchCalculationsByNanosystem = async (
     nanosystemId: string,
@@ -260,4 +261,25 @@ export const plotScatteringComparePng = async (request: PlotScatteringCompareReq
     });
 
     return response.data.result;
+};
+
+export const downloadCalculation = async (id: string): Promise<void> => {
+    try {
+        const response = await calculationApiClient.get('/calculation/download-calculation', {
+            responseType: 'blob',
+            params: { id },
+            timeout: 0,
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `calculation-${id}.txt`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        throw handleError(error as Error);
+    }
 };

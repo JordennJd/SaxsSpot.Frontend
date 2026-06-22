@@ -14,9 +14,11 @@ const SUPPORTED_OPERATION_TYPES = ['manual-series-run', 'RunRadialAnalysis', 'Ru
 
 const JOB_TYPE_LABELS: Record<string, string> = {
     'manual-series-run': 'Generation',
+    'nanosystem-generation': 'Generation',
+    'calculate-scattering': 'By model',
     'RunRadialAnalysis': 'Radial analysis',
-    'RunStrictScatteringCalculation': 'Strict SAXS',
-    'RunSphereScatteringCalculation': 'Sphere SAXS',
+    'RunStrictScatteringCalculation': 'Theory (strict)',
+    'RunSphereScatteringCalculation': 'Theory (sphere)',
 };
 
 /** Progress 0–100 from job.progress or parsed from message (e.g. "Generation in progress: 45%") */

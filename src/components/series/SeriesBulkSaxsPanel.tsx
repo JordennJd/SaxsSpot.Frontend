@@ -7,7 +7,6 @@ import { SCATTERING } from '@/lib/scatteringLabels';
 
 const defaultSaxsParams: Omit<RunScatteringCalculationRequest, 'nanosystemId'> = {
   qSpaceParameters: { spaceMethod: 0, scaleMethod: 1, spaceParameter: 20, start: 0.02, end: 0.4 },
-  excess: 0,
 };
 
 interface SeriesBulkSaxsPanelProps {
@@ -44,12 +43,12 @@ export const SeriesBulkSaxsPanel = ({ seriesId, systemCount, variant = 'hero' }:
     setIsRunning(true);
     setProgress({ done: 0, total: 0 });
     try {
-      const allSystems: { id: string; particleKind: string; excess: number }[] = [];
+      const allSystems: { id: string }[] = [];
       let page = 1;
       const pageSize = 100;
       while (true) {
         const res = await fetchNanosystemList(`seriesId=${seriesId}`, page, pageSize);
-        allSystems.push(...res.result.data.map((s) => ({ id: s.id, particleKind: s.particleKind, excess: s.excess })));
+        allSystems.push(...res.result.data.map((s) => ({ id: s.id })));
         if (allSystems.length >= res.result.count) break;
         page += 1;
       }
@@ -68,7 +67,6 @@ export const SeriesBulkSaxsPanel = ({ seriesId, systemCount, variant = 'hero' }:
           await runScatteringCalculation({
             nanosystemId: system.id,
             qSpaceParameters: params.qSpaceParameters,
-            excess: system.particleKind === 'Sphere' ? (params.excess ?? system.excess) : undefined,
           });
           queued += 1;
         } catch {
@@ -102,7 +100,6 @@ export const SeriesBulkSaxsPanel = ({ seriesId, systemCount, variant = 'hero' }:
       onParamChange={handleParamChange}
       onRun={handleRunBulk}
       isRunning={isRunning}
-      showExcess
       title={`${SCATTERING.theory} for entire series`}
       description={`The same Q parameters will be applied to every nanosystem in this series${countLabel}.`}
       runLabel={SCATTERING.runTheorySeries}

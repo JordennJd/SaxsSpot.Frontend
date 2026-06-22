@@ -9,6 +9,9 @@ interface RadialAnalysisModalProps {
   onParamChange: (path: string, value: unknown) => void;
   onAnalyse: () => void;
   isAnalysing?: boolean;
+  title?: string;
+  description?: string;
+  runLabel?: string;
 }
 
 export const RadialAnalysisModal = ({
@@ -18,6 +21,9 @@ export const RadialAnalysisModal = ({
   onParamChange,
   onAnalyse,
   isAnalysing = false,
+  title = 'Radial Analysis Parameters',
+  description,
+  runLabel = 'Analyse',
 }: RadialAnalysisModalProps) => {
   const [isDirty, setIsDirty] = useState(false);
 
@@ -47,7 +53,7 @@ export const RadialAnalysisModal = ({
           <div className="bg-gradient-to-r from-purple-600 to-pink-700 px-6 py-5">
             <div className="flex items-center justify-between">
               <Dialog.Title className="text-xl font-bold text-white">
-                Radial Analysis Parameters
+                {title}
               </Dialog.Title>
               <button
                 onClick={onClose}
@@ -61,6 +67,9 @@ export const RadialAnalysisModal = ({
           </div>
 
           <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+            {description && (
+              <p className="text-sm text-gray-600 bg-purple-50 border border-purple-100 rounded-lg px-4 py-3">{description}</p>
+            )}
             <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Analysis Parameters</h3>
@@ -157,12 +166,7 @@ export const RadialAnalysisModal = ({
                     Analysing...
                   </>
                 ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    Analyse
-                  </>
+                  runLabel
                 )}
               </button>
             </div>

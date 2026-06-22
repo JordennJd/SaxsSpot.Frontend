@@ -68,7 +68,6 @@ export const NanosystemWorkspaceModals = ({ workspace }: NanosystemWorkspaceModa
         onParamChange={handleScatteringCalculationParamChange}
         onRun={handleScatteringCalculation}
         isRunning={isRunningScatteringCalculation}
-        showExcess={nanosystem?.particleKind === 'Sphere'}
       />
 
       <NanosystemViewer3DModal

@@ -9,7 +9,7 @@ import { useNanosystemWorkspace } from '../hooks/useNanosystemWorkspace';
 import { openNanosystemInNewWindow } from '@/lib/navigation';
 
 const parseSection = (tab: string | null): WorkspaceSection => {
-  if (tab === 'calculations' || tab === 'legacy' || tab === 'radial' || tab === 'saxs' || tab === 'overview') {
+  if (tab === 'calculations' || tab === 'legacy' || tab === 'radial' || tab === 'saxs' || tab === 'overview' || tab === 'jobs') {
     return tab;
   }
   return 'overview';

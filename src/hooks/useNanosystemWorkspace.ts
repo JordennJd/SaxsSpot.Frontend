@@ -57,7 +57,6 @@ export function useNanosystemWorkspace(nanosystem: NanosystemDto | null | undefi
   const [scatteringCalculationParams, setScatteringCalculationParams] = useState<RunScatteringCalculationRequest>({
     nanosystemId: '',
     qSpaceParameters: { spaceMethod: 0, scaleMethod: 1, spaceParameter: 20, start: 0.02, end: 0.4 },
-    excess: 0,
   });
 
   const { data: calculations, isLoading: isCalculationsLoading, isError: isCalculationsError } = useCalculationsData(
@@ -140,7 +139,7 @@ export function useNanosystemWorkspace(nanosystem: NanosystemDto | null | undefi
   const handleViewCalculationChartSelected = useCallback((calculationIds: string[]) => {
     const request: PlotChartRequest = {
       CalculatesId: calculationIds,
-      ChartTitle: 'Scattering',
+      ChartTitle: SCATTERING.model,
       XAxis: 'Q',
       YAxis: 'I',
       ScaleMethodsX: 'Log',
@@ -156,7 +155,7 @@ export function useNanosystemWorkspace(nanosystem: NanosystemDto | null | undefi
   const handleViewCalculationChartAverageSelected = useCallback((calculationIds: string[]) => {
     const request: PlotChartRequest = {
       CalculatesId: calculationIds,
-      ChartTitle: 'Scattering (average)',
+      ChartTitle: `${SCATTERING.model} (average)`,
       XAxis: 'Q',
       YAxis: 'I',
       ScaleMethodsX: 'Log',

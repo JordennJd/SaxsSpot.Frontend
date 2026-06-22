@@ -8,6 +8,7 @@ import type {
   RunCalculationRequest, 
   PlotChartRequest, 
 } from '@/features/calculation/api/calculationTypes';
+import { SCATTERING } from '@/lib/scatteringLabels';
 
 export class CalculationService {
   static async getCalculationsByNanosystem(
@@ -126,7 +127,7 @@ export class CalculationService {
   static createDefaultChartRequest(calculationIds: string[]): PlotChartRequest {
     return {
       CalculatesId: calculationIds,
-      ChartTitle: 'Scattering',
+      ChartTitle: SCATTERING.model,
       XAxis: 'Q',
       YAxis: 'I',
       ScaleMethodsX: 'Linear',

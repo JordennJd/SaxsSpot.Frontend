@@ -105,7 +105,7 @@ export const ScatteringCalculationChartPage = () => {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
-  <title>SAXS Scattering Chart</title>
+  <title>${SCATTERING.theory} chart</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     html { height: 100%; }

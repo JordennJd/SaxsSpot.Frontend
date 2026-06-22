@@ -1,6 +1,7 @@
 // CalculationDetailsCard.tsx
 import { Dialog } from '@headlessui/react';
 import { type CalculationDto, type PlotChartRequest } from '../api/calculationTypes.ts';
+import { downloadCalculation } from '../api/calculationApi';
 import { useNavigate } from 'react-router-dom';
 import {
     ChartBarIcon,
@@ -11,8 +12,10 @@ import {
     ArrowsRightLeftIcon,
     ScaleIcon,
     HashtagIcon,
+    ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { formatDateTime } from '@/lib/utils';
+import { SCATTERING } from '@/lib/scatteringLabels';
 
 export const CalculationDetailsCard = ({
                                            calculation,
@@ -28,13 +31,21 @@ export const CalculationDetailsCard = ({
     const handleViewChart = async () => {
         const request: PlotChartRequest = {
             CalculatesId: [calculation.id],
-            ChartTitle: 'Scattering',
+            ChartTitle: SCATTERING.model,
             XAxis: 'Q',
             YAxis: 'I',
             ScaleMethodsX: 'Log',
             ScaleMethodsY: 'Log',
         };
         navigate(`/calculations/${calculation.id}/chart`, { state: { request } });
+    };
+
+    const handleDownload = async () => {
+        try {
+            await downloadCalculation(calculation.id);
+        } catch (error) {
+            console.error('Download failed:', error);
+        }
     };
 
     // Группируем данные для лучшей организации
@@ -103,7 +114,7 @@ export const CalculationDetailsCard = ({
                         <div>
                             <Dialog.Title className="text-2xl font-bold text-white flex items-center gap-2">
                                 <CubeIcon className="h-6 w-6" />
-                                Calculation Details
+                                {SCATTERING.model} details
                             </Dialog.Title>
                             <p className="text-blue-100 mt-1 flex items-center gap-1">
                                 <HashtagIcon className="h-4 w-4" />
@@ -172,13 +183,22 @@ export const CalculationDetailsCard = ({
 
                     {/* Footer */}
                     <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center rounded-b-xl">
-                        <button
-                            onClick={handleViewChart}
-                            className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
-                        >
-                            <ChartBarIcon className="h-5 w-5" />
-                            View Chart
-                        </button>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleViewChart}
+                                className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                            >
+                                <ChartBarIcon className="h-5 w-5" />
+                                View Chart
+                            </button>
+                            <button
+                                onClick={handleDownload}
+                                className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                            >
+                                <ArrowDownTrayIcon className="h-5 w-5" />
+                                Download
+                            </button>
+                        </div>
                         <button
                             onClick={onClose}
                             className="px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all shadow-md hover:shadow-lg"

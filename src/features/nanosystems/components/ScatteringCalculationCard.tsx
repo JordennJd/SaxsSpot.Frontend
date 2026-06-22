@@ -85,9 +85,6 @@ export const ScatteringCalculationDetailsCard = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <DetailItem label="Q from" value={String(calculation.qVectorFrom)} icon={HashtagIcon} />
                 <DetailItem label="Q to" value={String(calculation.qVectorTo)} icon={HashtagIcon} />
-                {calculation.excess != null && (
-                  <DetailItem label="Excess" value={String(calculation.excess)} icon={HashtagIcon} />
-                )}
               </div>
             </Section>
             <Section title="Timeline">

@@ -6,7 +6,8 @@ import {useToastContext} from '../contexts/ToastContext';
 import {type ApiResponseListNanosystemDto, type NanosystemDto} from '../features/nanosystems/api/nanosystemTypes';
 import type { RunCalculationRequest } from '../features/calculation/api/calculationTypes.ts';
 import {RunSeriesCalculation} from '../features/calculation/api/calculationApi.ts';
-import { updateSeriesComment} from '../features/nanosystems/api/nanosystemApi.ts';
+import { updateSeriesComment, fetchNanosystemList, fetchRadialAnalysisList} from '../features/nanosystems/api/nanosystemApi.ts';
+import type { PlotAnalyseRequest } from '../features/calculation/api/calculationTypes.ts';
 import { CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader } from '../components/series';
 import { SeriesActionsBar } from '../components/series/SeriesActionsBar';
 import { openNanosystemInNewWindow } from '@/lib/navigation';
@@ -35,6 +36,7 @@ export const SeriesDetailPage = () => {
   const [seriesTab, setSeriesTab] = useState<'main' | 'comment'>('main');
   const [commentDraft, setCommentDraft] = useState('');
   const [isSavingComment, setIsSavingComment] = useState(false);
+  const [isSeriesAverageChartLoading, setIsSeriesAverageChartLoading] = useState(false);
 
   const [calculationParams, setCalculationParams] = useState<RunCalculationRequest>({
     qVectorSpaceParameters: {
@@ -150,6 +152,48 @@ export const SeriesDetailPage = () => {
     });
   };
 
+  const handleViewSeriesAverageChart = useCallback(async () => {
+    setIsSeriesAverageChartLoading(true);
+    try {
+      const res = await fetchNanosystemList(`seriesId=${seriesId}`, 1, 500);
+      const systems = res.result.data;
+      if (systems.length === 0) {
+        showError('No systems', 'This series has no nanosystems.');
+        return;
+      }
+      const firstAnalysisIds = await Promise.all(
+        systems.map((ns) =>
+          fetchRadialAnalysisList(ns.id, 1, 1, undefined, 'startDate').then(
+            (r) => r.result.data[0]?.id,
+          ),
+        ),
+      );
+      const ids = firstAnalysisIds.filter((id): id is string => id != null);
+      if (ids.length === 0) {
+        showError('No analyses', 'No radial analyses found. Run radial analysis for at least one system.');
+        return;
+      }
+      const request: PlotAnalyseRequest = {
+        RadialAnalysisIds: ids,
+        ChartTitle: 'Series average (first analyses)',
+        XAxis: 'r, nm',
+        YAxis: 'Numerical concentration',
+        ScaleMethodsX: 0,
+        ScaleMethodsY: 0,
+      };
+      const params = new URLSearchParams();
+      params.set('analysisIds', ids.join(','));
+      params.set('isAverage', '1');
+      params.set('seriesId', seriesId);
+      navigate(`/radial-analyses/${ids[0]}/chart?${params.toString()}`, { state: { request, isAverage: true } });
+    } catch (error) {
+      console.error('Error loading series average chart:', error);
+      showError('Chart error', 'Failed to load first analyses for the series.');
+    } finally {
+      setIsSeriesAverageChartLoading(false);
+    }
+  }, [seriesId, navigate, showError]);
+
   if (isSeriesLoading) {
     return <div className="text-center py-8">Loading series data...</div>;
   }
@@ -225,6 +269,8 @@ export const SeriesDetailPage = () => {
             seriesId={seriesId}
             systemCount={nanosystems?.result.count}
             onRunModel={openSeriesCalculateModal}
+            onViewRadialAverageChart={handleViewSeriesAverageChart}
+            isRadialAverageChartLoading={isSeriesAverageChartLoading}
           />
 
           <NanosystemsTable

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { PlotChart, PlotChartAverage, PlotChartAveragePng, PlotChartPng } from '../features/calculation/api/calculationApi';
 import type { PlotChartRequest } from '../features/calculation/api/calculationTypes';
+import { SCATTERING } from '@/lib/scatteringLabels';
 
 export const CalculationChartPage = () => {
     const { id } = useParams();
@@ -42,7 +43,7 @@ export const CalculationChartPage = () => {
         if (hasCalcIdsQuery && calcIdsQuery.length > 0) {
             return {
                 CalculatesId: calcIdsQuery,
-                ChartTitle: isAverage ? 'Scattering (average)' : 'Scattering',
+                ChartTitle: isAverage ? `${SCATTERING.model} (average)` : SCATTERING.model,
                 XAxis: 'Q',
                 YAxis: 'I',
                 ScaleMethodsX: 'Log',
@@ -53,7 +54,7 @@ export const CalculationChartPage = () => {
         return (
             location.state?.request || {
                 CalculatesId: id ? [id] : [],
-                ChartTitle: 'Scattering',
+                ChartTitle: SCATTERING.model,
                 XAxis: 'Q',
                 YAxis: 'I',
                 ScaleMethodsX: 'Log',

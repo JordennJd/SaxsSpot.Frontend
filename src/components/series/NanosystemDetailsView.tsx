@@ -14,11 +14,13 @@ import {
   ChartBarIcon,
   CubeTransparentIcon,
   InformationCircleIcon,
+  QueueListIcon,
 } from '@heroicons/react/24/outline';
 import { formatDateTime, formatGenerationDuration } from '@/lib/utils';
 import { SCATTERING } from '@/lib/scatteringLabels';
+import { NanosystemJobsTab } from '../nanosystem/NanosystemJobsTab';
 
-export type NanosystemTabId = 'overview' | 'legacy' | 'radial' | 'saxs';
+export type NanosystemTabId = 'overview' | 'legacy' | 'radial' | 'saxs' | 'jobs';
 
 interface DetailItemProps {
   label: string;
@@ -604,6 +606,12 @@ export const NanosystemDetailsView = ({
             onClick={() => handleTabChange('saxs')}
             accentClass="text-orange-600"
           />
+          <TabButton
+            active={displayedTab === 'jobs'}
+            label="Jobs"
+            onClick={() => handleTabChange('jobs')}
+            accentClass="text-slate-700"
+          />
         </div>
       </div>
       )}
@@ -641,6 +649,15 @@ export const NanosystemDetailsView = ({
         {displayedTab === 'legacy' && renderLegacyTab()}
         {displayedTab === 'radial' && renderRadialTab()}
         {displayedTab === 'saxs' && renderSaxsTab()}
+        {displayedTab === 'jobs' && (
+          <div>
+            <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+              <QueueListIcon className="h-4 w-4" />
+              Jobs
+            </h3>
+            <NanosystemJobsTab nanosystemId={nanosystem.id} active={displayedTab === 'jobs'} />
+          </div>
+        )}
           </>
         )}
       </div>

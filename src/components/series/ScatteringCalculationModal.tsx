@@ -10,7 +10,6 @@ interface ScatteringCalculationModalProps {
   onParamChange: (path: string, value: unknown) => void;
   onRun: () => void;
   isRunning?: boolean;
-  showExcess?: boolean;
   title?: string;
   description?: string;
   runLabel?: string;
@@ -111,7 +110,6 @@ export const ScatteringCalculationModal = ({
   onParamChange,
   onRun,
   isRunning = false,
-  showExcess = false,
   title = SCATTERING.theory,
   description,
   runLabel = SCATTERING.runTheory,
@@ -155,15 +153,6 @@ export const ScatteringCalculationModal = ({
               params={params.qSpaceParameters}
               onParamChange={handleParamChange}
             />
-            {showExcess && (
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <Field
-                  label="Excess (0-1)"
-                  value={params.excess ?? 0}
-                  onChange={(v) => handleParamChange('excess', v)}
-                />
-              </div>
-            )}
           </div>
 
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
