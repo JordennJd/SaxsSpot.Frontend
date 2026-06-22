@@ -1,6 +1,7 @@
 import { Dialog } from '@headlessui/react';
 import { useState, useEffect } from 'react';
 import type { RunScatteringCalculationRequest } from '../../features/nanosystems/api/nanosystemApi';
+import { SCATTERING } from '@/lib/scatteringLabels';
 
 interface ScatteringCalculationModalProps {
   isOpen: boolean;
@@ -111,9 +112,9 @@ export const ScatteringCalculationModal = ({
   onRun,
   isRunning = false,
   showExcess = false,
-  title = 'SAXS Scattering Calculation',
+  title = SCATTERING.theory,
   description,
-  runLabel = 'Run SAXS calculation',
+  runLabel = SCATTERING.runTheory,
 }: ScatteringCalculationModalProps) => {
   const [isDirty, setIsDirty] = useState(false);
 

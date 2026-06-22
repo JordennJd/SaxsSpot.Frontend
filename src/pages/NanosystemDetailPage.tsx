@@ -8,6 +8,7 @@ import { useNanosystemData, useSeriesData } from '../hooks/useSeriesDetail';
 import { useNanosystemWorkspace } from '../hooks/useNanosystemWorkspace';
 import { formatDateTime, formatGenerationDuration } from '@/lib/utils';
 import { openNanosystemInNewWindow } from '@/lib/navigation';
+import { SCATTERING } from '@/lib/scatteringLabels';
 
 const parseSection = (tab: string | null): WorkspaceSection => {
   if (tab === 'calculations' || tab === 'legacy' || tab === 'radial' || tab === 'saxs' || tab === 'overview') {
@@ -108,7 +109,7 @@ export const NanosystemDetailPage = () => {
           <div className="flex-1 min-w-0 flex flex-col">
             {activeSection === 'calculations' && (
               <div className="px-5 py-3 bg-violet-50 dark:bg-violet-950/30 border-b border-violet-100 dark:border-violet-900/50 text-sm text-violet-800 dark:text-violet-200">
-                <strong>Pick & compare:</strong> use checkboxes in Legacy and SAXS tabs, then build charts or compare pipelines. Switch tabs below without losing this panel.
+                <strong>Pick & compare:</strong> use checkboxes in {SCATTERING.model} and {SCATTERING.theory} tabs, then build charts or compare pipelines. Switch tabs below without losing this panel.
               </div>
             )}
             <NanosystemDetailsView

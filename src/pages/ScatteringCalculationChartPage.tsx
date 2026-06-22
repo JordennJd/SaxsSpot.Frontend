@@ -7,6 +7,7 @@ import {
     plotScatteringChartPng,
     type PlotScatteringChartRequest,
 } from '../features/nanosystems/api/nanosystemApi';
+import { SCATTERING } from '@/lib/scatteringLabels';
 
 export const ScatteringCalculationChartPage = () => {
     const { id } = useParams();
@@ -47,7 +48,7 @@ export const ScatteringCalculationChartPage = () => {
         if (hasScatteringIdsQuery && scatteringIdsQuery.length > 0) {
             return {
                 ScatteringCalculationIds: scatteringIdsQuery,
-                ChartTitle: isAverage ? 'SAXS Scattering (average)' : 'SAXS Scattering',
+                ChartTitle: isAverage ? `${SCATTERING.theory} (average)` : SCATTERING.theory,
                 XAxis: 'Q',
                 YAxis: 'I',
                 ScaleMethodsX: 'Log',
@@ -58,7 +59,7 @@ export const ScatteringCalculationChartPage = () => {
         return (
             location.state?.request || {
                 ScatteringCalculationIds: id ? [id] : [],
-                ChartTitle: 'SAXS Scattering',
+                ChartTitle: SCATTERING.theory,
                 XAxis: 'Q',
                 YAxis: 'I',
                 ScaleMethodsX: 'Log',
@@ -149,14 +150,14 @@ export const ScatteringCalculationChartPage = () => {
             <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">
-                        {isAverage ? 'SAXS Chart (average, log–log)' : 'SAXS Chart (log–log)'}
+                        {isAverage ? `${SCATTERING.theory} (average, log–log)` : `${SCATTERING.theory} (log–log)`}
                     </h1>
                     <p className="text-sm text-gray-500 mt-1">
                         {isAverage
-                            ? `Average of ${request.ScatteringCalculationIds.length} SAXS calculations (same Q grid)`
+                            ? `Average of ${request.ScatteringCalculationIds.length} ${SCATTERING.theory.toLowerCase()} calculations (same Q grid)`
                             : request.ScatteringCalculationIds.length === 1
                                 ? `Calculation ID: ${request.ScatteringCalculationIds[0]}`
-                                : `${request.ScatteringCalculationIds.length} SAXS calculations`}
+                                : `${request.ScatteringCalculationIds.length} ${SCATTERING.theory.toLowerCase()} calculations`}
                     </p>
                 </div>
                 <button
@@ -179,12 +180,12 @@ export const ScatteringCalculationChartPage = () => {
                     <iframe
                         srcDoc={chart}
                         className="w-full h-full border-0"
-                        title="SAXS Scattering Chart"
+                        title={`${SCATTERING.theory} chart`}
                     />
                 ) : request.ScatteringCalculationIds.length === 0 ? (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-center text-gray-500">
-                            <p>Select at least one SAXS calculation to display the chart</p>
+                            <p>Select at least one {SCATTERING.theory.toLowerCase()} calculation to display the chart</p>
                         </div>
                     </div>
                 ) : (

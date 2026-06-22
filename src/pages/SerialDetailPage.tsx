@@ -6,7 +6,6 @@ import {useToastContext} from '../contexts/ToastContext';
 import {type ApiResponseListNanosystemDto, type NanosystemDto} from '../features/nanosystems/api/nanosystemTypes';
 import type {
   PlotAnalyseRequest,
-  PlotChartRequest,
   RunCalculationRequest,
   SeriesCalculationGroupDto,
 } from '../features/calculation/api/calculationTypes.ts';
@@ -15,6 +14,9 @@ import {fetchNanosystemList, fetchRadialAnalysisList, updateSeriesComment} from 
 import { ApiError } from '../lib/axios';
 import { CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader } from '../components/series';
 import { SeriesBulkSaxsPanel } from '../components/series/SeriesBulkSaxsPanel';
+import { SeriesGroupComparePanel } from '../components/series/SeriesGroupComparePanel';
+import { useSeriesTheoryGroups } from '@/hooks/useSeriesTheoryGroups';
+import { SCATTERING } from '@/lib/scatteringLabels';
 import { getSeriesCalculationsUrl, openNanosystemInNewWindow } from '@/lib/navigation';
 import { NanosystemWorkspaceModals } from '../components/series/NanosystemWorkspaceModals';
 import {
@@ -41,7 +43,7 @@ export const SeriesDetailPage = () => {
   const [isSeriesAverageChartLoading, setIsSeriesAverageChartLoading] = useState(false);
   const [isSeriesScatteringGroupsLoading, setIsSeriesScatteringGroupsLoading] = useState(false);
   const [seriesScatteringGroups, setSeriesScatteringGroups] = useState<SeriesCalculationGroupDto[]>([]);
-  const [selectedSeriesScatteringGroupId, setSelectedSeriesScatteringGroupId] = useState<string | null>(null);
+  const { groups: theoryScatteringGroups, isLoading: isTheoryGroupsLoading } = useSeriesTheoryGroups(seriesId);
   const [seriesTab, setSeriesTab] = useState<'main' | 'comment'>('main');
   const [commentDraft, setCommentDraft] = useState('');
   const [isSavingComment, setIsSavingComment] = useState(false);
@@ -104,11 +106,9 @@ export const SeriesDetailPage = () => {
         const res = await fetchSeriesCalculationGroups(seriesId);
         const groups = res.result ?? [];
         setSeriesScatteringGroups(groups);
-        setSelectedSeriesScatteringGroupId(groups[0]?.groupId ?? null);
       } catch (error) {
         console.error('Error loading series calculation groups:', error);
         setSeriesScatteringGroups([]);
-        setSelectedSeriesScatteringGroupId(null);
         if (!(error instanceof ApiError && (error.status === 404 || error.status === 400))) {
           showError('Series groups', 'Failed to load scattering calculation groups for this series.');
         }
@@ -119,10 +119,6 @@ export const SeriesDetailPage = () => {
 
     loadSeriesGroups();
   }, [seriesId, showError]);
-
-  const selectedSeriesScatteringGroup = seriesScatteringGroups.find(
-    (g) => g.groupId === selectedSeriesScatteringGroupId,
-  );
 
   const handleSaveComment = useCallback(async () => {
     if (!seriesId) return;
@@ -192,28 +188,6 @@ export const SeriesDetailPage = () => {
       return newParams;
     });
   };
-
-  const handleViewSeriesScatteringAverageChartSelected = useCallback(() => {
-    if (!selectedSeriesScatteringGroup) return;
-    if (selectedSeriesScatteringGroup.calculationIds.length === 0) return;
-    const request: PlotChartRequest = {
-      CalculatesId: selectedSeriesScatteringGroup.calculationIds,
-      ChartTitle: 'Scattering (average)',
-      XAxis: 'Q',
-      YAxis: 'I',
-      ScaleMethodsX: 'Log',
-      ScaleMethodsY: 'Log',
-    };
-    const params = new URLSearchParams();
-    params.set('calcIds', selectedSeriesScatteringGroup.calculationIds.join(','));
-    params.set('isAverage', '1');
-    params.set('seriesId', seriesId);
-    params.set('qFrom', String(selectedSeriesScatteringGroup.parameters.qVectorFrom));
-    params.set('qTo', String(selectedSeriesScatteringGroup.parameters.qVectorTo));
-    navigate(`/calculations/${selectedSeriesScatteringGroup.calculationIds[0]}/chart?${params.toString()}`, {
-      state: { request, isAverage: true },
-    });
-  }, [navigate, selectedSeriesScatteringGroup, seriesId]);
 
   const handleViewSeriesAverageChart = useCallback(async () => {
     setIsSeriesAverageChartLoading(true);
@@ -329,63 +303,38 @@ export const SeriesDetailPage = () => {
 
       {seriesTab === 'main' ? (
         <>
+      <SeriesBulkSaxsPanel seriesId={seriesId} systemCount={nanosystems?.result.count} variant="hero" />
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          Open the calculations explorer to compare groups or pick SAXS runs across systems.
+          Compare {SCATTERING.modelShort.toLowerCase()} and {SCATTERING.theoryShort.toLowerCase()} by Q groups, or pick individual runs.
         </p>
         <Link
           to={getSeriesCalculationsUrl(seriesId)}
           className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors shrink-0"
         >
-          Calculations & charts
+          Chart picker
         </Link>
       </div>
 
-      <SeriesBulkSaxsPanel seriesId={seriesId} systemCount={nanosystems?.result.count} />
-
-      {/* Legacy calculation — entire series */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Legacy scattering (entire series)
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Runs the legacy pipeline for every nanosystem in this series (not SAXS).
-            </p>
-          </div>
-          <div className="flex-shrink-0">
-            <button
-              className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-4 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 font-semibold text-lg hover:shadow-2xl transform hover:scale-105 active:scale-95 overflow-hidden"
-              onClick={openSeriesCalculateModal}
-            >
-              {/* Animated background effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              {/* Icon with animation */}
-              <div className="relative z-10 flex items-center gap-3">
-                <div className="p-1 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors duration-300">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <div className="font-bold">Start legacy calc</div>
-                  <div className="text-xs opacity-90 font-normal">All systems in series</div>
-                </div>
-              </div>
-              
-              {/* Loading indicator (hidden by default) */}
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </div>
-            </button>
-          </div>
+      {/* Scattering by model — entire series */}
+      <details className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20">
+        <summary className="cursor-pointer px-6 py-4 text-sm font-medium text-gray-700 dark:text-gray-200">
+          Advanced: {SCATTERING.model.toLowerCase()} for entire series
+        </summary>
+        <div className="px-6 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-t border-blue-100 dark:border-blue-900/50 pt-4">
+          <p className="text-sm text-gray-600 dark:text-gray-300 flex-1">
+            Runs {SCATTERING.model.toLowerCase()} on every nanosystem in this series.
+          </p>
+          <button
+            type="button"
+            className="shrink-0 px-5 py-2.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700"
+            onClick={openSeriesCalculateModal}
+          >
+            {SCATTERING.runModel}
+          </button>
         </div>
-      </div>
+      </details>
 
       {/* Series average chart: one graph = average of first analysis per system */}
       <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800 p-6">
@@ -422,97 +371,32 @@ export const SeriesDetailPage = () => {
         </div>
       </div>
 
-      {/* Series scattering average: average by equal input parameters */}
-      <div className="bg-gradient-to-r from-indigo-50 to-cyan-50 dark:from-indigo-900/20 dark:to-cyan-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800 p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Group compare: scattering by model vs theory scattering */}
+      <div className="bg-gradient-to-r from-indigo-50 to-emerald-50 dark:from-indigo-900/20 dark:to-emerald-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800 p-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Chart: average intensity by input parameters
+              {SCATTERING.compare} by Q groups
             </h3>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Choose one parameter set; we average scattering intensity across systems that match it.
+              Compare averaged {SCATTERING.modelShort.toLowerCase()} with averaged {SCATTERING.theoryShort.toLowerCase()} for matching Q parameters.
             </p>
           </div>
-          <div className="flex-shrink-0">
-            <button
-              type="button"
-              disabled={isSeriesScatteringGroupsLoading || !selectedSeriesScatteringGroup || selectedSeriesScatteringGroup.calculationIds.length === 0}
-              onClick={handleViewSeriesScatteringAverageChartSelected}
-              className="group relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-cyan-700 text-white rounded-xl shadow-lg hover:from-indigo-700 hover:to-cyan-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 font-semibold text-lg hover:shadow-2xl transform hover:scale-105 active:scale-95 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="relative z-10 flex items-center gap-3">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <div className="text-left">
-                  <div className="font-bold">
-                    {isSeriesScatteringGroupsLoading ? 'Loading…' : 'View averaged intensity'}
-                  </div>
-                  <div className="text-xs opacity-90 font-normal">
-                    {selectedSeriesScatteringGroup
-                      ? `Systems: ${selectedSeriesScatteringGroup.systemsCount}`
-                      : 'Select a group'}
-                  </div>
-                </div>
-              </div>
-            </button>
-          </div>
+          <Link
+            to={getSeriesCalculationsUrl(seriesId)}
+            className="shrink-0 px-4 py-2 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-700"
+          >
+            Open chart picker
+          </Link>
         </div>
-
-        {isSeriesScatteringGroupsLoading ? (
-          <div className="mt-4 text-center text-gray-600 dark:text-gray-300">
-            Loading calculation groups...
-          </div>
-        ) : seriesScatteringGroups.length > 0 ? (
-          <div className="mt-5 space-y-2">
-            {seriesScatteringGroups.map((group) => (
-              <label
-                key={group.groupId}
-                className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                  selectedSeriesScatteringGroupId === group.groupId
-                    ? 'border-indigo-400 bg-indigo-50 dark:border-indigo-300 dark:bg-indigo-900/20'
-                    : 'border-gray-200 hover:border-indigo-300 dark:border-gray-800 dark:hover:border-indigo-300/60'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="series-scattering-group"
-                  checked={selectedSeriesScatteringGroupId === group.groupId}
-                  onChange={() => setSelectedSeriesScatteringGroupId(group.groupId)}
-                  className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                        Q: {group.parameters.qVectorFrom}-{group.parameters.qVectorTo}
-                      </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                        Phi:{' '}
-                        {group.parameters.phiVectorFrom == null || (group.parameters.phiVectorFrom === -1 && group.parameters.phiVectorTo === -1)
-                          ? '—'
-                          : `${group.parameters.phiVectorFrom}-${group.parameters.phiVectorTo}`}
-                        {' | '}
-                        Theta:{' '}
-                        {group.parameters.thetaVectorFrom == null || (group.parameters.thetaVectorFrom === -1 && group.parameters.thetaVectorTo === -1)
-                          ? '—'
-                          : `${group.parameters.thetaVectorFrom}-${group.parameters.thetaVectorTo}`}
-                      </div>
-                    </div>
-                    <div className="shrink-0 text-xs text-gray-500 dark:text-gray-400">
-                      {group.systemsCount} systems
-                    </div>
-                  </div>
-                </div>
-              </label>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-4 text-center text-gray-600 dark:text-gray-300">
-            No grouped calculations found yet for this series.
-          </div>
-        )}
+        <SeriesGroupComparePanel
+          seriesId={seriesId}
+          modelGroups={seriesScatteringGroups}
+          theoryGroups={theoryScatteringGroups}
+          modelLoading={isSeriesScatteringGroupsLoading}
+          theoryLoading={isTheoryGroupsLoading}
+          compact
+        />
       </div>
 
       <NanosystemsTable

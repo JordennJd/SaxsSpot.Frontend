@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { getSeriesCalculationsUrl } from '@/lib/navigation';
+import { SCATTERING } from '@/lib/scatteringLabels';
 
 export type WorkspaceSection = 'overview' | 'calculations' | 'legacy' | 'radial' | 'saxs';
 
@@ -136,7 +137,7 @@ export const NanosystemWorkspaceSidebar = ({
       />
       <SectionButton
         active={activeSection === 'legacy'}
-        label="Legacy scattering"
+        label={SCATTERING.model}
         count={legacyCount}
         icon={CalculatorIcon}
         onClick={() => onSectionChange('legacy')}
@@ -152,7 +153,7 @@ export const NanosystemWorkspaceSidebar = ({
       />
       <SectionButton
         active={activeSection === 'saxs'}
-        label="SAXS results"
+        label={SCATTERING.theory}
         count={saxsCount}
         icon={BeakerIcon}
         onClick={() => onSectionChange('saxs')}
@@ -164,9 +165,9 @@ export const NanosystemWorkspaceSidebar = ({
       <p className="px-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Actions</p>
       <ActionButton label="Download system" icon={ArrowDownTrayIcon} onClick={onDownload} />
       {onView3D && <ActionButton label="3D viewer" icon={CubeTransparentIcon} onClick={onView3D} />}
-      <ActionButton label="Run legacy calc" icon={CalculatorIcon} onClick={onCalculate} variant="primary" />
+      <ActionButton label={SCATTERING.runModel} icon={CalculatorIcon} onClick={onCalculate} variant="primary" />
       <ActionButton label="Run radial analysis" icon={ChartBarIcon} onClick={onAnalyse} />
-      <ActionButton label="Run SAXS" icon={BeakerIcon} onClick={onScatteringCalculate} variant="saxs" />
+      <ActionButton label={SCATTERING.runTheory} icon={BeakerIcon} onClick={onScatteringCalculate} variant="saxs" />
     </div>
 
     <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
@@ -176,7 +177,7 @@ export const NanosystemWorkspaceSidebar = ({
         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
       >
         <ChartBarSquareIcon className="h-4 w-4" />
-        Series charts & groups
+        Chart picker
       </Link>
       {onOpenNewWindow && !standalone && (
         <button

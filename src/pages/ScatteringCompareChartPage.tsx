@@ -5,6 +5,7 @@ import {
     plotScatteringComparePng,
     type PlotScatteringCompareRequest,
 } from '../features/calculation/api/calculationApi';
+import { SCATTERING } from '@/lib/scatteringLabels';
 
 export const ScatteringCompareChartPage = () => {
     const location = useLocation();
@@ -39,7 +40,7 @@ export const ScatteringCompareChartPage = () => {
             return {
                 LegacyCalculationIds: legacyIds,
                 NanoScatteringIds: nanoIds,
-                ChartTitle: 'Scattering compare (legacy vs SAXS)',
+                ChartTitle: SCATTERING.compare,
                 XAxis: 'Q',
                 YAxis: 'I',
                 AverageLegacy: averageLegacy,
@@ -53,7 +54,7 @@ export const ScatteringCompareChartPage = () => {
             location.state?.request || {
                 LegacyCalculationIds: [],
                 NanoScatteringIds: [],
-                ChartTitle: 'Scattering compare (legacy vs SAXS)',
+                ChartTitle: SCATTERING.compare,
                 XAxis: 'Q',
                 YAxis: 'I',
                 AverageLegacy: true,
@@ -140,12 +141,12 @@ export const ScatteringCompareChartPage = () => {
         <div className="h-screen w-full flex flex-col bg-gray-50">
             <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Scattering compare (legacy vs SAXS)</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">{SCATTERING.compare}</h1>
                     <p className="text-sm text-gray-500 mt-1">
-                        Legacy: {request.LegacyCalculationIds.length}
+                        {SCATTERING.modelShort}: {request.LegacyCalculationIds.length}
                         {request.AverageLegacy ? ' (averaged)' : ''}
                         {' · '}
-                        SAXS: {request.NanoScatteringIds.length}
+                        {SCATTERING.theoryShort}: {request.NanoScatteringIds.length}
                         {request.AverageNano ? ' (averaged)' : ''}
                     </p>
                 </div>
@@ -174,7 +175,7 @@ export const ScatteringCompareChartPage = () => {
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-center text-gray-500">
-                            <p>Select legacy and SAXS calculations to compare</p>
+                            <p>Select {SCATTERING.modelShort.toLowerCase()} and {SCATTERING.theoryShort.toLowerCase()} calculations to compare</p>
                         </div>
                     </div>
                 )}

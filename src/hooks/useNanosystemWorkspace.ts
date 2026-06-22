@@ -11,6 +11,7 @@ import {
   type RunRadialAnalysisRequest,
   type RunScatteringCalculationRequest,
 } from '../features/nanosystems/api/nanosystemApi';
+import { SCATTERING } from '@/lib/scatteringLabels';
 import {
   useCalculationsData,
   useRadialAnalysisData,
@@ -171,7 +172,7 @@ export function useNanosystemWorkspace(nanosystem: NanosystemDto | null | undefi
   const handleViewScatteringChartSelected = useCallback((scatteringIds: string[]) => {
     const request = {
       ScatteringCalculationIds: scatteringIds,
-      ChartTitle: 'SAXS Scattering',
+      ChartTitle: SCATTERING.theory,
       XAxis: 'Q',
       YAxis: 'I',
       ScaleMethodsX: 'Log',
@@ -187,7 +188,7 @@ export function useNanosystemWorkspace(nanosystem: NanosystemDto | null | undefi
   const handleViewScatteringChartAverageSelected = useCallback((scatteringIds: string[]) => {
     const request = {
       ScatteringCalculationIds: scatteringIds,
-      ChartTitle: 'SAXS Scattering (average)',
+      ChartTitle: `${SCATTERING.theory} (average)`,
       XAxis: 'Q',
       YAxis: 'I',
       ScaleMethodsX: 'Log',
@@ -204,7 +205,7 @@ export function useNanosystemWorkspace(nanosystem: NanosystemDto | null | undefi
     const request = {
       LegacyCalculationIds: legacyIds,
       NanoScatteringIds: nanoIds,
-      ChartTitle: 'Scattering compare (legacy vs SAXS)',
+      ChartTitle: SCATTERING.compare,
       XAxis: 'Q',
       YAxis: 'I',
       AverageLegacy: legacyIds.length >= 2,
@@ -238,10 +239,10 @@ export function useNanosystemWorkspace(nanosystem: NanosystemDto | null | undefi
       setIsRunningScatteringCalculation(true);
       const operationId = await runScatteringCalculation(scatteringCalculationParams);
       closeScatteringCalculationModal();
-      showSuccess(`SAXS calculation started. Operation ID: ${operationId}`);
+      showSuccess(`${SCATTERING.theory} started. Operation ID: ${operationId}`);
       await queryClient.invalidateQueries({ queryKey: ['scatteringCalculations', nanosystem?.id] });
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Failed to start SAXS calculation');
+      showError(error instanceof Error ? error.message : `Failed to start ${SCATTERING.theory.toLowerCase()}`);
     } finally {
       setIsRunningScatteringCalculation(false);
     }

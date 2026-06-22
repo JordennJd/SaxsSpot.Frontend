@@ -12,6 +12,7 @@ import {
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { formatDateTime } from '@/lib/utils';
+import { SCATTERING } from '@/lib/scatteringLabels';
 
 const kindLabels: Record<number, string> = {
   0: 'Strict parallelepiped',
@@ -40,7 +41,7 @@ export const ScatteringCalculationDetailsCard = ({
   const handleViewChart = () => {
     const request = {
       ScatteringCalculationIds: [calculation.id],
-      ChartTitle: 'SAXS Scattering',
+      ChartTitle: SCATTERING.theory,
       XAxis: 'Q',
       YAxis: 'I',
       ScaleMethodsX: 'Log',
@@ -61,7 +62,7 @@ export const ScatteringCalculationDetailsCard = ({
             <div>
               <Dialog.Title className="text-2xl font-bold text-white flex items-center gap-2">
                 <BeakerIcon className="h-6 w-6" />
-                SAXS Scattering Details
+                {SCATTERING.theory} details
               </Dialog.Title>
               <p className="text-orange-100 mt-1 flex items-center gap-1">
                 <HashtagIcon className="h-4 w-4" />

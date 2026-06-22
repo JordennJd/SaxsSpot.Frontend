@@ -16,6 +16,7 @@ import {
   InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { formatDateTime, formatGenerationDuration } from '@/lib/utils';
+import { SCATTERING } from '@/lib/scatteringLabels';
 
 export type NanosystemTabId = 'overview' | 'legacy' | 'radial' | 'saxs';
 
@@ -215,7 +216,7 @@ export const NanosystemActionButtons = ({
           className="px-4 py-2 text-sm font-medium rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors inline-flex items-center gap-2"
         >
           <BeakerIcon className="h-4 w-4" />
-          SAXS
+          {SCATTERING.theoryShort}
         </button>
         {onClose && (
           <button
@@ -368,7 +369,7 @@ export const NanosystemDetailsView = ({
   const renderLegacyTab = () => {
     if (isCalculationsLoading) return <LoadingState label="Loading calculations…" accentClass="border-indigo-500" />;
     if (isCalculationsError) return <EmptyState icon={CalculatorIcon} message="Calculations service unavailable" />;
-    if (calculations.length === 0) return <EmptyState icon={CalculatorIcon} message="No legacy calculations yet. Run Calculate to add one." />;
+    if (calculations.length === 0) return <EmptyState icon={CalculatorIcon} message={`No ${SCATTERING.model.toLowerCase()} yet. Run Calculate to add one.`} />;
 
     return (
       <>
@@ -395,7 +396,7 @@ export const NanosystemDetailsView = ({
                     <p className="text-xs font-mono text-indigo-600 truncate mt-0.5">{calc.id}</p>
                     <p className="text-xs text-gray-500 mt-1">Q: {calc.qVectorFrom}–{calc.qVectorTo}</p>
                   </div>
-                  <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 shrink-0">Legacy</span>
+                  <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 shrink-0">{SCATTERING.modelShort}</span>
                 </div>
               </div>
             </li>
@@ -422,7 +423,7 @@ export const NanosystemDetailsView = ({
             )}
             {canCompare && (
               <ToolbarButton onClick={handleCompareScatteringChartSelected} variant="compare">
-                Compare vs SAXS
+                {SCATTERING.compare} ({selectedCalculationIds.size} + {selectedScatteringCalculationIds.size})
               </ToolbarButton>
             )}
           </ChartToolbar>
@@ -478,13 +479,13 @@ export const NanosystemDetailsView = ({
   };
 
   const renderSaxsTab = () => {
-    if (isScatteringCalculationsLoading) return <LoadingState label="Loading SAXS calculations…" accentClass="border-orange-500" />;
-    if (isScatteringCalculationsError) return <EmptyState icon={BeakerIcon} message="SAXS service unavailable" />;
+    if (isScatteringCalculationsLoading) return <LoadingState label={`Loading ${SCATTERING.theory.toLowerCase()}…`} accentClass="border-orange-500" />;
+    if (isScatteringCalculationsError) return <EmptyState icon={BeakerIcon} message={`${SCATTERING.theory} service unavailable`} />;
     if (scatteringCalculations.length === 0) {
       return (
         <EmptyState
           icon={BeakerIcon}
-          message="No SAXS calculations for this system yet. Use the SAXS button below to run one."
+          message={`No ${SCATTERING.theory.toLowerCase()} for this system yet. Use the ${SCATTERING.theoryShort} button below to run one.`}
         />
       );
     }
@@ -504,7 +505,7 @@ export const NanosystemDetailsView = ({
                 onChange={() => {}}
                 onClick={(e) => toggleScatteringCalculationSelection(e, calculation.id)}
                 className="mt-1 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
-                aria-label={`Select SAXS calculation ${calculation.id}`}
+                aria-label={`Select ${SCATTERING.theoryShort} calculation ${calculation.id}`}
               />
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between gap-2">
@@ -528,7 +529,7 @@ export const NanosystemDetailsView = ({
                 onClick={() => onViewScatteringChartSelected(Array.from(selectedScatteringCalculationIds))}
                 disabled={selectedScatteringCalculationIds.size === 0}
               >
-                SAXS chart ({selectedScatteringCalculationIds.size})
+                {SCATTERING.theory} chart ({selectedScatteringCalculationIds.size})
               </ToolbarButton>
             )}
             {onViewScatteringChartAverageSelected && (
@@ -536,12 +537,12 @@ export const NanosystemDetailsView = ({
                 onClick={() => onViewScatteringChartAverageSelected(Array.from(selectedScatteringCalculationIds))}
                 disabled={selectedScatteringCalculationIds.size < 2}
               >
-                SAXS average ({selectedScatteringCalculationIds.size})
+                {SCATTERING.theoryShort} average ({selectedScatteringCalculationIds.size})
               </ToolbarButton>
             )}
             {canCompare && (
               <ToolbarButton onClick={handleCompareScatteringChartSelected} variant="compare">
-                Compare vs legacy
+                {SCATTERING.compare}
               </ToolbarButton>
             )}
           </ChartToolbar>
@@ -584,7 +585,7 @@ export const NanosystemDetailsView = ({
           />
           <TabButton
             active={displayedTab === 'legacy'}
-            label="Legacy scattering"
+            label={SCATTERING.model}
             count={calculations.length}
             onClick={() => handleTabChange('legacy')}
             accentClass="text-indigo-600"
@@ -598,7 +599,7 @@ export const NanosystemDetailsView = ({
           />
           <TabButton
             active={displayedTab === 'saxs'}
-            label="SAXS"
+            label={SCATTERING.theory}
             count={scatteringCalculations.length}
             onClick={() => handleTabChange('saxs')}
             accentClass="text-orange-600"
@@ -611,11 +612,11 @@ export const NanosystemDetailsView = ({
         {pickerMode ? (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-sm font-semibold text-indigo-700 mb-3">Legacy scattering</h3>
+              <h3 className="text-sm font-semibold text-indigo-700 mb-3">{SCATTERING.model}</h3>
               {renderLegacyTab()}
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-orange-700 mb-3">SAXS</h3>
+              <h3 className="text-sm font-semibold text-orange-700 mb-3">{SCATTERING.theory}</h3>
               {renderSaxsTab()}
             </div>
           </div>
