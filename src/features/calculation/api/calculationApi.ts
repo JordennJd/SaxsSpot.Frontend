@@ -213,3 +213,51 @@ export const PlotAnalyseAveragePng = async (request: PlotAnalyseRequest): Promis
 
     return response.data.result;
 };
+
+export interface PlotScatteringCompareRequest {
+    ChartTitle: string;
+    XAxis: string;
+    YAxis: string;
+    LegacyCalculationIds: string[];
+    NanoScatteringIds: string[];
+    AverageLegacy: boolean;
+    AverageNano: boolean;
+    ScaleMethodsX: string | number;
+    ScaleMethodsY: string | number;
+}
+
+const appendPlotScatteringCompareParams = (params: URLSearchParams, request: PlotScatteringCompareRequest) => {
+    request.LegacyCalculationIds.forEach((id) => params.append('LegacyCalculationIds', id));
+    request.NanoScatteringIds.forEach((id) => params.append('NanoScatteringIds', id));
+    params.set('ChartTitle', request.ChartTitle);
+    params.set('XAxis', request.XAxis);
+    params.set('YAxis', request.YAxis);
+    params.set('AverageLegacy', String(request.AverageLegacy));
+    params.set('AverageNano', String(request.AverageNano));
+    params.set('ScaleMethodsX', String(request.ScaleMethodsX));
+    params.set('ScaleMethodsY', String(request.ScaleMethodsY));
+};
+
+export const plotScatteringCompare = async (request: PlotScatteringCompareRequest): Promise<string> => {
+    const params = new URLSearchParams();
+    appendPlotScatteringCompareParams(params, request);
+
+    const response = await calculationApiClient.get<{ result: string }>('/calculation/plot-scattering-compare', {
+        params,
+        paramsSerializer: (p) => (p instanceof URLSearchParams ? p.toString() : ''),
+    });
+
+    return response.data.result;
+};
+
+export const plotScatteringComparePng = async (request: PlotScatteringCompareRequest): Promise<string> => {
+    const params = new URLSearchParams();
+    appendPlotScatteringCompareParams(params, request);
+
+    const response = await calculationApiClient.get<{ result: string }>('/calculation/plot-scattering-compare-png', {
+        params,
+        paramsSerializer: (p) => (p instanceof URLSearchParams ? p.toString() : ''),
+    });
+
+    return response.data.result;
+};

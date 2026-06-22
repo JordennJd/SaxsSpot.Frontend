@@ -278,6 +278,72 @@ export const fetchScatteringCalculationList = async (
   }
 };
 
+export interface PlotScatteringChartRequest {
+  ScatteringCalculationIds: string[];
+  ChartTitle: string;
+  XAxis: string;
+  YAxis: string;
+  ScaleMethodsX: string | number;
+  ScaleMethodsY: string | number;
+}
+
+const appendPlotScatteringParams = (params: URLSearchParams, request: PlotScatteringChartRequest) => {
+  request.ScatteringCalculationIds.forEach((id) => params.append('ScatteringCalculationIds', id));
+  params.set('ChartTitle', request.ChartTitle);
+  params.set('XAxis', request.XAxis);
+  params.set('YAxis', request.YAxis);
+  params.set('ScaleMethodsX', String(request.ScaleMethodsX));
+  params.set('ScaleMethodsY', String(request.ScaleMethodsY));
+};
+
+export const plotScatteringChart = async (request: PlotScatteringChartRequest): Promise<string> => {
+  const params = new URLSearchParams();
+  appendPlotScatteringParams(params, request);
+
+  const response = await nanosystemApiClient.get<{ result: string }>('/scattering-calculation/plot', {
+    params,
+    paramsSerializer: (p) => (p instanceof URLSearchParams ? p.toString() : ''),
+  });
+
+  return response.data.result;
+};
+
+export const plotScatteringChartAverage = async (request: PlotScatteringChartRequest): Promise<string> => {
+  const params = new URLSearchParams();
+  appendPlotScatteringParams(params, request);
+
+  const response = await nanosystemApiClient.get<{ result: string }>('/scattering-calculation/plot-average', {
+    params,
+    paramsSerializer: (p) => (p instanceof URLSearchParams ? p.toString() : ''),
+  });
+
+  return response.data.result;
+};
+
+export const plotScatteringChartPng = async (request: PlotScatteringChartRequest): Promise<string> => {
+  const params = new URLSearchParams();
+  appendPlotScatteringParams(params, request);
+
+  const response = await nanosystemApiClient.get<{ result: string }>('/scattering-calculation/plot-png', {
+    params,
+    paramsSerializer: (p) => (p instanceof URLSearchParams ? p.toString() : ''),
+  });
+
+  return response.data.result;
+};
+
+export const plotScatteringChartAveragePng = async (request: PlotScatteringChartRequest): Promise<string> => {
+  const params = new URLSearchParams();
+  appendPlotScatteringParams(params, request);
+
+  const response = await nanosystemApiClient.get<{ result: string }>('/scattering-calculation/plot-average-png', {
+    params,
+    paramsSerializer: (p) => (p instanceof URLSearchParams ? p.toString() : ''),
+  });
+
+  return response.data.result;
+};
+
 export const downloadScatteringCalculation = async (id: string): Promise<void> => {
   try {
     const response = await nanosystemApiClient.get('/scattering-calculation/download-scattering-calculation', {

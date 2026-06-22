@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Dialog } from '@headlessui/react';
 import { type ScatteringCalculationDto } from '../api/nanosystemTypes';
 import { downloadScatteringCalculation } from '../api/nanosystemApi';
@@ -8,6 +9,7 @@ import {
   HashtagIcon,
   BeakerIcon,
   ArrowDownTrayIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 import { formatDateTime } from '@/lib/utils';
 
@@ -25,12 +27,29 @@ export const ScatteringCalculationDetailsCard = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
+  const navigate = useNavigate();
+
   const handleDownload = async () => {
     try {
       await downloadScatteringCalculation(calculation.id);
     } catch (error) {
       console.error('Download failed:', error);
     }
+  };
+
+  const handleViewChart = () => {
+    const request = {
+      ScatteringCalculationIds: [calculation.id],
+      ChartTitle: 'SAXS Scattering',
+      XAxis: 'Q',
+      YAxis: 'I',
+      ScaleMethodsX: 'Log',
+      ScaleMethodsY: 'Log',
+    };
+    const params = new URLSearchParams();
+    params.set('scatteringIds', calculation.id);
+    params.set('isAverage', '0');
+    navigate(`/scattering-calculations/${calculation.id}/chart?${params.toString()}`, { state: { request } });
   };
 
   return (
@@ -79,13 +98,22 @@ export const ScatteringCalculationDetailsCard = ({
           </div>
 
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center rounded-b-xl">
-            <button
-              onClick={handleDownload}
-              className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
-            >
-              <ArrowDownTrayIcon className="h-5 w-5" />
-              Download
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleViewChart}
+                className="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg hover:from-orange-600 hover:to-amber-700 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+              >
+                <ChartBarIcon className="h-5 w-5" />
+                View Chart
+              </button>
+              <button
+                onClick={handleDownload}
+                className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+              >
+                <ArrowDownTrayIcon className="h-5 w-5" />
+                Download
+              </button>
+            </div>
             <button
               onClick={onClose}
               className="px-5 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition-all shadow-md hover:shadow-lg"

@@ -48,6 +48,9 @@ interface NanosystemDetailsModalProps {
   onViewChartSelected?: (analysisIds: string[]) => void;
   onViewCalculationChartSelected?: (calculationIds: string[]) => void;
   onViewCalculationChartAverageSelected?: (calculationIds: string[]) => void;
+  onViewScatteringChartSelected?: (scatteringIds: string[]) => void;
+  onViewScatteringChartAverageSelected?: (scatteringIds: string[]) => void;
+  onCompareScatteringChartSelected?: (legacyIds: string[], nanoIds: string[]) => void;
   onView3D?: () => void;
 }
 
@@ -86,10 +89,14 @@ export const NanosystemDetailsModal = ({
                                          onViewChartSelected,
                                          onViewCalculationChartSelected,
                                          onViewCalculationChartAverageSelected,
+                                         onViewScatteringChartSelected,
+                                         onViewScatteringChartAverageSelected,
+                                         onCompareScatteringChartSelected,
                                          onView3D,
                                        }: NanosystemDetailsModalProps) => {
   const [selectedAnalysisIds, setSelectedAnalysisIds] = useState<Set<string>>(new Set());
   const [selectedCalculationIds, setSelectedCalculationIds] = useState<Set<string>>(new Set());
+  const [selectedScatteringCalculationIds, setSelectedScatteringCalculationIds] = useState<Set<string>>(new Set());
 
   const toggleAnalysisSelection = useCallback((e: React.MouseEvent, analysisId: string) => {
     e.stopPropagation();
@@ -111,9 +118,20 @@ export const NanosystemDetailsModal = ({
     });
   }, []);
 
+  const toggleScatteringCalculationSelection = useCallback((e: React.MouseEvent, scatteringId: string) => {
+    e.stopPropagation();
+    setSelectedScatteringCalculationIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(scatteringId)) next.delete(scatteringId);
+      else next.add(scatteringId);
+      return next;
+    });
+  }, []);
+
   const handleClose = useCallback(() => {
     setSelectedAnalysisIds(new Set());
     setSelectedCalculationIds(new Set());
+    setSelectedScatteringCalculationIds(new Set());
     onClose();
   }, [onClose]);
 
@@ -131,6 +149,24 @@ export const NanosystemDetailsModal = ({
     const ids = Array.from(selectedCalculationIds);
     if (ids.length >= 2 && onViewCalculationChartAverageSelected) onViewCalculationChartAverageSelected(ids);
   }, [selectedCalculationIds, onViewCalculationChartAverageSelected]);
+
+  const handleViewScatteringChartSelected = useCallback(() => {
+    const ids = Array.from(selectedScatteringCalculationIds);
+    if (ids.length > 0 && onViewScatteringChartSelected) onViewScatteringChartSelected(ids);
+  }, [selectedScatteringCalculationIds, onViewScatteringChartSelected]);
+
+  const handleViewScatteringChartAverageSelected = useCallback(() => {
+    const ids = Array.from(selectedScatteringCalculationIds);
+    if (ids.length >= 2 && onViewScatteringChartAverageSelected) onViewScatteringChartAverageSelected(ids);
+  }, [selectedScatteringCalculationIds, onViewScatteringChartAverageSelected]);
+
+  const handleCompareScatteringChartSelected = useCallback(() => {
+    const legacyIds = Array.from(selectedCalculationIds);
+    const nanoIds = Array.from(selectedScatteringCalculationIds);
+    if (legacyIds.length >= 1 && nanoIds.length >= 1 && onCompareScatteringChartSelected) {
+      onCompareScatteringChartSelected(legacyIds, nanoIds);
+    }
+  }, [selectedCalculationIds, selectedScatteringCalculationIds, onCompareScatteringChartSelected]);
 
   if (!nanosystem) return null;
 
@@ -440,9 +476,18 @@ export const NanosystemDetailsModal = ({
                         {scatteringCalculations?.map((calculation) => (
                             <li
                                 key={calculation.id}
-                                className="p-3 bg-white rounded-lg border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all cursor-pointer"
+                                className="p-3 bg-white rounded-lg border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all cursor-pointer flex items-start gap-3"
                                 onClick={() => onScatteringCalculationClick(calculation)}
                             >
+                              <input
+                                  type="checkbox"
+                                  checked={selectedScatteringCalculationIds.has(calculation.id)}
+                                  onChange={() => {}}
+                                  onClick={(e) => toggleScatteringCalculationSelection(e, calculation.id)}
+                                  className="mt-1 h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                  aria-label={`Select SAXS calculation ${calculation.id}`}
+                              />
+                              <div className="flex-1 min-w-0">
                               <div className="flex justify-between items-start">
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-1">
@@ -457,6 +502,7 @@ export const NanosystemDetailsModal = ({
                                 <span className="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full bg-orange-100 text-orange-800 shrink-0">
                                   {calculation.calculationKind === 1 ? 'Sphere' : 'Strict'}
                                 </span>
+                              </div>
                               </div>
                             </li>
                         ))}
@@ -514,6 +560,38 @@ export const NanosystemDetailsModal = ({
                     >
                       <ChartBarIcon className="h-5 w-5" />
                       View average chart ({selectedCalculationIds.size})
+                    </button>
+                )}
+                {onViewScatteringChartSelected && (
+                    <button
+                        onClick={handleViewScatteringChartSelected}
+                        disabled={selectedScatteringCalculationIds.size === 0}
+                        className="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg hover:from-orange-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChartBarIcon className="h-5 w-5" />
+                      View SAXS chart ({selectedScatteringCalculationIds.size})
+                    </button>
+                )}
+                {onViewScatteringChartAverageSelected && (
+                    <button
+                        onClick={handleViewScatteringChartAverageSelected}
+                        disabled={selectedScatteringCalculationIds.size < 2}
+                        title="Average SAXS intensity when Q grid matches"
+                        className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:from-amber-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChartBarIcon className="h-5 w-5" />
+                      View SAXS average ({selectedScatteringCalculationIds.size})
+                    </button>
+                )}
+                {onCompareScatteringChartSelected && (
+                    <button
+                        onClick={handleCompareScatteringChartSelected}
+                        disabled={selectedCalculationIds.size === 0 || selectedScatteringCalculationIds.size === 0}
+                        title="Compare legacy worker scattering with new SAXS (averaged when multiple selected)"
+                        className="px-5 py-2.5 bg-gradient-to-r from-violet-500 to-indigo-600 text-white rounded-lg hover:from-violet-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition-all flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Squares2X2Icon className="h-5 w-5" />
+                      Compare legacy vs SAXS
                     </button>
                 )}
               </div>

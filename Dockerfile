@@ -1,26 +1,26 @@
 FROM node:alpine AS build
 
+RUN npm install -g yarn@1.22.22 \
+ && yarn --version
+
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package.json yarn.lock ./
 
-RUN npm ci --omit=optional --ignore-scripts
-RUN npm install -D esbuild@0.25.5 --ignore-scripts
+RUN yarn install --frozen-lockfile --ignore-scripts
+RUN yarn add -D esbuild@0.25.5 && yarn install --frozen-lockfile
 
 COPY vite.config.ts ./
 COPY tsconfig.json ./
 COPY index.html ./
 
-# 4. Копируем остальные файлы
 COPY src ./src
 COPY public ./public
 COPY . .
 COPY .env.devspot .env
 
-# 5. Собираем проект
-RUN npm run build
+RUN yarn run build
 
-# Stage 2: Serve with Nginx
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf

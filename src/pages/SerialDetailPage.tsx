@@ -441,6 +441,59 @@ export const SeriesDetailPage = () => {
     });
   }, [navigate, selectedSeriesScatteringGroup, seriesId]);
 
+  const handleViewScatteringChartSelected = useCallback((scatteringIds: string[]) => {
+    const request = {
+      ScatteringCalculationIds: scatteringIds,
+      ChartTitle: 'SAXS Scattering',
+      XAxis: 'Q',
+      YAxis: 'I',
+      ScaleMethodsX: 'Log',
+      ScaleMethodsY: 'Log',
+    };
+    const params = new URLSearchParams();
+    params.set('scatteringIds', scatteringIds.join(','));
+    params.set('isAverage', '0');
+    params.set('seriesId', seriesId);
+    navigate(`/scattering-calculations/${scatteringIds[0]}/chart?${params.toString()}`, { state: { request } });
+  }, [navigate, seriesId]);
+
+  const handleViewScatteringChartAverageSelected = useCallback((scatteringIds: string[]) => {
+    const request = {
+      ScatteringCalculationIds: scatteringIds,
+      ChartTitle: 'SAXS Scattering (average)',
+      XAxis: 'Q',
+      YAxis: 'I',
+      ScaleMethodsX: 'Log',
+      ScaleMethodsY: 'Log',
+    };
+    const params = new URLSearchParams();
+    params.set('scatteringIds', scatteringIds.join(','));
+    params.set('isAverage', '1');
+    params.set('seriesId', seriesId);
+    navigate(`/scattering-calculations/${scatteringIds[0]}/chart?${params.toString()}`, { state: { request, isAverage: true } });
+  }, [navigate, seriesId]);
+
+  const handleCompareScatteringChartSelected = useCallback((legacyIds: string[], nanoIds: string[]) => {
+    const request = {
+      LegacyCalculationIds: legacyIds,
+      NanoScatteringIds: nanoIds,
+      ChartTitle: 'Scattering compare (legacy vs SAXS)',
+      XAxis: 'Q',
+      YAxis: 'I',
+      AverageLegacy: legacyIds.length >= 2,
+      AverageNano: nanoIds.length >= 2,
+      ScaleMethodsX: 'Log',
+      ScaleMethodsY: 'Log',
+    };
+    const params = new URLSearchParams();
+    params.set('legacyIds', legacyIds.join(','));
+    params.set('nanoIds', nanoIds.join(','));
+    params.set('averageLegacy', legacyIds.length >= 2 ? '1' : '0');
+    params.set('averageNano', nanoIds.length >= 2 ? '1' : '0');
+    params.set('seriesId', seriesId);
+    navigate(`/scattering-calculations/compare/chart?${params.toString()}`, { state: { request } });
+  }, [navigate, seriesId]);
+
   const handleViewSeriesAverageChart = useCallback(async () => {
     setIsSeriesAverageChartLoading(true);
     try {
@@ -761,6 +814,9 @@ export const SeriesDetailPage = () => {
         onViewChartSelected={handleViewChartSelected}
         onViewCalculationChartSelected={handleViewCalculationChartSelected}
         onViewCalculationChartAverageSelected={handleViewCalculationChartAverageSelected}
+        onViewScatteringChartSelected={handleViewScatteringChartSelected}
+        onViewScatteringChartAverageSelected={handleViewScatteringChartAverageSelected}
+        onCompareScatteringChartSelected={handleCompareScatteringChartSelected}
         onView3D={() => setIs3DModalOpen(true)}
       />
 
