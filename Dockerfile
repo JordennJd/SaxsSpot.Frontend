@@ -4,10 +4,8 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 
-RUN yarn install --no-audit --prefer-offline \
-    --omit=optional \
-    --ignore-scripts
-RUN yarn add -D esbuild@0.25.5 && yarn install
+RUN npm ci --omit=optional --ignore-scripts
+RUN npm install -D esbuild@0.25.5 --ignore-scripts
 
 COPY vite.config.ts ./
 COPY tsconfig.json ./
@@ -20,7 +18,7 @@ COPY . .
 COPY .env.devspot .env
 
 # 5. Собираем проект
-RUN yarn run build
+RUN npm run build
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
