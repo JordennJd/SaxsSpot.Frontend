@@ -18,7 +18,7 @@ import {
   type SphereParticle,
 } from './nanosystemTypes';
 
-import { nanosystemApiClient, calculationApiClient } from '../../../lib/axios';
+import { nanosystemApiClient, calculationApiClient, ApiError } from '../../../lib/axios';
 import type { PaginatedResponse } from './common/commonTypes';
 import { handleError } from '../../../lib/errorHandler';
 
@@ -271,8 +271,25 @@ export const fetchScatteringCalculationList = async (
       },
     );
 
-    return ScatteringCalculationApiResponseSchema.parse(response.data);
+    const parsed = ScatteringCalculationApiResponseSchema.safeParse(response.data);
+    if (parsed.success) {
+      return parsed.data;
+    }
+
+    return {
+      isSuccess: true,
+      result: { count: 0, data: [] },
+      errors: [],
+    };
   } catch (error) {
+    if (error instanceof ApiError && (error.status === 404 || error.status === 400)) {
+      return {
+        isSuccess: true,
+        result: { count: 0, data: [] },
+        errors: [],
+      };
+    }
+
     const appError = handleError(error as Error);
     throw appError;
   }

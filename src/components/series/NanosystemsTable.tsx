@@ -6,11 +6,14 @@ function intersectionPlacementLabel(system: NanosystemDto): string {
 }
 import { Pagination } from '../ui/Pagination';
 import { formatDateTime, formatGenerationDuration } from '@/lib/utils';
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 interface NanosystemsTableProps {
   nanosystems: ApiResponseListNanosystemDto;
   isLoading: boolean;
   onNanosystemClick: (system: NanosystemDto) => void;
+  onOpenNanosystemPage?: (system: NanosystemDto) => void;
+  seriesId?: string;
   currentPage: number;
   pageSize: number;
   onPageChange: (page: number) => void;
@@ -19,7 +22,9 @@ interface NanosystemsTableProps {
 export const NanosystemsTable = ({ 
   nanosystems, 
   isLoading, 
-  onNanosystemClick, 
+  onNanosystemClick,
+  onOpenNanosystemPage,
+  seriesId,
   currentPage, 
   pageSize, 
   onPageChange, 
@@ -66,6 +71,9 @@ export const NanosystemsTable = ({
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gen. time</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Intersection</th>
               <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              {seriesId && onOpenNanosystemPage && (
+                <th className="px-4 lg:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Open</th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -128,6 +136,22 @@ export const NanosystemsTable = ({
                     Generated
                   </span>
                 </td>
+                {seriesId && onOpenNanosystemPage && (
+                  <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-right">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenNanosystemPage(system);
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                      title="Open full page"
+                    >
+                      <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                      Page
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -156,9 +180,24 @@ export const NanosystemsTable = ({
                   ID: {system.id.slice(0, 8)}...
                 </p>
               </div>
-              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800 flex-shrink-0 ml-2">
-                Generated
-              </span>
+              <div className="flex items-center gap-2 shrink-0 ml-2">
+                {seriesId && onOpenNanosystemPage && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenNanosystemPage(system);
+                    }}
+                    className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md bg-indigo-600 text-white"
+                  >
+                    <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+                    Page
+                  </button>
+                )}
+                <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                  Generated
+                </span>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div>

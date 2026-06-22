@@ -6,6 +6,7 @@ import {
   type RadialAnalysisDto,
 } from '../features/nanosystems/api/nanosystemTypes';
 import { fetchNanosystemList, fetchSeriesNanosystems, fetchRadialAnalysisList, fetchScatteringCalculationList } from '../features/nanosystems/api/nanosystemApi';
+import { ApiError } from '../lib/axios';
 import { fetchCalculationsByNanosystem } from '../features/calculation/api/calculationApi';
 import type { CalculationDto } from '../features/calculation/api/calculationTypes';
 import type { ScatteringCalculationDto } from '../features/nanosystems/api/nanosystemTypes';
@@ -177,6 +178,21 @@ export const useRadialAnalysisData = (
   };
 };
 
+export const useNanosystemData = (nanosystemId: string | undefined) => {
+  return useQuery({
+    queryKey: ['nanosystem', nanosystemId],
+    queryFn: async () => {
+      const res = await fetchNanosystemList(`id=${nanosystemId}`, 1, 1);
+      if (res.result.data.length === 0) {
+        throw new Error('Nanosystem not found');
+      }
+      return res.result.data[0];
+    },
+    enabled: !!nanosystemId,
+    retry: 1,
+  });
+};
+
 export const useScatteringCalculationData = (
   nanosystemId: string | undefined,
   page: number,
@@ -190,8 +206,11 @@ export const useScatteringCalculationData = (
     try {
       setHasError(false);
       const response = await fetchScatteringCalculationList(id, page, pageSize, filter, sortBy);
-      return response.result.data;
+      return response.result?.data ?? [];
     } catch (error) {
+      if (error instanceof ApiError && (error.status === 404 || error.status === 400)) {
+        return [];
+      }
       console.error('Error fetching scattering calculations:', error);
       setHasError(true);
       return [];

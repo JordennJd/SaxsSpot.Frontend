@@ -10,6 +10,7 @@ import { CalculationChartPage } from './pages/CalculationChartPage';
 import { RadialAnalysisChartPage } from './pages/RadialAnalysisChartPage';
 import { ScatteringCalculationChartPage } from './pages/ScatteringCalculationChartPage';
 import { ScatteringCompareChartPage } from './pages/ScatteringCompareChartPage';
+import { NanosystemDetailPage } from './pages/NanosystemDetailPage';
 import { ErrorBoundary } from './components/ui/common/ErrorBoundary';
 import { ToastProvider } from './contexts/ToastContext';
 import { config } from './lib/config';
@@ -67,6 +68,7 @@ function App() {
                 <Route path="/" element={<NanosystemSeriesListPage />} />
                 <Route path="/new" element={<NanosystemSeriesAddPage />} />
                 <Route path="/series/:guid" element={<SeriesDetailPage />} />
+                <Route path="/series/:seriesId/nanosystems/:nanosystemId" element={<NanosystemDetailPage />} />
                 <Route path="/jobs" element={<JobManagementDashboard />} />
                 <Route path="/calculations/:guid/chart" element={<CalculationChartPage />} />
                 <Route path="/scattering-calculations/:guid/chart" element={<ScatteringCalculationChartPage />} />

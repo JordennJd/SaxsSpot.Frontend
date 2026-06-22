@@ -5,16 +5,16 @@ export const ApiResponseListSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
         result: z.object({
             count: z.number(),
             data: z.array(dataSchema),
-        }),
+        }).nullable().transform((value) => value ?? { count: 0, data: [] }),
         isSuccess: z.boolean(),
-        errors: z.array(z.unknown()),
+        errors: z.array(z.unknown()).optional().default([]),
     });
 
 export const ApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
     z.object({
         result: dataSchema,
         isSuccess: z.boolean(),
-        errors: z.array(z.unknown()),
+        errors: z.array(z.unknown()).optional().default([]),
     });
 
 
