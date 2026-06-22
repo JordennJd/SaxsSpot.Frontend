@@ -10,6 +10,9 @@ interface ScatteringCalculationModalProps {
   onRun: () => void;
   isRunning?: boolean;
   showExcess?: boolean;
+  title?: string;
+  description?: string;
+  runLabel?: string;
 }
 
 const SpaceParameterFields = ({
@@ -108,6 +111,9 @@ export const ScatteringCalculationModal = ({
   onRun,
   isRunning = false,
   showExcess = false,
+  title = 'SAXS Scattering Calculation',
+  description,
+  runLabel = 'Run SAXS calculation',
 }: ScatteringCalculationModalProps) => {
   const [isDirty, setIsDirty] = useState(false);
 
@@ -128,7 +134,7 @@ export const ScatteringCalculationModal = ({
           <div className="bg-gradient-to-r from-orange-600 to-amber-700 px-6 py-5">
             <div className="flex items-center justify-between">
               <Dialog.Title className="text-xl font-bold text-white">
-                SAXS Scattering Calculation
+                {title}
               </Dialog.Title>
               <button onClick={onClose} className="text-orange-100 hover:text-white transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -139,6 +145,9 @@ export const ScatteringCalculationModal = ({
           </div>
 
           <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+            {description && (
+              <p className="text-sm text-gray-600 bg-orange-50 border border-orange-100 rounded-lg px-4 py-3">{description}</p>
+            )}
             <SpaceParameterFields
               title="Q-space parameters"
               prefix="qSpaceParameters"
@@ -168,7 +177,7 @@ export const ScatteringCalculationModal = ({
               disabled={isRunning}
               className="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg hover:from-orange-600 hover:to-amber-700 disabled:opacity-50 transition-all"
             >
-              {isRunning ? 'Starting...' : 'Run SAXS calculation'}
+              {isRunning ? 'Starting...' : runLabel}
             </button>
           </div>
         </Dialog.Panel>

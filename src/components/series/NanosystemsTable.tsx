@@ -13,6 +13,7 @@ interface NanosystemsTableProps {
   isLoading: boolean;
   onNanosystemClick: (system: NanosystemDto) => void;
   onOpenNanosystemPage?: (system: NanosystemDto) => void;
+  onOpenNanosystemNewWindow?: (system: NanosystemDto) => void;
   seriesId?: string;
   currentPage: number;
   pageSize: number;
@@ -24,6 +25,7 @@ export const NanosystemsTable = ({
   isLoading, 
   onNanosystemClick,
   onOpenNanosystemPage,
+  onOpenNanosystemNewWindow,
   seriesId,
   currentPage, 
   pageSize, 
@@ -138,18 +140,32 @@ export const NanosystemsTable = ({
                 </td>
                 {seriesId && onOpenNanosystemPage && (
                   <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-right">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpenNanosystemPage(system);
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
-                      title="Open full page"
-                    >
-                      <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-                      Page
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenNanosystemPage(system);
+                        }}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                        title="Open workspace"
+                      >
+                        Workspace
+                      </button>
+                      {onOpenNanosystemNewWindow && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenNanosystemNewWindow(system);
+                          }}
+                          className="inline-flex items-center p-1.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+                          title="Open in new window"
+                        >
+                          <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 )}
               </tr>
@@ -190,8 +206,20 @@ export const NanosystemsTable = ({
                     }}
                     className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md bg-indigo-600 text-white"
                   >
+                    Workspace
+                  </button>
+                )}
+                {onOpenNanosystemNewWindow && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenNanosystemNewWindow(system);
+                    }}
+                    className="inline-flex items-center p-1 rounded-md border border-gray-300 text-gray-600"
+                    title="New window"
+                  >
                     <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
-                    Page
                   </button>
                 )}
                 <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">

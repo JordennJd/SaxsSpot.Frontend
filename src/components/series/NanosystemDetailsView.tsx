@@ -60,6 +60,10 @@ export interface NanosystemDetailsViewProps {
   onCompareScatteringChartSelected?: (legacyIds: string[], nanoIds: string[]) => void;
   onView3D?: () => void;
   layout?: 'modal' | 'page';
+  compactChrome?: boolean;
+  showTabBar?: boolean;
+  forceTab?: NanosystemTabId;
+  pickerMode?: boolean;
   initialTab?: NanosystemTabId;
   onTabChange?: (tab: NanosystemTabId) => void;
   showFooterActions?: boolean;
@@ -252,13 +256,17 @@ export const NanosystemDetailsView = ({
   onCompareScatteringChartSelected,
   onView3D,
   layout = 'modal',
+  compactChrome = false,
+  showTabBar = true,
+  forceTab,
+  pickerMode = false,
   initialTab,
   onTabChange,
   showFooterActions = true,
   headerExtra,
   onClose,
 }: NanosystemDetailsViewProps) => {
-  const [activeTab, setActiveTab] = useState<NanosystemTabId>(initialTab ?? 'overview');
+  const [activeTab, setActiveTab] = useState<NanosystemTabId>(forceTab ?? initialTab ?? 'overview');
   const [selectedAnalysisIds, setSelectedAnalysisIds] = useState<Set<string>>(new Set());
   const [selectedCalculationIds, setSelectedCalculationIds] = useState<Set<string>>(new Set());
   const [selectedScatteringCalculationIds, setSelectedScatteringCalculationIds] = useState<Set<string>>(new Set());
@@ -266,8 +274,10 @@ export const NanosystemDetailsView = ({
   const listMaxClass = layout === 'page' ? 'max-h-none min-h-[480px]' : 'max-h-[420px]';
 
   useEffect(() => {
-    setActiveTab(initialTab ?? 'overview');
-  }, [nanosystem?.id, initialTab]);
+    setActiveTab(forceTab ?? initialTab ?? 'overview');
+  }, [nanosystem?.id, initialTab, forceTab]);
+
+  const displayedTab = forceTab ?? activeTab;
 
   const handleTabChange = useCallback(
     (tab: NanosystemTabId) => {
@@ -543,9 +553,10 @@ export const NanosystemDetailsView = ({
   return (
     <div
       className={`flex flex-col overflow-hidden ${
-        layout === 'modal' ? 'max-h-[92vh]' : 'min-h-0'
+        layout === 'modal' ? 'max-h-[92vh]' : 'min-h-0 flex-1'
       }`}
     >
+      {!compactChrome && (
       <div className="bg-gradient-to-r from-slate-800 to-indigo-900 px-6 py-4 flex justify-between items-start shrink-0">
         <div className="min-w-0">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -556,7 +567,9 @@ export const NanosystemDetailsView = ({
         </div>
         {headerExtra && <div className="shrink-0 ml-4">{headerExtra}</div>}
       </div>
+      )}
 
+      {showTabBar && (
       <div
         className={`border-b border-gray-200 bg-gray-50 px-4 overflow-x-auto shrink-0 ${
           layout === 'page' ? 'sticky top-0 z-10' : ''
@@ -564,27 +577,27 @@ export const NanosystemDetailsView = ({
       >
         <div className="flex min-w-max">
           <TabButton
-            active={activeTab === 'overview'}
+            active={displayedTab === 'overview'}
             label="Overview"
             onClick={() => handleTabChange('overview')}
             accentClass="text-slate-700"
           />
           <TabButton
-            active={activeTab === 'legacy'}
+            active={displayedTab === 'legacy'}
             label="Legacy scattering"
             count={calculations.length}
             onClick={() => handleTabChange('legacy')}
             accentClass="text-indigo-600"
           />
           <TabButton
-            active={activeTab === 'radial'}
+            active={displayedTab === 'radial'}
             label="Radial"
             count={radialAnalyses.length}
             onClick={() => handleTabChange('radial')}
             accentClass="text-purple-600"
           />
           <TabButton
-            active={activeTab === 'saxs'}
+            active={displayedTab === 'saxs'}
             label="SAXS"
             count={scatteringCalculations.length}
             onClick={() => handleTabChange('saxs')}
@@ -592,9 +605,23 @@ export const NanosystemDetailsView = ({
           />
         </div>
       </div>
+      )}
 
       <div className="p-6 overflow-y-auto flex-1 bg-gray-50/80">
-        {activeTab === 'overview' && (
+        {pickerMode ? (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-sm font-semibold text-indigo-700 mb-3">Legacy scattering</h3>
+              {renderLegacyTab()}
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-orange-700 mb-3">SAXS</h3>
+              {renderSaxsTab()}
+            </div>
+          </div>
+        ) : (
+          <>
+        {displayedTab === 'overview' && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {overviewItems.map((item, index) => (
@@ -610,9 +637,11 @@ export const NanosystemDetailsView = ({
             </div>
           </div>
         )}
-        {activeTab === 'legacy' && renderLegacyTab()}
-        {activeTab === 'radial' && renderRadialTab()}
-        {activeTab === 'saxs' && renderSaxsTab()}
+        {displayedTab === 'legacy' && renderLegacyTab()}
+        {displayedTab === 'radial' && renderRadialTab()}
+        {displayedTab === 'saxs' && renderSaxsTab()}
+          </>
+        )}
       </div>
 
       {showFooterActions && (

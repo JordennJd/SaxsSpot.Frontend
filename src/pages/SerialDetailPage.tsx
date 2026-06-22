@@ -1,5 +1,5 @@
 import {useEffect, useState, useCallback, useMemo} from 'react';
-import {useParams, useNavigate} from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {useQueryClient} from '@tanstack/react-query';
 import {useToastContext} from '../contexts/ToastContext';
 
@@ -14,6 +14,8 @@ import {fetchSeriesCalculationGroups, RunSeriesCalculation} from '../features/ca
 import {fetchNanosystemList, fetchRadialAnalysisList, updateSeriesComment} from '../features/nanosystems/api/nanosystemApi.ts';
 import { ApiError } from '../lib/axios';
 import { CalculationModal, NanosystemDetailsModal, NanosystemsTable, SeriesHeader } from '../components/series';
+import { SeriesBulkSaxsPanel } from '../components/series/SeriesBulkSaxsPanel';
+import { getSeriesCalculationsUrl, openNanosystemInNewWindow } from '@/lib/navigation';
 import { NanosystemWorkspaceModals } from '../components/series/NanosystemWorkspaceModals';
 import {
   useNanosystemsData,
@@ -327,15 +329,29 @@ export const SeriesDetailPage = () => {
 
       {seriesTab === 'main' ? (
         <>
-      {/* Calculation Action Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Open the calculations explorer to compare groups or pick SAXS runs across systems.
+        </p>
+        <Link
+          to={getSeriesCalculationsUrl(seriesId)}
+          className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors shrink-0"
+        >
+          Calculations & charts
+        </Link>
+      </div>
+
+      <SeriesBulkSaxsPanel seriesId={seriesId} systemCount={nanosystems?.result.count} />
+
+      {/* Legacy calculation — entire series */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Ready to Calculate?
+              Legacy scattering (entire series)
             </h3>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Start SAXS calculation for this series. The process will calculate by all nanosystems in the series.
+              Runs the legacy pipeline for every nanosystem in this series (not SAXS).
             </p>
           </div>
           <div className="flex-shrink-0">
@@ -354,8 +370,8 @@ export const SeriesDetailPage = () => {
                   </svg>
                 </div>
                 <div className="text-left">
-                  <div className="font-bold">Start Calculation</div>
-                  <div className="text-xs opacity-90 font-normal">Launch SAXS calculate</div>
+                  <div className="font-bold">Start legacy calc</div>
+                  <div className="text-xs opacity-90 font-normal">All systems in series</div>
                 </div>
               </div>
               
@@ -504,6 +520,7 @@ export const SeriesDetailPage = () => {
         isLoading={isNanosystemsLoading}
         onNanosystemClick={openNanosystemDetails}
         onOpenNanosystemPage={(system) => navigate(`/series/${seriesId}/nanosystems/${system.id}`)}
+        onOpenNanosystemNewWindow={(system) => openNanosystemInNewWindow(seriesId, system.id)}
         seriesId={seriesId}
         currentPage={page}
         pageSize={pageSize}

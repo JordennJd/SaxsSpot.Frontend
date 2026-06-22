@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { XMarkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { NanosystemDetailsView } from './NanosystemDetailsView';
 import type { NanosystemDetailsViewProps } from './NanosystemDetailsView';
+import { openNanosystemInNewWindow } from '@/lib/navigation';
 
 interface NanosystemDetailsModalProps extends Omit<NanosystemDetailsViewProps, 'layout' | 'showFooterActions' | 'headerExtra' | 'onClose'> {
   isOpen: boolean;
@@ -34,11 +35,22 @@ export const NanosystemDetailsModal = ({
                   to={`/series/${seriesId}/nanosystems/${nanosystem.id}`}
                   onClick={onClose}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-                  title="Open full page"
+                  title="Open workspace"
+                >
+                  Workspace
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    openNanosystemInNewWindow(seriesId, nanosystem.id);
+                    onClose();
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                  title="Open in new window"
                 >
                   <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-                  Full page
-                </Link>
+                  New window
+                </button>
                 <button
                   onClick={onClose}
                   className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
